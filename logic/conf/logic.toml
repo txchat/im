@@ -1,0 +1,69 @@
+env="debug"
+
+[log]
+    Level="debug"
+    Mode="console"
+    Path=""
+    Display="json"
+
+[Trace]
+    ServiceName=""
+    Gen128Bit=true
+[Trace.Sampler]
+    Type="const"
+    Param=1.0
+[Trace.Reporter]
+    LogSpans=true
+    LocalAgentHostPort="172.16.101.130:6831"
+
+[reg]
+    schema   = "im"
+    srvName  = "logic"
+    regAddrs = "127.0.0.1:2379"
+
+[node]
+    heartbeat = "4m"
+    heartbeatMax = 2
+
+[backoff]
+    maxDelay  = 300
+    baseDelay = 3
+    factor    = 1.8
+    jitter    = 0.3
+
+[RPCServer]
+    Network                           = "tcp"
+    Addr                              = ":3119"
+    Timeout                           = "1s"
+    KeepAliveMaxConnectionIdle        = "60s"
+    KeepAliveMaxConnectionAge         = "2h"
+    KeepAliveMaxMaxConnectionAgeGrace = "20s"
+    KeepAliveTime                     = "60s"
+    KeepAliveTimeout                  = "20s"
+
+
+[CometRPCClient]
+    schema  = "im"
+    srvName = "comet"
+    dial    = "1s"
+    timeout = "1s"
+
+[kafka]
+    topic   = "goim-push-topic"
+    brokers = ["127.0.0.1:9092"]
+
+[redis]
+    network      = "tcp"
+    addr         = "127.0.0.1:6379"
+    active       = 60000
+    idle         = 1024
+    dialTimeout  = "200ms"
+    readTimeout  = "500ms"
+    writeTimeout = "500ms"
+    idleTimeout  = "120s"
+    expire       = "30m"
+
+[[apps]]
+    appId   = "dtalk"
+    authUrl = "http://127.0.0.1:18002/user/login"
+    timeout = "1s"
