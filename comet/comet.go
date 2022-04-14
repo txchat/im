@@ -12,13 +12,13 @@ import (
 	"time"
 
 	"github.com/Terry-Mao/goim/pkg/ip"
-	"github.com/zhenjl/cityhash"
 	"github.com/txchat/im-pkg/trace"
 	comet "github.com/txchat/im/api/comet/grpc"
 	logic "github.com/txchat/im/api/logic/grpc"
 	"github.com/txchat/im/comet/conf"
 	"github.com/txchat/im/common"
 	"github.com/txchat/im/naming"
+	"github.com/zhenjl/cityhash"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/resolver"
 )

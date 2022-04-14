@@ -8,8 +8,8 @@ import (
 
 	"github.com/BurntSushi/toml"
 	xtime "github.com/Terry-Mao/goim/pkg/time"
-	traceConfig "github.com/uber/jaeger-client-go/config"
 	xlog "github.com/txchat/im-pkg/log"
+	traceConfig "github.com/uber/jaeger-client-go/config"
 )
 
 const (
@@ -110,7 +110,7 @@ func Default() *Config {
 			TaskDuration:     xtime.Duration(time.Second * 5),
 			MinHeartbeat:     xtime.Duration(time.Minute * 10),
 			MaxHeartbeat:     xtime.Duration(time.Minute * 30),
-			Rto: 			  xtime.Duration(time.Second * 3),
+			Rto:              xtime.Duration(time.Second * 3),
 		},
 		Bucket: &Bucket{
 			Size:          32,
@@ -198,7 +198,7 @@ type Protocol struct {
 	MinHeartbeat     xtime.Duration
 	MaxHeartbeat     xtime.Duration
 	TaskDuration     xtime.Duration
-	Rto     		 xtime.Duration
+	Rto              xtime.Duration
 }
 
 // Bucket is bucket config.

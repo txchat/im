@@ -15,14 +15,14 @@ require (
 	github.com/oofpgDLD/dtask v1.0.2
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/rs/zerolog v1.21.0
-	github.com/uber/jaeger-client-go v2.30.0+incompatible
-	github.com/zhenjl/cityhash v0.0.0-20131128155616-cdd6a94144ab
 	//github.com/txchat/dtalk v0.0.0-00010101000000-000000000000
 	github.com/txchat/dtalk v0.0.1
 	//github.com/txchat/im-pkg v0.0.0-00010101000000-000000000000
 	github.com/txchat/im-pkg v0.0.1
 	//github.com/txchat/imparse v0.0.0-00010101000000-000000000000
 	github.com/txchat/imparse v0.0.1
+	github.com/uber/jaeger-client-go v2.30.0+incompatible
+	github.com/zhenjl/cityhash v0.0.0-20131128155616-cdd6a94144ab
 	go.etcd.io/etcd/api/v3 v3.5.0
 	go.etcd.io/etcd/client/v3 v3.5.0
 	google.golang.org/genproto v0.0.0-20210602131652-f16073e35f0c

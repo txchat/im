@@ -7,9 +7,9 @@ import (
 
 	"github.com/BurntSushi/toml"
 	xtime "github.com/Terry-Mao/goim/pkg/time"
+	xlog "github.com/txchat/im-pkg/log"
 	"github.com/uber/jaeger-client-go"
 	traceConfig "github.com/uber/jaeger-client-go/config"
-	xlog "github.com/txchat/im-pkg/log"
 )
 
 var (

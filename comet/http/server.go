@@ -40,7 +40,19 @@ func Start(addr string, s *comet.Comet) *http.Server {
 }
 
 func SetupEngine(e *gin.Engine) *gin.Engine {
-	e.GET("/statics", Statics)
-	e.GET("/groupDetails", GroupDetails)
+	statics := e.Group("/statics")
+	statics.GET("/num", StaticsNumb)
+
+	//buckets
+	buckets := statics.Group("/buckets")
+	buckets.GET("", BucketsInfo)
+
+	users := statics.Group("/users")
+	users.GET("/:uid", UserInfo)
+
+	group := statics.Group("/group")
+	group.GET("", GroupsInfo)
+	group.GET("/:gid", GroupInfo)
+
 	return e
 }

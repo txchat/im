@@ -17,8 +17,6 @@ import (
 	"github.com/Terry-Mao/goim/pkg/ip"
 	"github.com/opentracing/opentracing-go"
 	"github.com/rs/zerolog/log"
-	"github.com/uber/jaeger-client-go"
-	"github.com/uber/jaeger-client-go/config"
 	xlog "github.com/txchat/im-pkg/log"
 	"github.com/txchat/im-pkg/trace"
 	"github.com/txchat/im/comet"
@@ -26,6 +24,8 @@ import (
 	"github.com/txchat/im/comet/grpc"
 	"github.com/txchat/im/comet/http"
 	"github.com/txchat/im/naming"
+	"github.com/uber/jaeger-client-go"
+	"github.com/uber/jaeger-client-go/config"
 )
 
 const (
