@@ -1,0 +1,110 @@
+version: "2.4"
+services:
+  zookeeper:
+    image: wurstmeister/zookeeper
+    container_name: txchat-zookeeper
+    restart: unless-stopped
+    volumes:
+      - txchat-zookeeper:/data
+    networks:
+      - txchat-components
+    ports:
+      - "2181:2181"
+  # kafka version: 1.1.0
+  # scala version: 2.12
+  kafka:
+    image: wurstmeister/kafka
+    container_name: txchat-kafka
+    restart: unless-stopped
+    ports:
+      - "9092:9092"
+    # kafka connectivity: https://github.com/wurstmeister/kafka-docker/wiki/Connectivity#internal-versus-advertised
+    environment:
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://${HOST_ETH0_NAME}:9092
+#      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+#      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://host.docker.internal:9092
+#      KAFKA_ADVERTISED_HOST_NAME: localhost
+      KAFKA_ZOOKEEPER_CONNECT: "txchat-zookeeper:2181"
+      KAFKA_BROKER_ID: 1
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CREATE_TOPICS: "stream-in:1:1,stream-out:1:1"
+    volumes:
+      - txchat-kafka:/kafka
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - txchat-components
+    depends_on:
+      - zookeeper
+    healthcheck:
+      test: [ "CMD", "kafka-topics.sh", "--list", "--zookeeper", "txchat-zookeeper:2181" ]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+  kafka-manager:
+    container_name: txchat-kafka-manager
+    image: sheepkiller/kafka-manager
+    environment:
+      ZK_HOSTS: txchat-zookeeper:2181
+    networks:
+      - txchat-components
+    ports:
+      - "9020:9000"
+    depends_on:
+      zookeeper:
+        condition: service_started
+      kafka: # this feature is removed at compose version 3.x
+        condition: service_healthy
+  redis:
+    image: redis:${REDIS_VERSION}
+    container_name: ${REDIS_CONTAINER_NAME}
+    restart: unless-stopped
+    networks:
+      - txchat-components
+    volumes:
+      - ${REDIS_DATA_VOLUME}:/data
+      - ${REDIS_CONFIG_VOLUME}:/etc/redis/redis.conf
+      - ${REDIS_LOG_VOLUME}:/logs
+    ports:
+      - ${REDIS_PUB_PORT}:6379
+  etcd:
+    image: quay.io/coreos/etcd:${ETCD_VERSION}
+    container_name: ${ETCD_CONTAINER_NAME}
+    restart: unless-stopped
+    networks:
+      - txchat-components
+    ports:
+      - ${ETCD_PUB_CLIENT_PORT}:2379
+      - ${ETCD_PUB_PEER_PORT}:2380
+    volumes:
+      - ${ETCD_DATA_VOLUME}:/etcd-data
+    command:
+      - /usr/local/bin/etcd
+      - --name=${ETCD_NAME}
+      - --data-dir=/etcd_data
+      - --listen-client-urls=http://0.0.0.0:2379
+      - --advertise-client-urls=http://0.0.0.0:${ETCD_PUB_CLIENT_PORT}
+      - --listen-peer-urls=http://0.0.0.0:2380
+      - --initial-advertise-peer-urls=http://0.0.0.0:${ETCD_PUB_PEER_PORT}
+      - --initial-cluster=${ETCD_NAME}=http://0.0.0.0:${ETCD_PUB_PEER_PORT}
+      - --initial-cluster-token=${ETCD_TOKEN}
+      - --initial-cluster-state=new
+      - --log-level=info
+      - --logger=zap
+      - --log-outputs=stderr
+volumes:
+  txchat-zookeeper:
+    external: true
+  txchat-kafka:
+    external: true
+  txchat-redis-data:
+    external: true
+  txchat-redis-config:
+    external: true
+  txchat-redis-log:
+    external: true
+  txchat-etcd-data:
+    external: true
+networks:
+  txchat-components:
+    external: true

@@ -1,7 +1,7 @@
-env="debug"
+env="release"
 
 [log]
-    Level="debug"
+    Level="info"
     Mode="console"
     Path=""
     Display="json"
@@ -14,12 +14,12 @@ env="debug"
     Param=1.0
 [Trace.Reporter]
     LogSpans=true
-    LocalAgentHostPort="172.16.101.130:6831"
+    LocalAgentHostPort="txchat-jaeger:6831"
 
 [reg]
     schema   = "im"
     srvName  = "comet"
-    regAddrs = "127.0.0.1:2379"
+    regAddrs = "txchat-etcd:2379"
 
 [logicRPCClient]
     schema  = "im"
@@ -64,7 +64,7 @@ env="debug"
     handshakeTimeout = "8s"
     minHeartbeat     = "5s"
     maxHeartbeat     = "10s"
-    rto              = "1s"
+    rto              = "2s"
 
 [bucket]
     size    = 32

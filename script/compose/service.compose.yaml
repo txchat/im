@@ -1,0 +1,42 @@
+version: "2.4"
+services:
+  comet:
+    image: txchat-comet:${COMET_IMAGE}
+    container_name: ${COMET_CONTAINER_NAME}
+    networks:
+      - txchat-components
+      - txchat-service
+    volumes:
+      - ${COMET_CONFIG_VOLUME}:/etc/comet/config
+    ports:
+      - "3101:3101"
+      - "3102:3102"
+    depends_on:
+      - etcd
+  logic:
+    image: txchat-logic:${LOGIC_IMAGE}
+    container_name: ${LOGIC_CONTAINER_NAME}
+    networks:
+      - txchat-components
+      - txchat-service
+    volumes:
+      - ${LOGIC_CONFIG_VOLUME}:/etc/logic/config
+    depends_on:
+      kafka:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      comet:
+        condition: service_started
+      etcd:
+        condition: service_started
+networks:
+  txchat-components:
+    external: true
+  txchat-service:
+    external: true
+volumes:
+  txchat-comet-config:
+    external: true
+  txchat-logic-config:
+    external: true

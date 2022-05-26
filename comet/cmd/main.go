@@ -34,13 +34,15 @@ const (
 
 var (
 	// projectVersion 项目版本
-	projectVersion = "3.0.3"
+	projectVersion = ""
 	// goVersion go版本
 	goVersion = ""
 	// gitCommit git提交commit id
 	gitCommit = ""
 	// buildTime 编译时间
 	buildTime = ""
+	// osArch 目标主机架构
+	osArch = ""
 
 	isShowVersion = flag.Bool("version", false, "show project version")
 )
@@ -48,11 +50,12 @@ var (
 // showVersion 显示项目版本信息
 func showVersion(isShow bool) {
 	if isShow {
-		fmt.Printf("Project: %s\n", srvName)
+		fmt.Printf(" Project: %s\n", srvName)
 		fmt.Printf(" Version: %s\n", projectVersion)
 		fmt.Printf(" Go Version: %s\n", goVersion)
 		fmt.Printf(" Git Commit: %s\n", gitCommit)
-		fmt.Printf(" Build Time: %s\n", buildTime)
+		fmt.Printf(" Built: %s\n", buildTime)
+		fmt.Printf(" OS/Arch: %s\n", osArch)
 		os.Exit(0)
 	}
 }

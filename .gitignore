@@ -1,5 +1,5 @@
 .idea/
+target/
+run_compose
+target_*
 .DS_Store
-/target
-.DS_Store
-im_bin_*
