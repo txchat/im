@@ -21,10 +21,8 @@ services:
     # kafka connectivity: https://github.com/wurstmeister/kafka-docker/wiki/Connectivity#internal-versus-advertised
     environment:
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://${HOST_ETH0_NAME}:9092
-#      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
-#      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://host.docker.internal:9092
-#      KAFKA_ADVERTISED_HOST_NAME: localhost
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://txchat-kafka:9092
+      #KAFKA_ADVERTISED_HOST_NAME: txchat-kafka
       KAFKA_ZOOKEEPER_CONNECT: "txchat-zookeeper:2181"
       KAFKA_BROKER_ID: 1
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1

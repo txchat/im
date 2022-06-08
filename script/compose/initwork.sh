@@ -7,6 +7,24 @@ work_dir=$(
 created_volume=()
 created_network=()
 
+serviceList=$1
+projectVersion=$2
+
+# platform adaptation
+HOST_OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+case ${HOST_OS} in
+"darwin")
+  function dosed() {
+    sed -r -i '' "$@"
+  }
+  ;;
+*)
+  function dosed() {
+    sed -r -i "$@"
+  }
+  ;;
+esac
+
 function network_create() {
   networkName=$1
   filterName=$(docker network ls | awk 'NR>1{ print $2 }' | grep -w "${networkName}")
@@ -27,8 +45,16 @@ function volume_create() {
   fi
 }
 
-volumes=("txchat-zookeeper" "txchat-kafka" "txchat-redis-data" "txchat-redis-config" "txchat-redis-log" "txchat-etcd-data" "txchat-comet-config" "txchat-logic-config")
+volumes=("txchat-zookeeper" "txchat-kafka" "txchat-redis-data" "txchat-redis-config" "txchat-redis-log" "txchat-etcd-data")
 networks=("txchat-components" "txchat-service")
+
+for sName in ${serviceList} ; do \
+  volumes+=("txchat-${sName}-config")
+  # 将「-」转为「_」并将小写转大写
+  upperSName=$(echo "${sName//[-]/_}" | tr '[:lower:]' '[:upper:]')
+  # 修改.env文件服务镜像版本号
+  dosed "s/(${upperSName}_IMAGE=)\s*(.+)/\1${projectVersion}/" .env
+done
 
 for vname in ${volumes[*]} ; do \
   volume_create "${vname}"

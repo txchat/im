@@ -5,6 +5,7 @@ projectVersion=$(shell git describe --abbrev=8 --tags)
 gitCommit=$(shell git rev-parse --short=8 HEAD)
 
 pkgCommitName=${projectVersion}_${gitCommit}
+servers=comet logic
 
 help: ## 查看makefile帮助文档
 	@printf "Help doc:\nUsage: make [command]\n"
@@ -25,16 +26,14 @@ pkg_%: build_% ## 编译并打包目标机器的可执行文件（例如: make p
 
 images: build_linux_amd64 ## 打包docker镜像
 	cp script/docker/*Dockerfile ${TARGETDIR}
-	cd ${TARGETDIR} && \
-	docker build . -f comet.Dockerfile -t txchat-comet:${projectVersion}; \
-	docker build . -f logic.Dockerfile -t txchat-logic:${projectVersion}; \
+	cd ${TARGETDIR} && for i in $(servers) ; do \
+		docker build . -f $$i.Dockerfile -t txchat-$$i:${projectVersion}; \
+	done
 
 docker-compose-up: images ## 使用docker compose启动
 	cp -r script/compose/ run_compose/
 	cd run_compose && \
-	./initwork.sh && \
-	sed -r -i '' 's/(COMET_IMAGE=)\s*(.+)/\1${projectVersion}/' .env && \
-	sed -r -i '' 's/(LOGIC_IMAGE=)\s*(.+)/\1${projectVersion}/' .env && \
+	./initwork.sh "${servers}" "${projectVersion}" && \
 	docker compose -f components.compose.yaml -f service.compose.yaml up -d
 
 docker-compose-%: ## 使用docker compose 命令(服务列表：make docker-compose-ls；停止服务：make docker-compose-stop；卸载服务：make docker-compose-down)
@@ -51,9 +50,11 @@ clean:
 	rm -rf ${TARGETDIR}
 
 run:
-	nohup ${TARGETDIR}/logic -conf=${TARGETDIR}/logic.toml -logtostderr 2>&1 > ${TARGETDIR}/logic.log &
-	nohup ${TARGETDIR}/comet -conf=${TARGETDIR}/comet.toml -logtostderr 2>&1 > ${TARGETDIR}/comet.log &
+	for i in $(servers) ; do \
+		nohup ${TARGETDIR}/$$i -conf=${TARGETDIR}/$$i.toml -logtostderr 2>&1 > ${TARGETDIR}/$$i.log; \
+	done
 
 stop:
-	pkill -f ${TARGETDIR}/comet
-	pkill -f ${TARGETDIR}/logic
+	for i in $(servers) ; do \
+	  	pkill -f ${TARGETDIR}/$$i; \
+	done
