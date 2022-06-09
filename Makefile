@@ -31,14 +31,14 @@ images: build_linux_amd64 ## 打包docker镜像
 	done
 
 docker-compose-up: images ## 使用docker compose启动
-	cp -r script/compose/ run_compose/
+	cp -R script/compose/. run_compose/
 	cd run_compose && \
 	./initwork.sh "${servers}" "${projectVersion}" && \
 	docker compose -f components.compose.yaml -f service.compose.yaml up -d
 
 docker-compose-%: ## 使用docker compose 命令(服务列表：make docker-compose-ls；停止服务：make docker-compose-stop；卸载服务：make docker-compose-down)
 	@if [ ! -d "run_compose/" ]; then \
-       cp -r script/compose/ run_compose/; \
+       cp -R script/compose/. run_compose/; \
      fi; \
     cd run_compose && \
     docker compose -f components.compose.yaml -f service.compose.yaml $*
