@@ -39,6 +39,22 @@ func (b *Bucket) ChannelCount() int {
 	return len(b.chs)
 }
 
+func (b *Bucket) ChannelsCount() (res []string) {
+	var (
+		key string
+		i   int
+		//ch   *Channel
+	)
+	b.cLock.RLock()
+	res = make([]string, len(b.chs))
+	for key = range b.chs {
+		res[i] = key
+		i++
+	}
+	b.cLock.RUnlock()
+	return
+}
+
 // Put put a channel according with sub key.
 func (b *Bucket) Put(ch *Channel) (err error) {
 	b.cLock.Lock()

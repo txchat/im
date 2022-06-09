@@ -100,3 +100,26 @@ func (c *Channel) GetNode(id string) *Node {
 	defer c.mutex.Unlock()
 	return c.nodes[id]
 }
+
+// base info just for debug
+func (c *Channel) GetSeq() int32 {
+	return c.Seq
+}
+func (c *Channel) GetKey() string {
+	return c.Key
+}
+func (c *Channel) GetIP() string {
+	return c.IP
+}
+func (c *Channel) GetPort() string {
+	return c.Port
+}
+func (c *Channel) GetGroups() []string {
+	groups := make([]string, len(c.nodes))
+	i := 0
+	for k, _ := range c.nodes {
+		groups[i] = k
+		i++
+	}
+	return groups
+}

@@ -1,7 +1,7 @@
-env="debug"
+env="release"
 
 [log]
-    Level="debug"
+    Level="info"
     Mode="console"
     Path=""
     Display="json"
@@ -14,12 +14,12 @@ env="debug"
     Param=1.0
 [Trace.Reporter]
     LogSpans=true
-    LocalAgentHostPort="172.16.101.130:6831"
+    LocalAgentHostPort="txchat-jaeger:6831"
 
 [reg]
     schema   = "im"
     srvName  = "logic"
-    regAddrs = "127.0.0.1:2379"
+    regAddrs = "txchat-etcd:2379"
 
 [node]
     heartbeat = "4m"
@@ -50,11 +50,11 @@ env="debug"
 
 [kafka]
     topic   = "goim-push-topic"
-    brokers = ["127.0.0.1:9092"]
+    brokers = ["txchat-kafka:9092"]
 
 [redis]
     network      = "tcp"
-    addr         = "127.0.0.1:6379"
+    addr         = "txchat-redis:6379"
     active       = 60000
     idle         = 1024
     dialTimeout  = "200ms"
@@ -65,5 +65,5 @@ env="debug"
 
 [[apps]]
     appId   = "dtalk"
-    authUrl = "http://127.0.0.1:18002/user/login"
-    timeout = "1s"
+    authUrl = "http://txchat-gateway-node1:19000/user/login"
+    timeout = "5s"
