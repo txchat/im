@@ -45,6 +45,16 @@ function volume_create() {
   fi
 }
 
+function initRedis() {
+    for vname in ${created_volume[*]} ; do \
+      if [ "${vname}" = "txchat-redis-config" ]; then
+        docker container create --name dummy -v "txchat-redis-config":/root hello-world
+        docker cp redis.conf dummy:/root/redis.conf
+        docker rm dummy
+      fi
+    done
+}
+
 volumes=("txchat-zookeeper" "txchat-kafka" "txchat-redis-data" "txchat-redis-config" "txchat-redis-log" "txchat-etcd-data")
 networks=("txchat-components" "txchat-service")
 
@@ -63,3 +73,5 @@ done
 for netname in ${networks[*]} ; do \
   network_create "${netname}"
 done
+
+initRedis
