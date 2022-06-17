@@ -1,8 +1,11 @@
 version: "2.4"
 services:
   zookeeper:
-    image: wurstmeister/zookeeper
+    #image: zookeeper:3.7
+    image: ubuntu/zookeeper:3.1-22.04_beta
     container_name: txchat-zookeeper
+    environment:
+      TZ: Asia/Shanghai
     restart: unless-stopped
     volumes:
       - txchat-zookeeper:/data
@@ -10,23 +13,18 @@ services:
       - txchat-components
     ports:
       - "2181:2181"
-  # kafka version: 1.1.0
-  # scala version: 2.12
+  # ubuntu/kafka:3.1-22.04_beta -- scala version: 2.13 ; kafka version: 3.1.0
   kafka:
-    image: wurstmeister/kafka
+    image: ubuntu/kafka:3.1-22.04_beta
     container_name: txchat-kafka
     restart: unless-stopped
     ports:
       - "9092:9092"
     # kafka connectivity: https://github.com/wurstmeister/kafka-docker/wiki/Connectivity#internal-versus-advertised
     environment:
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://txchat-kafka:9092
-      #KAFKA_ADVERTISED_HOST_NAME: txchat-kafka
-      KAFKA_ZOOKEEPER_CONNECT: "txchat-zookeeper:2181"
-      KAFKA_BROKER_ID: 1
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_CREATE_TOPICS: "stream-in:1:1,stream-out:1:1"
+      TZ: Asia/Shanghai
+      ZOOKEEPER_HOST: txchat-zookeeper
+      ZOOKEEPER_PORT: 2181
     volumes:
       - txchat-kafka:/kafka
       - /var/run/docker.sock:/var/run/docker.sock
@@ -35,7 +33,7 @@ services:
     depends_on:
       - zookeeper
     healthcheck:
-      test: [ "CMD", "kafka-topics.sh", "--list", "--zookeeper", "txchat-zookeeper:2181" ]
+      test: [ "CMD", "kafka-topics.sh", "--list", "--bootstrap-server", "localhost:9092" ] ## confluentinc/cp-kafka
       interval: 5s
       timeout: 10s
       retries: 5
@@ -61,10 +59,11 @@ services:
       - txchat-components
     volumes:
       - ${REDIS_DATA_VOLUME}:/data
-      - ${REDIS_CONFIG_VOLUME}:/etc/redis/redis.conf
+      - ${REDIS_CONFIG_VOLUME}:/usr/local/etc/redis
       - ${REDIS_LOG_VOLUME}:/logs
     ports:
       - ${REDIS_PUB_PORT}:6379
+    command: [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
   etcd:
     image: quay.io/coreos/etcd:${ETCD_VERSION}
     container_name: ${ETCD_CONTAINER_NAME}
