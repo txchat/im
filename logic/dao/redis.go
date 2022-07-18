@@ -293,7 +293,7 @@ func (d *Dao) ServersByGid(c context.Context, appId string, gid string) (res []s
 		log.Error().Str("appId", appId).Str("gid", gid).Err(err).Msg(
 			fmt.Sprintf("conn.DO(ZRANGE %s,%s,%s,%s) error", keyGroupServer(appId, gid), "0", "-1", "WITHSCORES"))
 	}
-	for k, _ := range ress {
+	for k := range ress {
 		res = append(res, k)
 	}
 	return

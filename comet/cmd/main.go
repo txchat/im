@@ -78,8 +78,8 @@ func main() {
 	}
 	log.Logger.With().Str("service", srvName)
 
-	byte, _ := json.Marshal(conf.Conf)
-	log.Info().Str("config", string(byte)).Send()
+	b, _ := json.Marshal(conf.Conf)
+	log.Info().Str("config", string(b)).Send()
 
 	// trace init
 	tracer, tracerCloser := trace.Init(srvName, conf.Conf.Trace, config.Logger(jaeger.NullLogger))

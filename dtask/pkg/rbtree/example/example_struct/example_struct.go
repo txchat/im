@@ -58,10 +58,10 @@ func main() {
 	}
 
 	// var4 and var5 were expected
-	rbt.Ascend(rbt.Get(tmp), print)
+	rbt.Ascend(rbt.Get(tmp), show)
 }
 
-func print(item rbtree.Item) bool {
+func show(item rbtree.Item) bool {
 	i, ok := item.(Var)
 	if !ok {
 		return false

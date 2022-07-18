@@ -16,10 +16,10 @@ func main() {
 	rbt.Insert(rbtree.String("Hello"))
 	rbt.Insert(rbtree.String("World"))
 
-	rbt.Ascend(rbt.Min(), print)
+	rbt.Ascend(rbt.Min(), show)
 }
 
-func print(item rbtree.Item) bool {
+func show(item rbtree.Item) bool {
 	i, ok := item.(rbtree.String)
 	if !ok {
 		return false

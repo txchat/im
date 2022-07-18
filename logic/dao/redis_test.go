@@ -2,9 +2,10 @@ package dao
 
 import (
 	"context"
+	"testing"
+
 	"github.com/gomodule/redigo/redis"
 	"gopkg.in/Shopify/sarama.v1"
-	"testing"
 
 	"github.com/txchat/im/logic/conf"
 )

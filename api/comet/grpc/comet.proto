@@ -5,105 +5,99 @@ package im.comet;
 option go_package = "github.com/txchat/im/api/comet/grpc";
 
 message Proto {
-    int32 ver = 1;
-    int32 op = 2;
-    int32 seq = 3;
-    int32 ack = 4;
-    bytes body = 5;
+  int32 ver = 1;
+  int32 op = 2;
+  int32 seq = 3;
+  int32 ack = 4;
+  bytes body = 5;
 }
 
 enum Op {
-    Undefined       = 0;
+  Undefined = 0;
 
-    Auth            = 1;
-    AuthReply       = 2;
+  Auth = 1;
+  AuthReply = 2;
 
-    Heartbeat       = 3;
-    HeartbeatReply  = 4;
+  Heartbeat = 3;
+  HeartbeatReply = 4;
 
-    Disconnect      = 5;
-    DisconnectReply = 6;
+  Disconnect = 5;
+  DisconnectReply = 6;
 
-    SendMsg         = 7;
-    SendMsgReply    = 8; //客户端回复消息已收到
+  SendMsg = 7;
+  SendMsgReply = 8; //客户端回复消息已收到
 
-    ReceiveMsg      = 9;
-    ReceiveMsgReply = 10;
+  ReceiveMsg = 9;
+  ReceiveMsgReply = 10;
 
-    ProtoReady      = 11;
-    ProtoFinish     = 12;
+  ProtoReady = 11;
+  ProtoFinish = 12;
 
-    Raw             = 13;
+  Raw = 13;
 
-    SyncMsgReq      = 14;
-    SyncMsgReply    = 15;
+  SyncMsgReq = 14;
+  SyncMsgReply = 15;
 
-    RePush          = 16;
+  RePush = 16;
 }
 
 // Proto 中 Op 为 OpAuth 时， body 必须可以反序列化为 AuthMsg
 message AuthMsg {
-    string appId = 1;
-    string token = 2;
-    bytes ext = 3; // 其它业务方可能需要的信息
+  string appId = 1;
+  string token = 2;
+  bytes ext = 3; // 其它业务方可能需要的信息
 }
 
 // Proto 中 Op 为 SyncMsgReply 时， body 必须可以反序列化为 SyncMsg
-message SyncMsg {
-    int64 logId = 1;
-}
+message SyncMsg { int64 logId = 1; }
 
-message Empty{}
+message Empty {}
 
 message PushMsgReq {
-    repeated string keys = 1;
-    int32 protoOp = 2;
-    Proto proto = 3;
+  repeated string keys = 1;
+  int32 protoOp = 2;
+  Proto proto = 3;
 }
 
-message PushMsgReply {
-    map<string,int32> index = 1;
+message PushMsgReply { map<string, int32> index = 1; }
+
+message BroadcastReq {
+  int32 protoOp = 1;
+  Proto proto = 2;
 }
 
-message BroadcastReq{
-    int32 protoOp = 1;
-    Proto proto = 2;
-}
-
-message BroadcastReply{}
+message BroadcastReply {}
 
 message BroadcastGroupReq {
-    string groupID = 1;
-    Proto proto = 2;
+  string groupID = 1;
+  Proto proto = 2;
 }
 
-message BroadcastGroupReply{}
+message BroadcastGroupReply {}
 
 message JoinGroupsReq {
-    repeated string keys = 1;
-    repeated string gid = 2;
+  repeated string keys = 1;
+  repeated string gid = 2;
 }
 
-message JoinGroupsReply{}
+message JoinGroupsReply {}
 
 message LeaveGroupsReq {
-    repeated string keys = 1;
-    repeated string gid = 2;
+  repeated string keys = 1;
+  repeated string gid = 2;
 }
 
-message LeaveGroupsReply{}
+message LeaveGroupsReply {}
 
-message DelGroupsReq {
-    repeated string gid = 1;
-}
+message DelGroupsReq { repeated string gid = 1; }
 
-message DelGroupsReply{}
+message DelGroupsReply {}
 
 service Comet {
-    rpc PushMsg(PushMsgReq) returns (PushMsgReply);
-    rpc Broadcast(BroadcastReq) returns (BroadcastReply);
-    rpc BroadcastGroup(BroadcastGroupReq) returns (BroadcastGroupReply);
-    rpc JoinGroups(JoinGroupsReq) returns (JoinGroupsReply);
-    rpc LeaveGroups(LeaveGroupsReq) returns (LeaveGroupsReply);
-    rpc DelGroups(DelGroupsReq) returns (DelGroupsReply);
+  rpc PushMsg(PushMsgReq) returns (PushMsgReply);
+  rpc Broadcast(BroadcastReq) returns (BroadcastReply);
+  rpc BroadcastGroup(BroadcastGroupReq) returns (BroadcastGroupReply);
+  rpc JoinGroups(JoinGroupsReq) returns (JoinGroupsReply);
+  rpc LeaveGroups(LeaveGroupsReq) returns (LeaveGroupsReply);
+  rpc DelGroups(DelGroupsReq) returns (DelGroupsReply);
 }

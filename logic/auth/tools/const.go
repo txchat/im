@@ -6,10 +6,10 @@ import (
 
 const (
 	// http method
-	HTTP_GET    = "GET"
-	HTTP_POST   = "POST"
-	HTTP_DELETE = "DELETE"
+	HTTPGet    = "GET"
+	HTTPPost   = "POST"
+	HTTPDelete = "DELETE"
 
 	// http default timeout
-	HTTP_DEFAULT_TIMEOUT = 20 * time.Second
+	HTTPDefaultTimeout = 20 * time.Second
 )

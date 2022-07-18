@@ -73,7 +73,7 @@ func result() {
 		nowAlive := atomic.LoadInt64(&aliveCount)
 		diff := nowCount - lastTimes
 		lastTimes = nowCount
-		fmt.Println(fmt.Sprintf("%s alive:%d down:%d down/s:%d", time.Now().Format("2006-01-02 15:04:05"), nowAlive, nowCount, diff/interval))
+		fmt.Printf("%s alive:%d down:%d down/s:%d\n", time.Now().Format("2006-01-02 15:04:05"), nowAlive, nowCount, diff/interval)
 		time.Sleep(time.Second * time.Duration(interval))
 	}
 }
@@ -95,9 +95,9 @@ func startClient(key int64) {
 	}()
 
 	// connnect to server
-	wsUrl := "ws://" + os.Args[3] + "/sub"
-	fmt.Println("wsUrl", wsUrl)
-	conn, _, err := websocket.DefaultDialer.Dial(wsUrl, nil)
+	wsURL := "ws://" + os.Args[3] + "/sub"
+	fmt.Println("wsUrl", wsURL)
+	conn, _, err := websocket.DefaultDialer.Dial(wsURL, nil)
 	if err != nil {
 		panic(err)
 	}

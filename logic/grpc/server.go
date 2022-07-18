@@ -2,12 +2,13 @@ package grpc
 
 import (
 	"context"
+	"net"
+	"time"
+
 	"github.com/rs/zerolog/log"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"net"
-	"time"
 
 	"github.com/golang/protobuf/proto"
 	"github.com/txchat/im-pkg/trace"
@@ -15,7 +16,7 @@ import (
 	"github.com/txchat/im/logic"
 	"github.com/txchat/im/logic/conf"
 	"google.golang.org/grpc"
-	_ "google.golang.org/grpc/encoding/gzip"
+	_ "google.golang.org/grpc/encoding/gzip" //register gzip compressor
 	"google.golang.org/grpc/keepalive"
 )
 

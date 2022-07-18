@@ -3,8 +3,9 @@ package acc
 import (
 	"encoding/json"
 	"errors"
-	"github.com/txchat/im/logic/auth/tools"
 	"time"
+
+	"github.com/txchat/im/logic/auth/tools"
 )
 
 type talkClient struct {
@@ -18,9 +19,9 @@ func (a *talkClient) DoAuth(token string, ext []byte) (uid, errMsg string, err e
 	)
 	headers := map[string]string{}
 	headers["Authorization"] = token
-	bytes, err = tools.HttpReq(&tools.HttpParams{
+	bytes, err = tools.HTTPReq(&tools.HTTPParams{
 		Method:    "GET",
-		ReqUrl:    a.url,
+		ReqURL:    a.url,
 		HeaderMap: headers,
 		Timeout:   a.timeout,
 	})

@@ -51,15 +51,15 @@ func (c *Channel) push(p *grpc.Proto) (err error) {
 
 // Push server push message.
 func (c *Channel) Push(p *grpc.Proto) (seq int32, err error) {
-	if p, ok := proto.Clone(p).(*grpc.Proto); ok {
+	p, ok := proto.Clone(p).(*grpc.Proto)
+	if ok {
 		if p.Op == int32(grpc.Op_ReceiveMsg) {
 			p.Seq = c.seqInc()
 		}
 		seq = p.Seq
 		return seq, c.push(p)
-	} else {
-		return 0, errors.New("protocol type gRPC proto failed")
 	}
+	return 0, errors.New("protocol type gRPC proto failed")
 }
 
 // Ready check the channel ready or close?
@@ -117,7 +117,7 @@ func (c *Channel) GetPort() string {
 func (c *Channel) GetGroups() []string {
 	groups := make([]string, len(c.nodes))
 	i := 0
-	for k, _ := range c.nodes {
+	for k := range c.nodes {
 		groups[i] = k
 		i++
 	}

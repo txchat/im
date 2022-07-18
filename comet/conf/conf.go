@@ -2,9 +2,10 @@ package conf
 
 import (
 	"flag"
-	"github.com/uber/jaeger-client-go"
 	"os"
 	"time"
+
+	"github.com/uber/jaeger-client-go"
 
 	"github.com/BurntSushi/toml"
 	xtime "github.com/Terry-Mao/goim/pkg/time"
@@ -41,7 +42,7 @@ func Init() (err error) {
 	return
 }
 
-// Default new a config with specified defualt value.
+// Default new a config with specified default value.
 func Default() *Config {
 	return &Config{
 		Env: "",
@@ -140,7 +141,7 @@ type Config struct {
 type Reg struct {
 	Schema   string
 	SrvName  string // call
-	RegAddrs string // etcd addrs, seperate by ','
+	RegAddrs string // etcd address, be separated from ','
 }
 
 // RPCClient is RPC client config.

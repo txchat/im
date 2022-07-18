@@ -72,7 +72,7 @@ func result() {
 		nowAlive := atomic.LoadInt64(&aliveCount)
 		diff := nowCount - lastTimes
 		lastTimes = nowCount
-		fmt.Println(fmt.Sprintf("%s alive:%d down:%d down/s:%d", time.Now().Format("2006-01-02 15:04:05"), nowAlive, nowCount, diff/interval))
+		fmt.Printf("%s alive:%d down:%d down/s:%d\n", time.Now().Format("2006-01-02 15:04:05"), nowAlive, nowCount, diff/interval)
 		time.Sleep(time.Second * time.Duration(interval))
 	}
 }

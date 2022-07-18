@@ -5,20 +5,20 @@ import (
 	"time"
 )
 
-type HttpParams struct {
+type HTTPParams struct {
 	Method    string            `json:"Method"`
-	ReqUrl    string            `json:"ReqUrl"`
+	ReqURL    string            `json:"ReqUrl"`
 	StrParams string            `json:"StrParams"`
 	HeaderMap map[string]string `json:"HeaderMap"`
 	Timeout   time.Duration     `json:"Timeout"`
 }
 
-func HttpParamsUnmarshal(data []byte) (*HttpParams, error) {
-	tHttpParams := &HttpParams{}
-	err := json.Unmarshal(data, tHttpParams)
+func HTTPParamsUnmarshal(data []byte) (*HTTPParams, error) {
+	tHTTPParams := &HTTPParams{}
+	err := json.Unmarshal(data, tHTTPParams)
 	if err != nil {
 		return nil, err
 	}
 
-	return tHttpParams, nil
+	return tHTTPParams, nil
 }

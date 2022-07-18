@@ -35,7 +35,7 @@ func Init() (err error) {
 	return
 }
 
-// Default new a config with specified defualt value.
+// Default new a config with specified default value.
 func Default() *Config {
 	return &Config{
 		Env: "",
@@ -100,12 +100,12 @@ type Config struct {
 type Reg struct {
 	Schema   string
 	SrvName  string // call
-	RegAddrs string // etcd addrs, seperate by ','
+	RegAddrs string // etcd address, be separated from ','
 }
 
 type App struct {
 	AppId   string
-	AuthUrl string
+	AuthURL string
 	Timeout xtime.Duration
 }
 

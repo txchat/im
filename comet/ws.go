@@ -326,9 +326,8 @@ reauth:
 		}
 		if p.Op == int32(grpc.Op_Auth) {
 			break
-		} else {
-			log.Error().Int32("operation", p.Op).Msg("ws request operation not auth")
 		}
+		log.Error().Int32("operation", p.Op).Msg("ws request operation not auth")
 	}
 	var errMsg string
 	if key, hb, errMsg, err = s.Connect(ctx, p); err != nil {

@@ -4,16 +4,15 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/golang/protobuf/proto"
 	"github.com/mitchellh/mapstructure"
 	"github.com/rs/zerolog/log"
 	"github.com/txchat/im/logic/auth/tools"
 	xproto "github.com/txchat/imparse/proto"
-	"time"
 )
-
-var dev = make(map[xproto.Device]string)
 
 type EndpointRejectResp struct {
 	Result  int    `json:"result"`
@@ -22,7 +21,7 @@ type EndpointRejectResp struct {
 		Code    int    `json:"code"`
 		Service string `json:"service"`
 		Message struct {
-			UUid       string `json:"uuid"`
+			UUID       string `json:"uuid"`
 			Device     int    `json:"device"`
 			DeviceName string `json:"deviceName"`
 			Datetime   int64  `json:"datetime"`
@@ -32,7 +31,7 @@ type EndpointRejectResp struct {
 
 func errorMetaData(respData *AuthErrorDataReconnectNotAllowed) (string, error) {
 	data, err := proto.Marshal(&xproto.SignalEndpointLogin{
-		Uuid:       respData.Message.Uuid,
+		Uuid:       respData.Message.UUID,
 		Device:     xproto.Device(respData.Message.Device),
 		DeviceName: respData.Message.DeviceName,
 		Datetime:   uint64(respData.Message.Datetime),
@@ -77,9 +76,9 @@ func (a *talkClient) DoAuth(token string, ext []byte) (uid, errMsg string, err e
 		strParams = string(reqData)
 	}
 
-	bytes, err = tools.HttpReq(&tools.HttpParams{
+	bytes, err = tools.HTTPReq(&tools.HTTPParams{
 		Method:    "POST",
-		ReqUrl:    a.url,
+		ReqURL:    a.url,
 		HeaderMap: headers,
 		Timeout:   a.timeout,
 		StrParams: strParams,

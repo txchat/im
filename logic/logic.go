@@ -66,7 +66,7 @@ func (l *Logic) loadApps() {
 		if newAuth == nil {
 			panic("exec auth not exist:" + app.AppId)
 		}
-		exec := newAuth(app.AuthUrl, time.Duration(app.Timeout))
+		exec := newAuth(app.AuthURL, time.Duration(app.Timeout))
 		l.apps[app.AppId] = exec
 	}
 }
@@ -93,7 +93,7 @@ func (l *Logic) Connect(c context.Context, server string, p *comet.Proto) (mid s
 	}
 	log.Info().Str("appId", authMsg.AppId).Str("token", authMsg.Token).Msg("call auth")
 	appId = authMsg.AppId
-	authExec, _ := l.apps[authMsg.AppId]
+	authExec := l.apps[authMsg.AppId]
 	if authExec == nil {
 		err = ErrInvalidAppId
 		return

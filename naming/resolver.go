@@ -7,11 +7,11 @@ import (
 	"time"
 
 	"go.etcd.io/etcd/api/v3/mvccpb"
-	"go.etcd.io/etcd/client/v3"
+	clientv3 "go.etcd.io/etcd/client/v3"
 	"google.golang.org/grpc/resolver"
 )
 
-var schema string
+var schema string //nolint:deadcode
 var cli *clientv3.Client
 
 type etcdResolver struct {

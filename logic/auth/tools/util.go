@@ -9,34 +9,34 @@ import (
 
 var client = &http.Client{}
 
-func HttpReq(tHttpParams *HttpParams) ([]byte, error) {
+func HTTPReq(tHTTPParams *HTTPParams) ([]byte, error) {
 	var req *http.Request
 	var err error
 
-	switch tHttpParams.Method {
-	case HTTP_GET, HTTP_DELETE:
-		if "" == tHttpParams.StrParams {
-			req, err = http.NewRequest(tHttpParams.Method, tHttpParams.ReqUrl, nil)
+	switch tHTTPParams.Method {
+	case HTTPGet, HTTPDelete:
+		if "" == tHTTPParams.StrParams {
+			req, err = http.NewRequest(tHTTPParams.Method, tHTTPParams.ReqURL, nil)
 		} else {
-			req, err = http.NewRequest(tHttpParams.Method, tHttpParams.ReqUrl+"?"+tHttpParams.StrParams, nil)
+			req, err = http.NewRequest(tHTTPParams.Method, tHTTPParams.ReqURL+"?"+tHTTPParams.StrParams, nil)
 		}
-	case HTTP_POST:
-		req, err = http.NewRequest(tHttpParams.Method, tHttpParams.ReqUrl, strings.NewReader(tHttpParams.StrParams))
+	case HTTPPost:
+		req, err = http.NewRequest(tHTTPParams.Method, tHTTPParams.ReqURL, strings.NewReader(tHTTPParams.StrParams))
 	default:
-		panic(tHttpParams.Method)
+		panic(tHTTPParams.Method)
 	}
 	if nil != err {
 		return nil, err
 	}
 
-	for k, v := range tHttpParams.HeaderMap {
+	for k, v := range tHTTPParams.HeaderMap {
 		req.Header.Add(k, v)
 	}
 
-	if 0 != int64(tHttpParams.Timeout) {
-		client.Timeout = tHttpParams.Timeout
+	if 0 != int64(tHTTPParams.Timeout) {
+		client.Timeout = tHTTPParams.Timeout
 	} else {
-		client.Timeout = HTTP_DEFAULT_TIMEOUT
+		client.Timeout = HTTPDefaultTimeout
 	}
 
 	resp, err := client.Do(req)

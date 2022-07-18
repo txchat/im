@@ -88,15 +88,15 @@ func (r *Group) Push(p *grpc.Proto) {
 func (r *Group) Members() ([]string, []string) {
 	r.rLock.RLock()
 	members := make([]string, 0)
-	mIp := make([]string, 0)
+	mIP := make([]string, 0)
 	for node := r.next; node != nil; node = node.Next {
 		if node.Current != nil {
 			members = append(members, node.Current.Key)
-			mIp = append(mIp, fmt.Sprintf("%v:%v", node.Current.IP, node.Current.Port))
+			mIP = append(mIP, fmt.Sprintf("%v:%v", node.Current.IP, node.Current.Port))
 		}
 	}
 	r.rLock.RUnlock()
-	return members, mIp
+	return members, mIP
 }
 
 // Close close the group.

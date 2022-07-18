@@ -12,7 +12,7 @@ type AuthErrorDataReconnectNotAllowed struct {
 		Datetime   int64  `json:"datetime"`
 		Device     int    `json:"device"`
 		DeviceName string `json:"deviceName"`
-		Uuid       string `json:"uuid"`
+		UUID       string `json:"uuid"`
 	} `json:"message"`
 	Service string `json:"service"`
 }

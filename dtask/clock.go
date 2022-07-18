@@ -19,18 +19,19 @@
 package dtask
 
 import (
-	"github.com/txchat/im/dtask/pkg/rbtree"
 	"math"
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/txchat/im/dtask/pkg/rbtree"
 )
 
 /*
 This code is based on the following resources:
 source code:	https://github.com/alex023/clock.git
 */
-const _UNTOUCHED = time.Duration(math.MaxInt64)
+const Untouched = time.Duration(math.MaxInt64)
 
 var (
 	defaultClock *Clock
@@ -63,9 +64,9 @@ var singal = struct{}{}
 func NewClock() *Clock {
 	c := &Clock{
 		jobQueue:   rbtree.New(),
-		pauseChan:  make(chan struct{}, 0),
-		resumeChan: make(chan struct{}, 0),
-		exitChan:   make(chan struct{}, 0),
+		pauseChan:  make(chan struct{}),
+		resumeChan: make(chan struct{}),
+		exitChan:   make(chan struct{}),
 	}
 
 	c.start()
@@ -121,14 +122,14 @@ func (jl *Clock) schedule() {
 	var (
 		timeout time.Duration
 		job     *jobItem
-		timer   = newSafeTimer(_UNTOUCHED)
+		timer   = newSafeTimer(Untouched)
 	)
 	defer timer.Stop()
 Pause:
 	<-jl.resumeChan
 	for {
 		job, _ = jl.jobQueue.Min().(*jobItem) //ignore ok-assert
-		timeout = job.actionTime.Sub(time.Now())
+		timeout = time.Until(job.actionTime)
 		timer.SafeReset(timeout)
 		select {
 		case <-timer.C:
@@ -204,7 +205,7 @@ func (jl *Clock) AddJobWithInterval(actionInterval time.Duration, jobFunc func()
 // 	@jobScheduled	:	A reference to a task that has been scheduled.
 //	@inserted		:	return false ,if actionTime before time.Now or jobFunc is nil
 func (jl *Clock) AddJobWithDeadtime(actionTime time.Time, jobFunc func()) (jobScheduled Job, inserted bool) {
-	actionInterval := actionTime.Sub(time.Now())
+	actionInterval := time.Until(actionTime)
 	if jobFunc == nil || actionInterval.Nanoseconds() <= 0 {
 		return
 	}
@@ -276,7 +277,6 @@ func (jl *Clock) rmJob(job *jobItem) {
 	defer jl.resume()
 
 	jl.removeJob(job)
-	return
 }
 
 // Count 已经执行的任务数。对于重复任务，会计算多次

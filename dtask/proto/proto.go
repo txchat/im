@@ -6,7 +6,7 @@ const (
 )
 
 type Proto struct {
-	Uid string
+	UID string
 	Opt int
 	Seq int64
 }
