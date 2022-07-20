@@ -1,4 +1,6 @@
 #!/bin/bash
+# shellcheck disable=SC2034
+# shellcheck disable=SC2048
 work_dir=$(
     cd "$(dirname "$0")" || exit
     pwd

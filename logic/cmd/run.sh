@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # -log_dir=log 日志输出文件夹
 # -logtostderr=true 打印到标准错误而不是文件。
 # -alsologtostderr=true 同时打印到标准错误。
