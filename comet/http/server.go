@@ -1,12 +1,13 @@
 package http
 
 import (
+	"net/http"
+
 	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 	"github.com/txchat/im/comet"
 	"github.com/txchat/im/comet/conf"
-	"net/http"
 )
 
 var (

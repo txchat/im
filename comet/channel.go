@@ -117,7 +117,7 @@ func (c *Channel) GetPort() string {
 func (c *Channel) GetGroups() []string {
 	groups := make([]string, len(c.nodes))
 	i := 0
-	for k, _ := range c.nodes {
+	for k := range c.nodes {
 		groups[i] = k
 		i++
 	}

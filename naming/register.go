@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"go.etcd.io/etcd/client/v3"
+	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
 func Register(etcdAddr, name, addr, schema string, ttl int64) error {

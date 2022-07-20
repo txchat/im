@@ -4,13 +4,14 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/golang/protobuf/proto"
 	"github.com/mitchellh/mapstructure"
 	"github.com/rs/zerolog/log"
 	"github.com/txchat/im/logic/auth/tools"
 	xproto "github.com/txchat/imparse/proto"
-	"time"
 )
 
 var dev = make(map[xproto.Device]string)
