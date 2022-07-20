@@ -3,13 +3,14 @@ package comet
 import (
 	"context"
 	"fmt"
+	"math/rand"
+	"net"
+	"time"
+
 	"github.com/rs/zerolog/log"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"math/rand"
-	"net"
-	"time"
 
 	"github.com/Terry-Mao/goim/pkg/ip"
 	"github.com/txchat/im-pkg/trace"

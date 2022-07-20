@@ -1,11 +1,12 @@
 package dtask
 
 import (
-	"github.com/txchat/im/dtask/pkg/rbtree"
 	"log"
 	"runtime/debug"
 	"sync/atomic"
 	"time"
+
+	"github.com/txchat/im/dtask/pkg/rbtree"
 )
 
 /*

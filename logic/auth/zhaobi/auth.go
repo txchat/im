@@ -3,8 +3,9 @@ package acc
 import (
 	"encoding/json"
 	"errors"
-	"github.com/txchat/im/logic/auth/tools"
 	"time"
+
+	"github.com/txchat/im/logic/auth/tools"
 )
 
 type talkClient struct {

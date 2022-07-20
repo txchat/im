@@ -3,12 +3,14 @@ default_url="http://172.16.101.107:16060"
 default_prefix="debug/pprof"
 default_type="profile"
 
+# shellcheck disable=SC2162
 read -p "input the request url (default url is '${default_url}'): " url
-if [ -z ${url} ]; then
+if [ -z "${url}" ]; then
     url=${default_url}
 fi
+# shellcheck disable=SC2162
 read -p "input the pprof prefix (default prefix is '${default_prefix}'): " prefix
-if [ -z ${prefix} ]; then
+if [ -z "${prefix}" ]; then
     prefix=${default_prefix}
 fi
 
@@ -29,6 +31,7 @@ function show() {
 
 while true; do
     show
+    # shellcheck disable=SC2162
     read num
     case $num in
         0)

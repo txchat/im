@@ -2,9 +2,10 @@ package conf
 
 import (
 	"flag"
-	"github.com/uber/jaeger-client-go"
 	"os"
 	"time"
+
+	"github.com/uber/jaeger-client-go"
 
 	"github.com/BurntSushi/toml"
 	xtime "github.com/Terry-Mao/goim/pkg/time"

@@ -3,6 +3,7 @@ package dao
 import (
 	"context"
 	"fmt"
+
 	"github.com/opentracing/opentracing-go"
 	"github.com/txchat/im-pkg/trace"
 	comet "github.com/txchat/im/api/comet/grpc"

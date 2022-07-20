@@ -2,10 +2,11 @@ package grpc
 
 import (
 	"context"
-	"github.com/rs/zerolog/log"
-	"github.com/txchat/im-pkg/trace"
 	"net"
 	"time"
+
+	"github.com/rs/zerolog/log"
+	"github.com/txchat/im-pkg/trace"
 
 	pb "github.com/txchat/im/api/comet/grpc"
 	"github.com/txchat/im/comet"

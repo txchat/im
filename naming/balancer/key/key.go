@@ -1,11 +1,12 @@
 package key
 
 import (
+	"sync"
+
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc/balancer"
 	"google.golang.org/grpc/balancer/base"
 	"google.golang.org/grpc/grpclog"
-	"sync"
 )
 
 const (
