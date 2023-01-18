@@ -11,10 +11,11 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/rs/zerolog/log"
 	"github.com/txchat/im/logic/auth/tools"
-	xproto "github.com/txchat/imparse/proto"
+	"github.com/txchat/imparse/proto/auth"
+	"github.com/txchat/imparse/proto/signal"
 )
 
-var dev = make(map[xproto.Device]string)
+var dev = make(map[auth.Device]string)
 
 type EndpointRejectResp struct {
 	Result  int    `json:"result"`
@@ -32,9 +33,9 @@ type EndpointRejectResp struct {
 }
 
 func errorMetaData(respData *AuthErrorDataReconnectNotAllowed) (string, error) {
-	data, err := proto.Marshal(&xproto.SignalEndpointLogin{
+	data, err := proto.Marshal(&signal.SignalEndpointLogin{
 		Uuid:       respData.Message.Uuid,
-		Device:     xproto.Device(respData.Message.Device),
+		Device:     auth.Device(respData.Message.Device),
 		DeviceName: respData.Message.DeviceName,
 		Datetime:   uint64(respData.Message.Datetime),
 	})
@@ -58,7 +59,7 @@ func (a *talkClient) DoAuth(token string, ext []byte) (uid, errMsg string, err e
 	headers["FZM-SIGNATURE"] = token
 
 	if len(ext) != 0 {
-		var device xproto.Login
+		var device auth.Login
 		err = proto.Unmarshal(ext, &device)
 		if err != nil {
 			return "", "", err

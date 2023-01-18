@@ -27,6 +27,8 @@ require (
 	go.etcd.io/etcd/client/v3 v3.5.0
 	google.golang.org/genproto v0.0.0-20210602131652-f16073e35f0c
 	google.golang.org/grpc v1.40.0
-	google.golang.org/protobuf v1.27.1
+	google.golang.org/protobuf v1.28.1
 	gopkg.in/Shopify/sarama.v1 v1.19.0
 )
+
+replace github.com/txchat/imparse => ../imparse
