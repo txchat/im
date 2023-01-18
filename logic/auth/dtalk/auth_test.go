@@ -7,7 +7,7 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/txchat/dtalk/pkg/auth"
-	xproto "github.com/txchat/imparse/proto"
+	authProto "github.com/txchat/imparse/proto/auth"
 )
 
 func Test_talkClient_DoAuthReConnect(t *testing.T) {
@@ -29,11 +29,11 @@ func Test_talkClient_DoAuthReConnect(t *testing.T) {
 	authenticator := auth.NewDefaultApuAuthenticator()
 	token := authenticator.Request("", pubKey, privKey)
 
-	devInfo := &xproto.Login{
-		Device:      xproto.Device_Android,
+	devInfo := &authProto.Login{
+		Device:      authProto.Device_Android,
 		Username:    "测试comet",
 		DeviceToken: "",
-		ConnType:    xproto.Login_Reconnect,
+		ConnType:    authProto.Login_Reconnect,
 		Uuid:        "7447ecc2-948b-465a-bd8a-4830da2e5a09",
 		DeviceName:  "虚拟驱动测试",
 	}
@@ -88,11 +88,11 @@ func Test_talkClient_DoAuthConnect(t *testing.T) {
 	authenticator := auth.NewDefaultApuAuthenticator()
 	token := authenticator.Request("", pubKey, privKey)
 
-	devInfo := &xproto.Login{
-		Device:      xproto.Device_Android,
+	devInfo := &authProto.Login{
+		Device:      authProto.Device_Android,
 		Username:    "1P2vRmRcxNwgSyef12cZxJHqk7sv873tL7",
 		DeviceToken: "",
-		ConnType:    xproto.Login_Reconnect,
+		ConnType:    authProto.Login_Reconnect,
 		Uuid:        "3ade6a21-a0d7-48ce-94a2-2f3567adc468",
 		DeviceName:  "虚拟驱动",
 	}
