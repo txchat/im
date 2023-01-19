@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+package im.comet;
+option go_package = "github.com/txchat/im/api/comet;comet";
+
+import "github.com/txchat/im/api/protocol/protocol.proto";
+
+// Proto 中 Op 为 OpAuth 时， body 必须可以反序列化为 AuthMsg
+message AuthMsg {
+  string appId = 1;
+  string token = 2;
+  bytes ext = 3; // 其它业务方可能需要的信息
+}
+
+// Proto 中 Op 为 SyncMsgReply 时， body 必须可以反序列化为 SyncMsg
+message SyncMsg { int64 logId = 1; }
+
+message Empty {}
+
+message PushMsgReq {
+  repeated string keys = 1;
+  int32 protoOp = 2;
+  im.protocol.Proto proto = 3;
+}
+
+message PushMsgReply { map<string, int32> index = 1; }
+
+message BroadcastReq {
+  int32 protoOp = 1;
+  im.protocol.Proto proto = 2;
+}
+
+message BroadcastReply {}
+
+message BroadcastGroupReq {
+  string groupID = 1;
+  im.protocol.Proto proto = 2;
+}
+
+message BroadcastGroupReply {}
+
+message JoinGroupsReq {
+  repeated string keys = 1;
+  repeated string gid = 2;
+}
+
+message JoinGroupsReply {}
+
+message LeaveGroupsReq {
+  repeated string keys = 1;
+  repeated string gid = 2;
+}
+
+message LeaveGroupsReply {}
+
+message DelGroupsReq { repeated string gid = 1; }
+
+message DelGroupsReply {}
+
+service Comet {
+  rpc PushMsg(PushMsgReq) returns (PushMsgReply);
+  rpc Broadcast(BroadcastReq) returns (BroadcastReply);
+  rpc BroadcastGroup(BroadcastGroupReq) returns (BroadcastGroupReply);
+  rpc JoinGroups(JoinGroupsReq) returns (JoinGroupsReply);
+  rpc LeaveGroups(LeaveGroupsReq) returns (LeaveGroupsReply);
+  rpc DelGroups(DelGroupsReq) returns (DelGroupsReply);
+}

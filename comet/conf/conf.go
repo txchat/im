@@ -201,12 +201,3 @@ type Protocol struct {
 	TaskDuration     xtime.Duration
 	Rto              xtime.Duration
 }
-
-// Bucket is bucket config.
-type Bucket struct {
-	Size          int
-	Channel       int
-	Groups        int
-	RoutineAmount uint64
-	RoutineSize   int
-}
