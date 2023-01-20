@@ -3,7 +3,7 @@ package acc
 import (
 	"time"
 
-	"github.com/txchat/im/logic/auth"
+	"github.com/txchat/im/internel/auth"
 )
 
 const Name = "zb_otc"

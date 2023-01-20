@@ -3,7 +3,7 @@ package logic
 import (
 	"context"
 
-	"github.com/txchat/im/internel/errors"
+	"github.com/txchat/im/internal/errors"
 
 	"github.com/txchat/im/api/comet"
 	"github.com/txchat/im/app/comet/internal/svc"

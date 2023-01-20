@@ -5,7 +5,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/txchat/im/logic/auth/tools"
+	tools2 "github.com/txchat/im/internel/auth/tools"
 )
 
 type talkClient struct {
@@ -19,7 +19,7 @@ func (a *talkClient) DoAuth(token string, ext []byte) (uid, errMsg string, err e
 	)
 	headers := map[string]string{}
 	headers["Authorization"] = token
-	bytes, err = tools.HttpReq(&tools.HttpParams{
+	bytes, err = tools2.HttpReq(&tools2.HttpParams{
 		Method:    "GET",
 		ReqUrl:    a.url,
 		HeaderMap: headers,

@@ -19,7 +19,7 @@ import (
 	"github.com/txchat/im/api/protocol"
 	"github.com/txchat/im/app/comet/internal/svc"
 	"github.com/txchat/im/dtask"
-	"github.com/txchat/im/internel/comet"
+	"github.com/txchat/im/internal/comet"
 )
 
 // InitTCP listen all tcp.bind and start accept connections.

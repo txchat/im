@@ -6,13 +6,15 @@ package server
 import (
 	"context"
 
+	xlogic "github.com/txchat/im/api/logic"
+
 	"github.com/txchat/im/app/logic/internal/logic"
 	"github.com/txchat/im/app/logic/internal/svc"
 )
 
 type LogicServer struct {
 	svcCtx *svc.ServiceContext
-	logic.UnimplementedLogicServer
+	xlogic.UnimplementedLogicServer
 }
 
 func NewLogicServer(svcCtx *svc.ServiceContext) *LogicServer {
@@ -21,62 +23,62 @@ func NewLogicServer(svcCtx *svc.ServiceContext) *LogicServer {
 	}
 }
 
-func (s *LogicServer) Connect(ctx context.Context, in *logic.ConnectReq) (*logic.ConnectReply, error) {
+func (s *LogicServer) Connect(ctx context.Context, in *xlogic.ConnectReq) (*xlogic.ConnectReply, error) {
 	l := logic.NewConnectLogic(ctx, s.svcCtx)
 	return l.Connect(in)
 }
 
-func (s *LogicServer) Disconnect(ctx context.Context, in *logic.DisconnectReq) (*logic.Reply, error) {
+func (s *LogicServer) Disconnect(ctx context.Context, in *xlogic.DisconnectReq) (*xlogic.Reply, error) {
 	l := logic.NewDisconnectLogic(ctx, s.svcCtx)
 	return l.Disconnect(in)
 }
 
-func (s *LogicServer) Heartbeat(ctx context.Context, in *logic.HeartbeatReq) (*logic.Reply, error) {
+func (s *LogicServer) Heartbeat(ctx context.Context, in *xlogic.HeartbeatReq) (*xlogic.Reply, error) {
 	l := logic.NewHeartbeatLogic(ctx, s.svcCtx)
 	return l.Heartbeat(in)
 }
 
-func (s *LogicServer) Receive(ctx context.Context, in *logic.ReceiveReq) (*logic.Reply, error) {
+func (s *LogicServer) Receive(ctx context.Context, in *xlogic.ReceiveReq) (*xlogic.Reply, error) {
 	l := logic.NewReceiveLogic(ctx, s.svcCtx)
 	return l.Receive(in)
 }
 
-func (s *LogicServer) PushByMids(ctx context.Context, in *logic.MidsMsg) (*logic.Reply, error) {
+func (s *LogicServer) PushByMids(ctx context.Context, in *xlogic.MidsMsg) (*xlogic.Reply, error) {
 	l := logic.NewPushByMidsLogic(ctx, s.svcCtx)
 	return l.PushByMids(in)
 }
 
-func (s *LogicServer) PushByKeys(ctx context.Context, in *logic.KeysMsg) (*logic.Reply, error) {
+func (s *LogicServer) PushByKeys(ctx context.Context, in *xlogic.KeysMsg) (*xlogic.Reply, error) {
 	l := logic.NewPushByKeysLogic(ctx, s.svcCtx)
 	return l.PushByKeys(in)
 }
 
-func (s *LogicServer) PushGroup(ctx context.Context, in *logic.GroupMsg) (*logic.Reply, error) {
+func (s *LogicServer) PushGroup(ctx context.Context, in *xlogic.GroupMsg) (*xlogic.Reply, error) {
 	l := logic.NewPushGroupLogic(ctx, s.svcCtx)
 	return l.PushGroup(in)
 }
 
-func (s *LogicServer) JoinGroupsByKeys(ctx context.Context, in *logic.GroupsKey) (*logic.Reply, error) {
+func (s *LogicServer) JoinGroupsByKeys(ctx context.Context, in *xlogic.GroupsKey) (*xlogic.Reply, error) {
 	l := logic.NewJoinGroupsByKeysLogic(ctx, s.svcCtx)
 	return l.JoinGroupsByKeys(in)
 }
 
-func (s *LogicServer) JoinGroupsByMids(ctx context.Context, in *logic.GroupsMid) (*logic.Reply, error) {
+func (s *LogicServer) JoinGroupsByMids(ctx context.Context, in *xlogic.GroupsMid) (*xlogic.Reply, error) {
 	l := logic.NewJoinGroupsByMidsLogic(ctx, s.svcCtx)
 	return l.JoinGroupsByMids(in)
 }
 
-func (s *LogicServer) LeaveGroupsByKeys(ctx context.Context, in *logic.GroupsKey) (*logic.Reply, error) {
+func (s *LogicServer) LeaveGroupsByKeys(ctx context.Context, in *xlogic.GroupsKey) (*xlogic.Reply, error) {
 	l := logic.NewLeaveGroupsByKeysLogic(ctx, s.svcCtx)
 	return l.LeaveGroupsByKeys(in)
 }
 
-func (s *LogicServer) LeaveGroupsByMids(ctx context.Context, in *logic.GroupsMid) (*logic.Reply, error) {
+func (s *LogicServer) LeaveGroupsByMids(ctx context.Context, in *xlogic.GroupsMid) (*xlogic.Reply, error) {
 	l := logic.NewLeaveGroupsByMidsLogic(ctx, s.svcCtx)
 	return l.LeaveGroupsByMids(in)
 }
 
-func (s *LogicServer) DelGroups(ctx context.Context, in *logic.DelGroupsReq) (*logic.Reply, error) {
+func (s *LogicServer) DelGroups(ctx context.Context, in *xlogic.DelGroupsReq) (*xlogic.Reply, error) {
 	l := logic.NewDelGroupsLogic(ctx, s.svcCtx)
 	return l.DelGroups(in)
 }

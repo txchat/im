@@ -6,11 +6,12 @@ import (
 	"errors"
 	"time"
 
+	tools2 "github.com/txchat/im/internel/auth/tools"
+
 	"github.com/gin-gonic/gin"
 	"github.com/golang/protobuf/proto"
 	"github.com/mitchellh/mapstructure"
 	"github.com/rs/zerolog/log"
-	"github.com/txchat/im/logic/auth/tools"
 	"github.com/txchat/imparse/proto/auth"
 	"github.com/txchat/imparse/proto/signal"
 )
@@ -79,7 +80,7 @@ func (a *talkClient) DoAuth(token string, ext []byte) (uid, errMsg string, err e
 		strParams = string(reqData)
 	}
 
-	bytes, err = tools.HttpReq(&tools.HttpParams{
+	bytes, err = tools2.HttpReq(&tools2.HttpParams{
 		Method:    "POST",
 		ReqUrl:    a.url,
 		HeaderMap: headers,

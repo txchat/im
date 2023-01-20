@@ -33,3 +33,4 @@ require (
 )
 
 replace github.com/txchat/imparse => ../imparse
+replace github.com/txchat/dtalk => ../dtalk

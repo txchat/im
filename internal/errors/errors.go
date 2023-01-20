@@ -31,3 +31,8 @@ var (
 	// rpc
 	ErrLogic = errors.New("logic rpc is not available")
 )
+
+var (
+	ErrInvalidAuthReq = errors.New("ErrInvalidAuthReq")
+	ErrInvalidAppId   = errors.New("ErrInvalidAppId")
+)

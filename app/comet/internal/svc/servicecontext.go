@@ -15,7 +15,7 @@ import (
 	"github.com/txchat/im/app/comet/internal/config"
 	"github.com/txchat/im/app/logic/logicclient"
 	"github.com/txchat/im/dtask"
-	"github.com/txchat/im/internel/comet"
+	"github.com/txchat/im/internal/comet"
 	"github.com/zhenjl/cityhash"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"

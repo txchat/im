@@ -4,11 +4,10 @@ import (
 	"flag"
 	"fmt"
 
+	"github.com/txchat/im/api/logic"
 	"github.com/txchat/im/app/logic/internal/config"
 	"github.com/txchat/im/app/logic/internal/server"
 	"github.com/txchat/im/app/logic/internal/svc"
-	"github.com/txchat/im/app/logic/logic"
-
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/service"
 	"github.com/zeromicro/go-zero/zrpc"

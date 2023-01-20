@@ -3,7 +3,7 @@ package config
 import (
 	"time"
 
-	"github.com/txchat/im/internel/comet"
+	"github.com/txchat/im/internal/comet"
 	"github.com/zeromicro/go-zero/zrpc"
 )
 

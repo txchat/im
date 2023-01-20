@@ -6,13 +6,14 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/txchat/im/internel/auth"
+
 	"github.com/golang/protobuf/proto"
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
 	"github.com/txchat/im-pkg/trace"
 	comet "github.com/txchat/im/api/comet/grpc"
 	"github.com/txchat/im/common"
-	"github.com/txchat/im/logic/auth"
 	"github.com/txchat/im/logic/conf"
 	"github.com/txchat/im/logic/dao"
 	"github.com/txchat/im/naming"
