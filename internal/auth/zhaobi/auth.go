@@ -5,7 +5,7 @@ import (
 	"errors"
 	"time"
 
-	tools2 "github.com/txchat/im/internel/auth/tools"
+	tools2 "github.com/txchat/im/internal/auth/tools"
 )
 
 type talkClient struct {

@@ -15,4 +15,5 @@ type LogicRepository interface {
 	IncGroupServer(c context.Context, appId, key, server string, gid []string) (err error)
 	DecGroupServer(c context.Context, appId, key, server string, gid []string) (err error)
 	ServersByGid(c context.Context, appId string, gid string) (res []string, err error)
+	ServersByGids(c context.Context, appId string, gids []string) (ress map[string][]string, err error)
 }

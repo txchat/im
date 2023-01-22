@@ -6,12 +6,11 @@ import (
 	"errors"
 	"time"
 
-	tools2 "github.com/txchat/im/internel/auth/tools"
-
 	"github.com/gin-gonic/gin"
 	"github.com/golang/protobuf/proto"
 	"github.com/mitchellh/mapstructure"
 	"github.com/rs/zerolog/log"
+	tools2 "github.com/txchat/im/internal/auth/tools"
 	"github.com/txchat/imparse/proto/auth"
 	"github.com/txchat/imparse/proto/signal"
 )

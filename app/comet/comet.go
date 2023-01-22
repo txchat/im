@@ -9,6 +9,8 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/rs/zerolog/log"
+	xlog "github.com/txchat/im-pkg/log"
 	"github.com/txchat/im/api/comet"
 	"github.com/txchat/im/app/comet/internal/config"
 	"github.com/txchat/im/app/comet/internal/http"
@@ -25,7 +27,7 @@ import (
 
 var (
 	// projectName 项目名称
-	projectName = "backup"
+	projectName = "comet"
 	// projectVersion 项目版本
 	projectVersion = "0.0.1"
 	// goVersion go版本
@@ -37,7 +39,7 @@ var (
 	// osArch 目标主机架构
 	osArch = ""
 	// isShowVersion 是否显示项目版本信息
-	isShowVersion = flag.Bool("v", false, "show project version")
+	isShowVersion = flag.Bool("version", false, "show project version")
 	// configFile 配置文件路径
 	configFile = flag.String("f", "etc/comet.yaml", "the config file")
 )
@@ -47,7 +49,16 @@ func main() {
 	showVersion(*isShowVersion)
 
 	var c config.Config
-	conf.MustLoad(*configFile, &c)
+	conf.MustLoad(*configFile, &c, conf.UseEnv())
+
+	//log init
+	var err error
+	log.Logger, err = xlog.Init(c.Zlog)
+	if err != nil {
+		panic(err)
+	}
+	log.Logger.With().Str("service", c.Name)
+
 	ctx := svc.NewServiceContext(c)
 
 	rand.Seed(time.Now().UTC().UnixNano())

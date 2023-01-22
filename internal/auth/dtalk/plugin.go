@@ -3,7 +3,7 @@ package acc
 import (
 	"time"
 
-	"github.com/txchat/im/internel/auth"
+	"github.com/txchat/im/internal/auth"
 )
 
 const Name = "dtalk"

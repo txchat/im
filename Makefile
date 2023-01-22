@@ -13,10 +13,10 @@ help: ## 查看makefile帮助文档
 	@grep -h -E '^([a-zA-Z_-]|\%)+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 build: clean ## 编译本机系统和指令集的可执行文件
-	./script/build/builder.sh ${TARGETDIR}
+	./script/build/builder.sh ${TARGETDIR} "" "${servers}"
 
 build_%: clean ## 编译目标机器的可执行文件（例如: make build_linux_amd64）
-	./script/build/builder.sh ${TARGETDIR} $*
+	./script/build/builder.sh ${TARGETDIR} $* "${servers}"
 
 pkg: build ## 编译并打包本机系统和指令集的可执行文件
 	tar -zcvf ${TARGETDIR}_'host'_${pkgCommitName}.tar.gz ${TARGETDIR}/
@@ -27,7 +27,7 @@ pkg_%: build_% ## 编译并打包目标机器的可执行文件（例如: make p
 images: build_linux_amd64 ## 打包docker镜像
 	cp script/docker/*Dockerfile ${TARGETDIR}
 	cd ${TARGETDIR} && for i in $(servers) ; do \
-		docker build . -f $$i.Dockerfile -t txchat-$$i:${projectVersion}; \
+		docker build --build-arg server_name=$$i . -f server.Dockerfile -t txchat-$$i:${projectVersion}; \
 	done
 
 init-compose: images ## 使用docker compose启动

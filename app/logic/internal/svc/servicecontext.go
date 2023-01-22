@@ -13,6 +13,7 @@ import (
 	"github.com/txchat/im/app/logic/internal/config"
 	"github.com/txchat/im/app/logic/internal/dao"
 	"github.com/txchat/im/internal/auth"
+	_ "github.com/txchat/im/internal/auth/dtalk"
 	"github.com/zeromicro/go-zero/zrpc"
 )
 
@@ -29,8 +30,8 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		Config:   c,
 		Repo:     dao.NewLogicRepositoryRedis(c.RedisDB),
 		Apps:     make(map[string]auth.Auth),
-		Producer: xkafka.NewProducer(c.Kafka),
-		CometRPC: cometclient.NewComet(zrpc.MustNewClient(c.CometRPC, zrpc.WithNonBlock())),
+		Producer: xkafka.NewProducer(c.Producer),
+		CometRPC: cometclient.NewComet(zrpc.MustNewClient(c.CometRPC, zrpc.WithNonBlock(), zrpc.WithNonBlock())),
 	}
 	loadApps(c, s)
 	return s

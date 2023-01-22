@@ -3,51 +3,53 @@ package config
 import (
 	"time"
 
+	xlog "github.com/txchat/im-pkg/log"
+
 	xtime "github.com/Terry-Mao/goim/pkg/time"
 	xkafka "github.com/txchat/dtalk/pkg/mq/kafka"
-
 	"github.com/zeromicro/go-zero/zrpc"
 )
 
 type Config struct {
 	zrpc.RpcServerConf
 	CometRPC zrpc.RpcClientConf
-	Apps     []*App
 	RedisDB  Redis
-	Kafka    xkafka.ProducerConfig
+	Producer xkafka.ProducerConfig
+	Apps     []*App
 	Node     Node
 	Backoff  Backoff
+	Zlog     xlog.Config
 }
 
 type Redis struct {
-	Network      string
+	Network      string `json:",default=tcp"`
 	Addr         string
-	Auth         string
-	Active       int
-	Idle         int
-	DialTimeout  time.Duration
-	ReadTimeout  time.Duration
-	WriteTimeout time.Duration
-	IdleTimeout  time.Duration
-	Expire       time.Duration
+	Auth         string        `json:",optional"`
+	Active       int           `json:",default=60000"`
+	Idle         int           `json:",default=1024"`
+	DialTimeout  time.Duration `json:",default=200ms"`
+	ReadTimeout  time.Duration `json:",default=500ms"`
+	WriteTimeout time.Duration `json:",default=500ms"`
+	IdleTimeout  time.Duration `json:",default=120s"`
+	Expire       time.Duration `json:",default=30m"`
 }
 
 type App struct {
 	AppId   string
 	AuthUrl string
-	Timeout xtime.Duration
+	Timeout xtime.Duration `json:",default=5s"`
 }
 
 // Node node config.
 type Node struct {
-	HeartbeatMax int
-	Heartbeat    xtime.Duration
+	HeartbeatMax int            `json:",default=2"`
+	Heartbeat    xtime.Duration `json:",default=4m"`
 }
 
 // Backoff message.
 type Backoff struct {
-	MaxDelay  int32
-	BaseDelay int32
-	Factor    float32
-	Jitter    float32
+	MaxDelay  int32   `json:",default=300"`
+	BaseDelay int32   `json:",default=3"`
+	Factor    float32 `json:",default=1.8"`
+	Jitter    float32 `json:",default=1.3"`
 }

@@ -9,11 +9,11 @@ import (
 
 // BucketConfig is bucket config.
 type BucketConfig struct {
-	Size          int
-	Channel       int
-	Groups        int
-	RoutineAmount uint64
-	RoutineSize   int
+	Size          int    `json:",default=32"`
+	Channel       int    `json:",default=1024"`
+	Groups        int    `json:",default=1024"`
+	RoutineAmount uint64 `json:",default=32"`
+	RoutineSize   int    `json:",default=1024"`
 }
 
 type GroupCastReq struct {

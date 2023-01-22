@@ -2,7 +2,7 @@ package comet
 
 import (
 	"github.com/txchat/im/api/protocol"
-	"github.com/txchat/im/internel/errors"
+	"github.com/txchat/im/internal/errors"
 )
 
 // Ring ring proto buffer.

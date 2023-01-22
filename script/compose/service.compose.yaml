@@ -3,6 +3,8 @@ services:
   comet:
     image: txchat-comet:${COMET_IMAGE}
     container_name: ${COMET_CONTAINER_NAME}
+    environment:
+      ETCD_HOST: txchat-etcd
     networks:
       - txchat-components
       - txchat-service
@@ -16,6 +18,11 @@ services:
   logic:
     image: txchat-logic:${LOGIC_IMAGE}
     container_name: ${LOGIC_CONTAINER_NAME}
+    environment:
+      ETCD_HOST: txchat-etcd
+      REDIS_HOST: txchat-redis
+      KAFKA_HOST: txchat-kafka
+      CHAT_API_HOST: txchat-chat-node1
     networks:
       - txchat-components
       - txchat-service

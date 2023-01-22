@@ -36,7 +36,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	_, port, _ := net.SplitHostPort(c.ListenOn)
 	svc := &ServiceContext{
 		Config:   c,
-		LogicRPC: logicclient.NewLogic(zrpc.MustNewClient(c.LogicRPC, zrpc.WithNonBlock())),
+		LogicRPC: logicclient.NewLogic(zrpc.MustNewClient(c.LogicRPC, zrpc.WithNonBlock(), zrpc.WithNonBlock())),
 		serverID: fmt.Sprintf("grpc://%s:%v", ip.InternalIP(), port),
 		round: comet.NewRound(comet.RoundOptions{
 			Reader:       c.TCP.Reader,

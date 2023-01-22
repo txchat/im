@@ -2,7 +2,6 @@ package dao
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -80,15 +79,47 @@ func (repo *LogicRepositoryRedis) GetMember(c context.Context, key string) (appI
 	defer conn.Close()
 	ss, err := redis.String(conn.Do("GET", keyKeyUser(key)))
 	if err != nil {
-		log.Error().Str("key", key).Err(err).Msg("conn.DO(GET)")
-		return "", "", err
+		return "", "", fmt.Errorf("conn.DO(GET) error: %v", err)
 	}
 	arr := strings.Split(ss, ":")
 	if len(arr) != 2 {
-		return "", "", errors.New("invalid key")
+		return "", "", fmt.Errorf("invalid key %v", key)
 	}
 	appId = arr[0]
 	mid = arr[1]
+	return
+}
+
+// KeysByMids get a key server by mid.
+func (repo *LogicRepositoryRedis) KeysByMids(c context.Context, appId string, mids []string) (ress map[string]string, olMids []string, err error) {
+	conn := repo.redis.Get()
+	defer conn.Close()
+	ress = make(map[string]string)
+	for _, mid := range mids {
+		if err = conn.Send("HGETALL", keyMidServer(appId, mid)); err != nil {
+			err = fmt.Errorf("conn.Do(HGETALL %s) error: %v", mid, err)
+			return
+		}
+	}
+	if err = conn.Flush(); err != nil {
+		err = fmt.Errorf("conn.Flush() error %v", err)
+		return
+	}
+	for idx := 0; idx < len(mids); idx++ {
+		var (
+			res map[string]string
+		)
+		if res, err = redis.StringMap(conn.Receive()); err != nil {
+			log.Error().Err(err).Msg("conn.Receive() error")
+			return
+		}
+		if len(res) > 0 {
+			olMids = append(olMids, mids[idx])
+		}
+		for k, v := range res {
+			ress[k] = v
+		}
+	}
 	return
 }
 
@@ -225,40 +256,6 @@ func (repo *LogicRepositoryRedis) DelMapping(c context.Context, mid string, appI
 	return
 }
 
-// KeysByMids get a key server by mid.
-func (repo *LogicRepositoryRedis) KeysByMids(c context.Context, appId string, mids []string) (ress map[string]string, olMids []string, err error) {
-	conn := repo.redis.Get()
-	defer conn.Close()
-	ress = make(map[string]string)
-	for _, mid := range mids {
-		if err = conn.Send("HGETALL", keyMidServer(appId, mid)); err != nil {
-			log.Error().Err(err).Msg(fmt.Sprintf("conn.Do(HGETALL %s) error", mid))
-			return
-		}
-	}
-	if err = conn.Flush(); err != nil {
-		log.Error().Err(err).Msg("conn.Flush() error")
-		return
-	}
-	for idx := 0; idx < len(mids); idx++ {
-		var (
-			res map[string]string
-		)
-		if res, err = redis.StringMap(conn.Receive()); err != nil {
-			log.Error().Err(err).Msg("conn.Receive() error")
-			return
-		}
-		if len(res) > 0 {
-			olMids = append(olMids, mids[idx])
-		}
-		for k, v := range res {
-			ress[k] = v
-		}
-	}
-	return
-}
-
-//groups
 func (repo *LogicRepositoryRedis) IncGroupServer(c context.Context, appId, key, server string, gid []string) (err error) {
 	conn := repo.redis.Get()
 	defer conn.Close()
@@ -329,6 +326,38 @@ func (repo *LogicRepositoryRedis) ServersByGid(c context.Context, appId string, 
 	}
 	for k := range ress {
 		res = append(res, k)
+	}
+	return
+}
+
+// KeysByMids key=server value=gid list
+func (repo *LogicRepositoryRedis) ServersByGids(c context.Context, appId string, gids []string) (ress map[string][]string, err error) {
+	conn := repo.redis.Get()
+	defer conn.Close()
+	ress = make(map[string][]string)
+	prefix := fmt.Sprintf("group_%s:", appId)
+	n := 0
+	for _, gid := range gids {
+		err = conn.Send("ZRANGE", keyGroupServer(appId, gid), "0", "-1", "WITHSCORES")
+		n++
+	}
+	if err = conn.Flush(); err != nil {
+		err = fmt.Errorf("conn.Flush() error %v", err)
+		return
+	}
+	for n > 0 {
+		n--
+		var res map[string]string
+		res, err = redis.StringMap(conn.Receive())
+		if err != nil {
+			return
+		}
+		for server := range res {
+			if _, ok := ress[server]; !ok {
+				ress[server] = make([]string, 0)
+			}
+			ress[server] = append(ress[server], strings.TrimPrefix(server, prefix))
+		}
 	}
 	return
 }

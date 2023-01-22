@@ -7,6 +7,7 @@ work_dir=$(
 
 targetDir=$1
 targetOsArch=$2
+serviceList=$3
 
 # $1:build target dir; $2:build target architecture(like linux_amd64)
 if [ "${targetDir}" = "" ]; then
@@ -66,8 +67,20 @@ exportGOEnv
 
 buildTargetDir="${work_dir}/${targetDir}/"
 
+# $1:service name; $2: config root path; $3: config file name; $4: service main filename
+buildService() {
+    serviceName="$1"
+    configPath="$2"
+    configName="$3"
+    serviceMain="$4"
+
+    echo "┌ start building ${serviceName} service"
+    cp "${configPath}/${configName}" "${buildTargetDir}/${configName}"
+    go build -ldflags "${ldflags}" -o "${buildTargetDir}/${serviceName}" "${serviceMain}" || exit
+    echo "└ building ${serviceName} service success"
+}
+
 mkdir "${buildTargetDir}"
-cp "${work_dir}/comet/conf/comet.toml" "${buildTargetDir}/comet.toml"
-cp "${work_dir}/logic/conf/logic.toml" "${buildTargetDir}/logic.toml"
-go build -ldflags "${ldflags}" -v -o "${buildTargetDir}/comet" "${work_dir}/comet/cmd/main.go"
-go build -ldflags "${ldflags}" -v -o "${buildTargetDir}/logic" "${work_dir}/logic/cmd/main.go"
+for sName in ${serviceList}; do
+    buildService "${sName}" "${work_dir}/app/${sName}/etc" "${sName}.yaml" "${work_dir}/app/${sName}/${sName}.go"
+done
