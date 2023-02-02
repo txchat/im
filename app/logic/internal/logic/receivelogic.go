@@ -32,7 +32,7 @@ func (l *ReceiveLogic) Receive(in *logic.ReceiveReq) (*logic.Reply, error) {
 }
 
 // Receive receive a message from client.
-func (l *ReceiveLogic) receive(c context.Context, key string, p *protocol.Proto) (err error) {
+func (l *ReceiveLogic) receive(c context.Context, key string, p *protocol.Proto) error {
 	appId, mid, err := l.svcCtx.Repo.GetMember(c, key)
 	if err != nil {
 		return err
