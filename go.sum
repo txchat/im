@@ -1915,6 +1915,9 @@ github.com/tv42/httpunix v0.0.0-20150427012821-b75d8614f926/go.mod h1:9ESjWnEqri
 github.com/txchat/im v0.0.1/go.mod h1:o8FD7hkTh0wX1OrATpm5Zrx4dyqdP0Ilvz3Sk2Bws0w=
 github.com/txchat/im-pkg v0.0.1 h1:pR24ubqlh9LMSUl7bEkmFpx3OHj5bOZyiis7xEfHYpY=
 github.com/txchat/im-pkg v0.0.1/go.mod h1:MPRQGxQU0M1GTucTMoHkR++gHXeBnISlzto9meK9VL0=
+github.com/txchat/imparse v0.0.1/go.mod h1:wQFzxb5b2fJv3vkFZNHlVUOhgxoRF5Jf99n50ou2hTM=
+github.com/txchat/imparse v0.1.0 h1:e0mlt6LolCqP9vNEvy2M+YqrcpdR53+TW+nNOdaXp4U=
+github.com/txchat/imparse v0.1.0/go.mod h1:cG9vNSz/pSoS91A248EN2XW+viHb+zVKMo9f+POmxI8=
 github.com/tyler-smith/go-bip39 v1.0.1-0.20181017060643-dbb3b84ba2ef/go.mod h1:sJ5fKU0s6JVwZjjcUEX2zFOnvq0ASQ2K9Zr6cf67kNs=
 github.com/uber-go/tally v3.3.15+incompatible/go.mod h1:YDTIBxdXyOU/sCWilKB4bgyufu1cEi0jdVnRdxvjnmU=
 github.com/uber/athenadriver v1.1.4/go.mod h1:tQjho4NzXw55LGfSZEcETuYydpY1vtmixUabHkC1K/E=
