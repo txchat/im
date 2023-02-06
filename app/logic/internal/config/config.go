@@ -6,7 +6,7 @@ import (
 	xlog "github.com/txchat/im-pkg/log"
 
 	xtime "github.com/Terry-Mao/goim/pkg/time"
-	xkafka "github.com/txchat/dtalk/pkg/mq/kafka"
+	xkafka "github.com/txchat/pkg/mq/kafka"
 	"github.com/zeromicro/go-zero/zrpc"
 )
 

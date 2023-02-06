@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/golang/protobuf/proto"
-	"github.com/txchat/dtalk/pkg/auth"
 	authProto "github.com/txchat/imparse/proto/auth"
+	"github.com/txchat/pkg/auth"
 )
 
 func Test_talkClient_DoAuthReConnect(t *testing.T) {
@@ -26,7 +26,7 @@ func Test_talkClient_DoAuthReConnect(t *testing.T) {
 		return
 	}
 
-	authenticator := auth.NewDefaultApiAuthenticator()
+	authenticator := auth.NewDefaultAPIAuthenticator()
 	token := authenticator.Request("", pubKey, privKey)
 
 	devInfo := &authProto.Login{
@@ -60,7 +60,7 @@ func Test_talkClient_DoAuthReConnect2(t *testing.T) {
 		return
 	}
 
-	authenticator := auth.NewDefaultApiAuthenticator()
+	authenticator := auth.NewDefaultAPIAuthenticator()
 	token := authenticator.Request("", pubKey, privKey)
 
 	gotUid, gotErrMsg, err := a.DoAuth(token, nil)
@@ -85,7 +85,7 @@ func Test_talkClient_DoAuthConnect(t *testing.T) {
 		return
 	}
 
-	authenticator := auth.NewDefaultApiAuthenticator()
+	authenticator := auth.NewDefaultAPIAuthenticator()
 	token := authenticator.Request("", pubKey, privKey)
 
 	devInfo := &authProto.Login{
