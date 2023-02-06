@@ -6,6 +6,7 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/txchat/im/api/logic"
 	"github.com/txchat/im/app/comet/cometclient"
+	"github.com/txchat/im/app/logic/internal/model"
 	"github.com/txchat/im/app/logic/internal/svc"
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -46,7 +47,7 @@ func (l *JoinGroupsByKeysLogic) joinGroupsByKeys(c context.Context, appId string
 		for _, key := range sKeys {
 			_ = l.svcCtx.Repo.IncGroupServer(c, appId, key, server, gids)
 		}
-		if reply, err = l.svcCtx.CometRPC.JoinGroups(context.WithValue(c, "TODO", server), &cometclient.JoinGroupsReq{Keys: sKeys, Gid: l.svcCtx.CometGroupsID(appId, gids)}); err != nil {
+		if reply, err = l.svcCtx.CometRPC.JoinGroups(context.WithValue(c, model.CtxKeyTODO, server), &cometclient.JoinGroupsReq{Keys: sKeys, Gid: l.svcCtx.CometGroupsID(appId, gids)}); err != nil {
 			return
 		}
 	}

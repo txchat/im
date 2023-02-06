@@ -23,5 +23,3 @@ require (
 	google.golang.org/protobuf v1.28.1
 	gopkg.in/Shopify/sarama.v1 v1.19.0
 )
-
-replace github.com/txchat/dtalk => ../dtalk

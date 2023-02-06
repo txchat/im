@@ -7,6 +7,7 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/txchat/im/api/logic"
+	"github.com/txchat/im/app/logic/internal/model"
 	"github.com/txchat/im/app/logic/internal/svc"
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -48,7 +49,7 @@ func (l *LeaveGroupsByKeysLogic) leaveGroupsByKeys(c context.Context, appId stri
 		for _, key := range sKeys {
 			_ = l.svcCtx.Repo.DecGroupServer(c, appId, key, server, gids)
 		}
-		if reply, err = l.svcCtx.CometRPC.LeaveGroups(context.WithValue(c, "TODO", server), &cometclient.LeaveGroupsReq{Keys: sKeys, Gid: l.svcCtx.CometGroupsID(appId, gids)}); err != nil {
+		if reply, err = l.svcCtx.CometRPC.LeaveGroups(context.WithValue(c, model.CtxKeyTODO, server), &cometclient.LeaveGroupsReq{Keys: sKeys, Gid: l.svcCtx.CometGroupsID(appId, gids)}); err != nil {
 			return
 		}
 	}

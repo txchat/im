@@ -27,7 +27,7 @@ Producer:
 Apps:
   -
     AppId: "dtalk"
-    AuthUrl: "http://${CHAT_API_HOST}:8888/app/user/login"
+    AuthURL: "http://${CHAT_API_HOST}:8888/app/user/login"
     Timeout: "5s"
 Node:
   Heartbeat: "4m"

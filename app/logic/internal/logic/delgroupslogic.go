@@ -7,6 +7,7 @@ import (
 	"github.com/txchat/im/api/comet"
 	"github.com/txchat/im/api/logic"
 	"github.com/txchat/im/app/comet/cometclient"
+	"github.com/txchat/im/app/logic/internal/model"
 	"github.com/txchat/im/app/logic/internal/svc"
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -45,7 +46,7 @@ func (l *DelGroupsLogic) delGroups(ctx context.Context, appId string, gids []str
 	}
 
 	for server, gid := range servers {
-		reply, err = l.svcCtx.CometRPC.DelGroups(context.WithValue(ctx, "TODO", server), &cometclient.DelGroupsReq{
+		reply, err = l.svcCtx.CometRPC.DelGroups(context.WithValue(ctx, model.CtxKeyTODO, server), &cometclient.DelGroupsReq{
 			Gid: l.svcCtx.CometGroupsID(appId, gid),
 		})
 		if err != nil {

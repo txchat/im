@@ -7,6 +7,7 @@ import (
 	"github.com/txchat/im/api/logic"
 	"github.com/txchat/im/api/protocol"
 	"github.com/txchat/im/app/comet/cometclient"
+	"github.com/txchat/im/app/logic/internal/model"
 	"github.com/txchat/im/app/logic/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -51,7 +52,7 @@ func (l *PushByKeysLogic) pushByKeys(c context.Context, appId string, keys []str
 		return
 	}
 	for server := range pushKeys {
-		if reply, err = l.svcCtx.CometRPC.PushMsg(context.WithValue(c, "TODO", server), &cometclient.PushMsgReq{Keys: pushKeys[server], Proto: &p}); err != nil {
+		if reply, err = l.svcCtx.CometRPC.PushMsg(context.WithValue(c, model.CtxKeyTODO, server), &cometclient.PushMsgReq{Keys: pushKeys[server], Proto: &p}); err != nil {
 			return
 		}
 	}

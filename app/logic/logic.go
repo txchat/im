@@ -11,6 +11,7 @@ import (
 	"github.com/txchat/im/app/logic/internal/config"
 	"github.com/txchat/im/app/logic/internal/server"
 	"github.com/txchat/im/app/logic/internal/svc"
+	_ "github.com/txchat/im/internal/auth/dtalk"
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/service"
 	"github.com/zeromicro/go-zero/zrpc"

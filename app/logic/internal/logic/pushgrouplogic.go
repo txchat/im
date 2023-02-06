@@ -7,6 +7,7 @@ import (
 	"github.com/txchat/im/api/logic"
 	"github.com/txchat/im/api/protocol"
 	"github.com/txchat/im/app/comet/cometclient"
+	"github.com/txchat/im/app/logic/internal/model"
 	"github.com/txchat/im/app/logic/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -52,7 +53,7 @@ func (l *PushGroupLogic) pushGroup(c context.Context, appId string, group string
 	}
 
 	for _, server := range servers {
-		if reply, err = l.svcCtx.CometRPC.BroadcastGroup(context.WithValue(c, "TODO", server), &cometclient.BroadcastGroupReq{GroupID: l.svcCtx.CometGid(appId, group), Proto: &p}); err != nil {
+		if reply, err = l.svcCtx.CometRPC.BroadcastGroup(context.WithValue(c, model.CtxKeyTODO, server), &cometclient.BroadcastGroupReq{GroupID: l.svcCtx.CometGid(appId, group), Proto: &p}); err != nil {
 			return
 		}
 	}

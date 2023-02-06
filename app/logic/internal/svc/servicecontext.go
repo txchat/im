@@ -13,7 +13,6 @@ import (
 	"github.com/txchat/im/app/logic/internal/config"
 	"github.com/txchat/im/app/logic/internal/dao"
 	"github.com/txchat/im/internal/auth"
-	_ "github.com/txchat/im/internal/auth/dtalk"
 	"github.com/zeromicro/go-zero/zrpc"
 )
 
@@ -43,7 +42,7 @@ func loadApps(c config.Config, svc *ServiceContext) {
 		if newAuth == nil {
 			panic("exec auth not exist:" + app.AppId)
 		}
-		exec := newAuth(app.AuthUrl, time.Duration(app.Timeout))
+		exec := newAuth(app.AuthURL, time.Duration(app.Timeout))
 		svc.Apps[app.AppId] = exec
 	}
 }

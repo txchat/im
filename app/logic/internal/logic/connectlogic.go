@@ -80,7 +80,7 @@ func (l *ConnectLogic) connect(c context.Context, server string, p *protocol.Pro
 	}
 	log.Info().Str("appId", authMsg.AppId).Str("token", authMsg.Token).Msg("call auth")
 	appId = authMsg.AppId
-	authExec, _ := l.svcCtx.Apps[authMsg.AppId]
+	authExec := l.svcCtx.Apps[authMsg.AppId]
 	if authExec == nil {
 		err = errors.ErrInvalidAppId
 		return

@@ -76,7 +76,7 @@ func (s *ServiceContext) Bucket(subKey string) *comet.Bucket {
 
 // RandServerHearbeat rand server heartbeat.
 func (s *ServiceContext) RandServerHearbeat() time.Duration {
-	return time.Duration(s.Config.Protocol.MinHeartbeat) + time.Duration(rand.Int63n(int64(s.Config.Protocol.MaxHeartbeat-s.Config.Protocol.MinHeartbeat)))
+	return s.Config.Protocol.MinHeartbeat + time.Duration(rand.Int63n(int64(s.Config.Protocol.MaxHeartbeat-s.Config.Protocol.MinHeartbeat)))
 }
 
 // Connect connected a connection.

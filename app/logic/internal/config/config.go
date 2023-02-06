@@ -36,7 +36,7 @@ type Redis struct {
 
 type App struct {
 	AppId   string
-	AuthUrl string
+	AuthURL string         `json:"AuthURL"`
 	Timeout xtime.Duration `json:",default=5s"`
 }
 

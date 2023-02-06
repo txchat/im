@@ -15,8 +15,6 @@ import (
 	"github.com/txchat/imparse/proto/signal"
 )
 
-var dev = make(map[auth.Device]string)
-
 type EndpointRejectResp struct {
 	Result  int    `json:"result"`
 	Message string `json:"message"`
