@@ -18,8 +18,8 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/txchat/im/api/protocol"
 	"github.com/txchat/im/app/comet/internal/svc"
-	"github.com/txchat/im/dtask"
 	"github.com/txchat/im/internal/comet"
+	dtask "github.com/txchat/task"
 )
 
 // InitWebsocket listen all tcp.bind and start accept connections.

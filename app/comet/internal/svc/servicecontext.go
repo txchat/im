@@ -9,13 +9,12 @@ import (
 	"time"
 
 	"github.com/Terry-Mao/goim/pkg/ip"
-	"github.com/zeromicro/go-zero/zrpc"
-
 	"github.com/txchat/im/api/protocol"
 	"github.com/txchat/im/app/comet/internal/config"
 	"github.com/txchat/im/app/logic/logicclient"
-	"github.com/txchat/im/dtask"
 	"github.com/txchat/im/internal/comet"
+	dtask "github.com/txchat/task"
+	"github.com/zeromicro/go-zero/zrpc"
 	"github.com/zhenjl/cityhash"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
