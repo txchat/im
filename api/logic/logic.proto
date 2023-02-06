@@ -1,0 +1,116 @@
+syntax = "proto3";
+
+package im.logic;
+option go_package = "github.com/txchat/im/api/logic;logic";
+
+import "github.com/txchat/im/api/protocol/protocol.proto";
+
+enum Type {
+  PUSH = 0;
+  ROOM = 1;
+  BROADCAST = 2;
+}
+
+message ConnectReq {
+  string server = 1; // 客户端连接的是哪个 comet
+  im.protocol.Proto proto = 3;
+}
+
+message ConnectReply {
+  string key = 1;
+  string appId = 2;
+  string mid = 3;
+  int64 heartbeat = 4;
+}
+
+message DisconnectReq {
+  string key = 1;
+  string server = 2;
+}
+
+message HeartbeatReq {
+  string key = 1;
+  string server = 2;
+}
+
+message ReceiveReq {
+  string key = 1;
+  im.protocol.Proto proto = 3;
+}
+
+message Reply {
+  bool isOk = 1;
+  bytes msg = 2;
+}
+
+// logic --> mq
+message BizMsg {
+  string appId = 1;
+  string fromId = 2;
+  Type type = 4;
+  int32 op = 5;
+  string key = 6;
+  bytes msg = 7;
+}
+
+// biz --> logic
+message MidsMsg {
+  string appId = 1;
+  repeated string toIds = 2;
+  Type type = 3;
+  int32 op = 4;
+  bytes msg = 5;
+}
+
+// biz --> logic
+message KeysMsg {
+  string appId = 1;
+  repeated string toKeys = 2;
+  Type type = 3;
+  int32 op = 4;
+  bytes msg = 5;
+}
+
+// biz --> logic
+message GroupMsg {
+  string appId = 1;
+  string group = 2;
+  Type type = 3;
+  int32 op = 4;
+  bytes msg = 5;
+}
+
+// biz --> logic
+message GroupsKey {
+  string appId = 1;
+  repeated string keys = 2;
+  repeated string gid = 3;
+}
+
+// biz --> logic
+message GroupsMid {
+  string appId = 1;
+  repeated string mids = 2;
+  repeated string gid = 3;
+}
+
+// biz --> logic
+message DelGroupsReq {
+  string appId = 1;
+  repeated string gid = 2;
+}
+
+service Logic {
+  rpc Connect(ConnectReq) returns (ConnectReply);   // comet
+  rpc Disconnect(DisconnectReq) returns (Reply);    // comet
+  rpc Heartbeat(HeartbeatReq) returns (Reply);      // comet
+  rpc Receive(ReceiveReq) returns (Reply);          // comet
+  rpc PushByMids(MidsMsg) returns (Reply);          // biz
+  rpc PushByKeys(KeysMsg) returns (Reply);          // biz
+  rpc PushGroup(GroupMsg) returns (Reply);          // biz
+  rpc JoinGroupsByKeys(GroupsKey) returns (Reply);  // biz
+  rpc JoinGroupsByMids(GroupsMid) returns (Reply);  // biz
+  rpc LeaveGroupsByKeys(GroupsKey) returns (Reply); // biz
+  rpc LeaveGroupsByMids(GroupsMid) returns (Reply); // biz
+  rpc DelGroups(DelGroupsReq) returns (Reply);      // biz
+}

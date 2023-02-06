@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package im.protocol;
+
+option go_package = "github.com/txchat/im/api/protocol;protocol";
+
+enum Op {
+  Undefined = 0;
+
+  Auth = 1;
+  AuthReply = 2;
+
+  Heartbeat = 3;
+  HeartbeatReply = 4;
+
+  Disconnect = 5;
+  DisconnectReply = 6;
+
+  SendMsg = 7;
+  SendMsgReply = 8; //客户端回复消息已收到
+
+  ReceiveMsg = 9;
+  ReceiveMsgReply = 10;
+
+  ProtoReady = 11;
+  ProtoFinish = 12;
+
+  Raw = 13;
+
+  SyncMsgReq = 14;
+  SyncMsgReply = 15;
+
+  RePush = 16;
+}
+
+message Proto {
+  int32 ver = 1;
+  int32 op = 2;
+  int32 seq = 3;
+  int32 ack = 4;
+  bytes body = 5;
+}

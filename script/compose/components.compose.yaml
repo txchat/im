@@ -1,11 +1,8 @@
 version: "2.4"
 services:
   zookeeper:
-    #image: zookeeper:3.7
-    image: ubuntu/zookeeper:3.1-22.04_beta
-    container_name: txchat-zookeeper
-    environment:
-      TZ: Asia/Shanghai
+    image: wurstmeister/zookeeper
+    container_name: ${ZOOKEEPER_CONTAINER_NAME}
     restart: unless-stopped
     volumes:
       - txchat-zookeeper:/data
@@ -13,18 +10,27 @@ services:
       - txchat-components
     ports:
       - "2181:2181"
-  # ubuntu/kafka:3.1-22.04_beta -- scala version: 2.13 ; kafka version: 3.1.0
+  # kafka version: 1.1.0
+  # scala version: 2.12
   kafka:
-    image: ubuntu/kafka:3.1-22.04_beta
-    container_name: txchat-kafka
+    image: wurstmeister/kafka
+    container_name: ${KAFKA_CONTAINER_NAME}
     restart: unless-stopped
     ports:
       - "9092:9092"
+      - "9094:9094"
     # kafka connectivity: https://github.com/wurstmeister/kafka-docker/wiki/Connectivity#internal-versus-advertised
     environment:
-      TZ: Asia/Shanghai
-      ZOOKEEPER_HOST: txchat-zookeeper
-      ZOOKEEPER_PORT: 2181
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://${KAFKA_CONTAINER_NAME}:9092,OUTSIDE://${HOST_ETH0_NAME}:9094
+      KAFKA_LISTENERS: INSIDE://:9092,OUTSIDE://:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+      #KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      #KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://${HOST_ETH0_NAME}:9092
+      KAFKA_ZOOKEEPER_CONNECT: "${ZOOKEEPER_CONTAINER_NAME}:2181"
+      KAFKA_BROKER_ID: 1
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CREATE_TOPICS: "stream-in:1:1,stream-out:1:1"
     volumes:
       - txchat-kafka:/kafka
       - /var/run/docker.sock:/var/run/docker.sock
@@ -33,15 +39,15 @@ services:
     depends_on:
       - zookeeper
     healthcheck:
-      test: [ "CMD", "kafka-topics.sh", "--list", "--bootstrap-server", "localhost:9092" ] ## confluentinc/cp-kafka
+      test: [ "CMD", "kafka-topics.sh", "--list", "--zookeeper", "txchat-zookeeper:2181" ]
       interval: 5s
       timeout: 10s
       retries: 5
   kafka-manager:
-    container_name: txchat-kafka-manager
+    container_name: ${KAFKA_MANAGER_CONTAINER_NAME}
     image: sheepkiller/kafka-manager
     environment:
-      ZK_HOSTS: txchat-zookeeper:2181
+      ZK_HOSTS: ${ZOOKEEPER_CONTAINER_NAME}:2181
     networks:
       - txchat-components
     ports:
@@ -80,10 +86,10 @@ services:
       - --name=${ETCD_NAME}
       - --data-dir=/etcd_data
       - --listen-client-urls=http://0.0.0.0:2379
-      - --advertise-client-urls=http://0.0.0.0:${ETCD_PUB_CLIENT_PORT}
+      - --advertise-client-urls=http://${ETCD_CONTAINER_NAME}:${ETCD_PUB_CLIENT_PORT}
       - --listen-peer-urls=http://0.0.0.0:2380
-      - --initial-advertise-peer-urls=http://0.0.0.0:${ETCD_PUB_PEER_PORT}
-      - --initial-cluster=${ETCD_NAME}=http://0.0.0.0:${ETCD_PUB_PEER_PORT}
+      - --initial-advertise-peer-urls=http://${ETCD_CONTAINER_NAME}:${ETCD_PUB_PEER_PORT}
+      - --initial-cluster=${ETCD_NAME}=http://${ETCD_CONTAINER_NAME}:${ETCD_PUB_PEER_PORT}
       - --initial-cluster-token=${ETCD_TOKEN}
       - --initial-cluster-state=new
       - --log-level=info

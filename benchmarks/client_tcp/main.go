@@ -20,7 +20,8 @@ import (
 	"time"
 
 	"github.com/golang/protobuf/proto"
-	comet "github.com/txchat/im/api/comet/grpc"
+	"github.com/txchat/im/api/comet"
+	"github.com/txchat/im/api/protocol"
 )
 
 const (
@@ -107,7 +108,7 @@ func startClient(key int64) {
 	}
 	p := new(Proto)
 	p.Ver = 1
-	p.Operation = int32(comet.Op_Auth)
+	p.Operation = int32(protocol.Op_Auth)
 	p.Seq = seq
 	p.Body, _ = proto.Marshal(authMsg)
 
@@ -126,7 +127,7 @@ func startClient(key int64) {
 		hbProto := new(Proto)
 		for {
 			// heartbeat
-			hbProto.Operation = int32(comet.Op_Heartbeat)
+			hbProto.Operation = int32(protocol.Op_Heartbeat)
 			hbProto.Seq = seq
 			hbProto.Body = nil
 			if err = tcpWriteProto(wr, hbProto); err != nil {
@@ -150,9 +151,9 @@ func startClient(key int64) {
 			quit <- true
 			return
 		}
-		if p.Operation == int32(comet.Op_AuthReply) {
+		if p.Operation == int32(protocol.Op_AuthReply) {
 			log.Printf("key:%d auth success", key)
-		} else if p.Operation == int32(comet.Op_HeartbeatReply) {
+		} else if p.Operation == int32(protocol.Op_HeartbeatReply) {
 			log.Printf("key:%d receive heartbeat reply", key)
 			if err = conn.SetReadDeadline(time.Now().Add(heart + 60*time.Second)); err != nil {
 				log.Printf("conn.SetReadDeadline() error(%v)", err)
