@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/txchat/im/app/comet/cometclient"
-	xkey "github.com/txchat/im/naming/balancer/key"
 
 	"github.com/golang/protobuf/proto"
 	"github.com/txchat/im/api/logic"
@@ -49,7 +48,7 @@ func (l *LeaveGroupsByKeysLogic) leaveGroupsByKeys(c context.Context, appId stri
 		for _, key := range sKeys {
 			_ = l.svcCtx.Repo.DecGroupServer(c, appId, key, server, gids)
 		}
-		if reply, err = l.svcCtx.CometRPC.LeaveGroups(context.WithValue(c, xkey.DefaultKey, server), &cometclient.LeaveGroupsReq{Keys: sKeys, Gid: l.svcCtx.CometGroupsID(appId, gids)}); err != nil {
+		if reply, err = l.svcCtx.CometRPC.LeaveGroups(context.WithValue(c, "TODO", server), &cometclient.LeaveGroupsReq{Keys: sKeys, Gid: l.svcCtx.CometGroupsID(appId, gids)}); err != nil {
 			return
 		}
 	}

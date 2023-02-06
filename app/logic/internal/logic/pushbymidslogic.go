@@ -8,7 +8,7 @@ import (
 	"github.com/txchat/im/api/protocol"
 	"github.com/txchat/im/app/comet/cometclient"
 	"github.com/txchat/im/app/logic/internal/svc"
-	xkey "github.com/txchat/im/naming/balancer/key"
+
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -52,7 +52,7 @@ func (l *PushByMidsLogic) pushByMids(c context.Context, appId string, toIds []st
 	}
 
 	for server, sKeys := range keys {
-		if reply, err = l.svcCtx.CometRPC.PushMsg(context.WithValue(c, xkey.DefaultKey, server), &cometclient.PushMsgReq{Keys: sKeys, Proto: &p}); err != nil {
+		if reply, err = l.svcCtx.CometRPC.PushMsg(context.WithValue(c, "TODO", server), &cometclient.PushMsgReq{Keys: sKeys, Proto: &p}); err != nil {
 			return
 		}
 	}

@@ -3,11 +3,9 @@ package logic
 import (
 	"context"
 
-	"github.com/txchat/im/app/comet/cometclient"
-	xkey "github.com/txchat/im/naming/balancer/key"
-
 	"github.com/golang/protobuf/proto"
 	"github.com/txchat/im/api/logic"
+	"github.com/txchat/im/app/comet/cometclient"
 	"github.com/txchat/im/app/logic/internal/svc"
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -49,7 +47,7 @@ func (l *JoinGroupsByMidsLogic) joinGroupsByMids(c context.Context, appId string
 		for _, key := range sKeys {
 			_ = l.svcCtx.Repo.IncGroupServer(c, appId, key, server, gids)
 		}
-		if reply, err = l.svcCtx.CometRPC.JoinGroups(context.WithValue(c, xkey.DefaultKey, server), &cometclient.JoinGroupsReq{Keys: sKeys, Gid: l.svcCtx.CometGroupsID(appId, gids)}); err != nil {
+		if reply, err = l.svcCtx.CometRPC.JoinGroups(context.WithValue(c, "TODO", server), &cometclient.JoinGroupsReq{Keys: sKeys, Gid: l.svcCtx.CometGroupsID(appId, gids)}); err != nil {
 			return
 		}
 	}

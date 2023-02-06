@@ -13,6 +13,7 @@ services:
     ports:
       - "3101:3101"
       - "3102:3102"
+      - "8000:8000"
     depends_on:
       - etcd
   logic:
