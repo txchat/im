@@ -10,6 +10,7 @@ require (
 	github.com/gomodule/redigo v2.0.0+incompatible
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/websocket v1.5.0
+	github.com/hashicorp/golang-lru/v2 v2.0.1
 	github.com/mitchellh/mapstructure v1.2.2
 	github.com/rs/zerolog v1.21.0
 	github.com/txchat/im-pkg v0.0.1
@@ -23,3 +24,5 @@ require (
 	google.golang.org/protobuf v1.28.1
 	gopkg.in/Shopify/sarama.v1 v1.19.0
 )
+
+replace github.com/txchat/pkg => ../pkg

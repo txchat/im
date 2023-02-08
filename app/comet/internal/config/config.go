@@ -10,6 +10,7 @@ import (
 )
 
 type Config struct {
+	Node int64 `json:",default=1"`
 	zrpc.RpcServerConf
 	LogicRPC  zrpc.RpcClientConf
 	TCP       TCP `json:"TCP"`
@@ -55,4 +56,5 @@ type Protocol struct {
 	MaxHeartbeat     time.Duration `json:",default=10m"`
 	TaskDuration     time.Duration `json:",default=30m"`
 	Rto              time.Duration `json:",default=3s"`
+	LRUSize          int           `json:",default=86400"`
 }

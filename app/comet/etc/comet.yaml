@@ -1,3 +1,4 @@
+Node: 1
 Name: comet.rpc
 ListenOn: 0.0.0.0:3109
 Etcd:
@@ -36,6 +37,7 @@ Protocol:
   MinHeartbeat: "5s"
   MaxHeartbeat: "10s"
   Rto: "2s"
+  LRUSize: 86400
 Bucket:
   Size: 32
   Channel: 1024

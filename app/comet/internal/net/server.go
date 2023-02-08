@@ -9,18 +9,17 @@ import (
 	"math"
 	"net"
 	"runtime"
-	"strconv"
 	"strings"
 	"time"
 
 	"github.com/Terry-Mao/goim/pkg/bytes"
 	xtime "github.com/Terry-Mao/goim/pkg/time"
 	"github.com/Terry-Mao/goim/pkg/websocket"
+	"github.com/golang/protobuf/proto"
 	"github.com/rs/zerolog/log"
 	"github.com/txchat/im/api/protocol"
 	"github.com/txchat/im/app/comet/internal/svc"
 	"github.com/txchat/im/internal/comet"
-	dtask "github.com/txchat/task"
 )
 
 type CometConnCreator func(conn net.Conn) Conn
@@ -118,6 +117,10 @@ func serve(svcCtx *svc.ServiceContext, conn net.Conn, r int, scheme CometConnCre
 
 type CometServer struct {
 	svcCtx *svc.ServiceContext
+
+	filter *comet.Filter
+	midGen *comet.MidGen
+	resend *comet.Resend
 }
 
 func NewCometServer(svcCtx *svc.ServiceContext) *CometServer {
@@ -139,7 +142,6 @@ func (s *CometServer) Serve(cometConn Conn, conn net.Conn, rp, wp *bytes.Pool, t
 		ch     = comet.NewChannel(s.svcCtx.Config.Protocol.CliProto, s.svcCtx.Config.Protocol.SvrProto)
 		rr     = &ch.Reader
 		wr     = &ch.Writer
-		tsk    *dtask.Task
 	)
 	// reset reader buffer
 	ch.Reader.ResetBuffer(conn, rb.Bytes())
@@ -194,10 +196,15 @@ func (s *CometServer) Serve(cometConn Conn, conn net.Conn, rp, wp *bytes.Pool, t
 
 	// handshake ok start dispatch goroutine
 	step = 3
-	tsk = dtask.NewTask()
-	go s.dispatch(cometConn, wp, wb, ch, tsk)
+	s.resend = comet.NewResend(ch.Key, s.svcCtx.Config.Protocol.Rto, s.svcCtx.TaskPool, func() {
+		ch.Resend()
+	})
+	s.filter = comet.NewFilter(ch)
+	s.midGen = comet.NewMidGen(s.svcCtx.IDGen, s.svcCtx.Config.Protocol.LRUSize)
 
-	serverHeartbeat := s.svcCtx.RandServerHearbeat()
+	go s.dispatch(cometConn, wp, wb, ch)
+
+	serverHeartbeat := s.svcCtx.RandServerHeartbeat()
 	for {
 		if p, err = ch.CliProto.Set(); err != nil {
 			break
@@ -217,7 +224,7 @@ func (s *CometServer) Serve(cometConn Conn, conn net.Conn, rp, wp *bytes.Pool, t
 			}
 			step++
 		} else {
-			if err = s.svcCtx.Operate(ctx, p, ch, tsk); err != nil {
+			if err = s.operate(ctx, p, ch); err != nil {
 				break
 			}
 		}
@@ -284,12 +291,11 @@ reauth:
 // dispatch accepts connections on the listener and serves requests
 // for each incoming connection.  dispatch blocks; the caller typically
 // invokes it in a go statement.
-func (s *CometServer) dispatch(conn Conn, wp *bytes.Pool, wb *bytes.Buffer, ch *comet.Channel, tsk *dtask.Task) {
+func (s *CometServer) dispatch(conn Conn, wp *bytes.Pool, wb *bytes.Buffer, ch *comet.Channel) {
 	var (
 		err    error
 		finish bool
 		online int32
-		rto    = s.svcCtx.Config.Protocol.Rto
 	)
 	for {
 		var p = ch.Ready()
@@ -308,9 +314,8 @@ func (s *CometServer) dispatch(conn Conn, wp *bytes.Pool, wb *bytes.Buffer, ch *
 						goto failed
 					}
 				} else if p.Op == int32(protocol.Op_ReceiveMsgReply) {
-					//skip
-				} else if p.Op == int32(protocol.Op_SendMsg) {
-					//skip
+					//del resend but skip conn write
+					s.resend.Del(p.GetAck())
 				} else {
 					if err = conn.WriteProto(p); err != nil {
 						goto failed
@@ -319,38 +324,22 @@ func (s *CometServer) dispatch(conn Conn, wp *bytes.Pool, wb *bytes.Buffer, ch *
 				p.Body = nil // avoid memory leak
 				ch.CliProto.GetAdv()
 			}
+		case protocol.ProtoResend:
+			for _, rp := range s.resend.All() {
+				if err = conn.WriteProto(rp); err != nil {
+					goto failed
+				}
+			}
 		default:
 			switch p.Op {
-			case int32(protocol.Op_SendMsgReply):
-				if err = conn.WriteProto(p); err != nil {
-					goto failed
-				}
-			case int32(protocol.Op_RePush):
-				p.Op = int32(protocol.Op_ReceiveMsg)
-				if err = conn.WriteProto(p); err != nil {
-					goto failed
-				}
 			case int32(protocol.Op_ReceiveMsg):
 				if err = conn.WriteProto(p); err != nil {
 					goto failed
 				}
-				p.Op = int32(protocol.Op_RePush)
-				seq := strconv.FormatInt(int64(p.Seq), 10)
-				if j := tsk.Get(seq); j != nil {
-					continue
-				}
-				//push into task pool
-				job, inserted := tsk.AddJobRepeat(rto, 0, func() {
-					if _, err = ch.Push(p); err != nil {
-						log.Error().Err(err).Msg("task job ch.Push error")
-						return
-					}
-				})
-				if !inserted {
+				if err = s.resend.Add(p); err != nil {
 					log.Error().Err(err).Msg("tsk.AddJobRepeat error")
 					goto failed
 				}
-				tsk.Add(seq, job)
 			default:
 				continue
 			}
@@ -364,11 +353,65 @@ failed:
 	if err != nil && err != io.EOF && err != websocket.ErrMessageClose {
 		log.Error().Err(err).Str("key", ch.Key).Msg("dispatch comet conn error")
 	}
-	tsk.Stop()
+	s.resend.Stop()
 	conn.Close()
 	wp.Put(wb)
-	// must ensure all channel message discard, for reader won't blocking Signal
+	// must ensure all channel message discard, for reader won't block Signal
 	for !finish {
-		finish = (ch.Ready() == protocol.ProtoFinish)
+		finish = ch.Ready() == protocol.ProtoFinish
 	}
+}
+
+// Operate operate.
+func (s *CometServer) operate(ctx context.Context, p *protocol.Proto, ch *comet.Channel) error {
+	switch p.Op {
+	case int32(protocol.Op_SendMsg):
+		//filter
+		err := s.filter.Filter(p.GetChannel(), p.GetTarget())
+		if err == nil {
+			//gen mid
+			mid := s.midGen.GetMid(p.GetSeq())
+			p.Mid = mid
+			err = s.svcCtx.Receive(ctx, ch.Key, p)
+			if err != nil {
+				//下层业务调用失败，返回error的话会直接断开连接
+				return err
+			}
+		}
+		//标明Ack的消息序列
+		p.Ack = p.Seq
+		p.Op = int32(protocol.Op_SendMsgReply)
+		p.Body = convertAckBody(err)
+	case int32(protocol.Op_ReceiveMsgReply):
+		err := s.svcCtx.Receive(ctx, ch.Key, p)
+		if err != nil {
+			//下层业务调用失败，返回error的话会直接断开连接
+			return err
+		}
+	case int32(protocol.Op_SyncMsgReq):
+		err := s.svcCtx.Receive(ctx, ch.Key, p)
+		if err != nil {
+			//下层业务调用失败，返回error的话会直接断开连接
+			return err
+		}
+		p.Op = int32(protocol.Op_SyncMsgReply)
+	default:
+		return s.svcCtx.Receive(ctx, ch.Key, p)
+	}
+	return nil
+}
+
+func convertAckBody(err error) []byte {
+	switch err {
+	case comet.ErrNotFriend:
+	case comet.ErrNotGroupMember:
+	case comet.ErrUnsupportedChannel:
+	case nil:
+		return nil
+	}
+	ackBody, _ := proto.Marshal(&protocol.SendMsgReplyBody{
+		Type: 0,
+		Msg:  "",
+	})
+	return ackBody
 }

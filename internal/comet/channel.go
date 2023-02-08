@@ -1,12 +1,9 @@
 package comet
 
 import (
-	"errors"
 	"sync"
-	"sync/atomic"
 
 	"github.com/Terry-Mao/goim/pkg/bufio"
-	"github.com/golang/protobuf/proto"
 	"github.com/txchat/im/api/protocol"
 )
 
@@ -17,7 +14,6 @@ type Channel struct {
 	Writer   bufio.Writer
 	Reader   bufio.Reader
 
-	Seq  int32
 	Key  string
 	IP   string
 	Port string
@@ -36,30 +32,12 @@ func NewChannel(cli, svr int) *Channel {
 }
 
 // Push server push message.
-func (c *Channel) seqInc() int32 {
-	return atomic.AddInt32(&c.Seq, 1)
-}
-
-// Push server push message.
-func (c *Channel) push(p *protocol.Proto) (err error) {
+func (c *Channel) Push(p *protocol.Proto) (err error) {
 	select {
 	case c.signal <- p:
 	default:
 	}
 	return
-}
-
-// Push server push message.
-func (c *Channel) Push(p *protocol.Proto) (seq int32, err error) {
-	if p, ok := proto.Clone(p).(*protocol.Proto); ok {
-		if p.Op == int32(protocol.Op_ReceiveMsg) {
-			p.Seq = c.seqInc()
-		}
-		seq = p.Seq
-		return seq, c.push(p)
-	} else {
-		return 0, errors.New("protocol type protocol proto failed")
-	}
 }
 
 // Ready check the channel ready or close?
@@ -72,13 +50,18 @@ func (c *Channel) Signal() {
 	c.signal <- protocol.ProtoReady
 }
 
+// Resend send signal to the channel, protocol resend.
+func (c *Channel) Resend() {
+	c.signal <- protocol.ProtoResend
+}
+
 // Close close the channel.
 func (c *Channel) Close() {
 	c.signal <- protocol.ProtoFinish
 }
 
 // Close close the channel.
-func (c Channel) Groups() map[string]*Node {
+func (c *Channel) Groups() map[string]*Node {
 	return c.nodes
 }
 
@@ -102,9 +85,6 @@ func (c *Channel) GetNode(id string) *Node {
 }
 
 // base info just for debug
-func (c *Channel) GetSeq() int32 {
-	return c.Seq
-}
 func (c *Channel) GetKey() string {
 	return c.Key
 }
