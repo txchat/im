@@ -10,26 +10,26 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-type BroadcastGroupLogic struct {
+type GroupCastLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 	logx.Logger
 }
 
-func NewBroadcastGroupLogic(ctx context.Context, svcCtx *svc.ServiceContext) *BroadcastGroupLogic {
-	return &BroadcastGroupLogic{
+func NewGroupCastLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GroupCastLogic {
+	return &GroupCastLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
 		Logger: logx.WithContext(ctx),
 	}
 }
 
-func (l *BroadcastGroupLogic) BroadcastGroup(in *comet.BroadcastGroupReq) (*comet.BroadcastGroupReply, error) {
-	if in.GetProto() == nil || in.GetGroupID() == "" {
+func (l *GroupCastLogic) GroupCast(in *comet.GroupCastReq) (*comet.GroupCastReply, error) {
+	if in.GetProto() == nil || in.GetGid() == "" {
 		return nil, errors.ErrBroadCastArg
 	}
 	for _, bucket := range l.svcCtx.Buckets() {
-		bucket.BroadcastGroup(in.GetGroupID(), in.GetProto())
+		bucket.GroupCast(in.GetGid(), in.GetProto())
 	}
-	return &comet.BroadcastGroupReply{}, nil
+	return &comet.GroupCastReply{}, nil
 }

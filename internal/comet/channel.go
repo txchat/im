@@ -55,36 +55,37 @@ func (c *Channel) Resend() {
 	c.signal <- protocol.ProtoResend
 }
 
-// Close close the channel.
+// Close notice goroutine finish.
 func (c *Channel) Close() {
 	c.signal <- protocol.ProtoFinish
 }
 
-// Close close the channel.
+// Groups get joined groups.
 func (c *Channel) Groups() map[string]*Node {
 	return c.nodes
 }
 
-//
+// DelNode delete the group node by id
 func (c *Channel) DelNode(id string) {
 	c.mutex.Lock()
 	delete(c.nodes, id)
 	c.mutex.Unlock()
 }
 
+// SetNode set a group node by id
 func (c *Channel) SetNode(id string, node *Node) {
 	c.mutex.Lock()
 	c.nodes[id] = node
 	c.mutex.Unlock()
 }
 
+// GetNode get a group node by id
 func (c *Channel) GetNode(id string) *Node {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 	return c.nodes[id]
 }
 
-// base info just for debug
 func (c *Channel) GetKey() string {
 	return c.Key
 }

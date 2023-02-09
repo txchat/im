@@ -68,7 +68,7 @@ func (b *Bucket) ChannelsCount() (res []string) {
 	return
 }
 
-// Put put a channel according with sub key.
+// Put hold a channel instance.
 func (b *Bucket) Put(ch *Channel) (err error) {
 	b.cLock.Lock()
 	// close old channel
@@ -80,7 +80,7 @@ func (b *Bucket) Put(ch *Channel) (err error) {
 	return
 }
 
-// Del delete the channel by sub key.
+// Del delete the channel instance.
 func (b *Bucket) Del(dch *Channel) {
 	var (
 		ok bool
@@ -110,18 +110,17 @@ func (b *Bucket) Channel(key string) (ch *Channel) {
 	return
 }
 
-// Broadcast push msgs to all channels in the bucket.
-func (b *Bucket) Broadcast(p *protocol.Proto, op int32) {
+// Broadcast push messages to all channels in the bucket.
+func (b *Bucket) Broadcast(p *protocol.Proto) {
 	var ch *Channel
 	b.cLock.RLock()
 	for _, ch = range b.chs {
-		_, _ = ch.Push(p)
+		_ = ch.Push(p)
 	}
 	b.cLock.RUnlock()
 }
 
-// group
-// GroupCount room count in the bucket
+// GroupCount groups count in the bucket
 func (b *Bucket) GroupCount() int {
 	return len(b.groups)
 }
@@ -143,7 +142,7 @@ func (b *Bucket) GroupsCount() (res map[string]int32) {
 	return
 }
 
-// Put put a group according with sub key.
+// PutGroup new and got group instance by id.
 func (b *Bucket) PutGroup(gid string) (group *Group, err error) {
 	var ok bool
 	b.cLock.Lock()
@@ -163,7 +162,7 @@ func (b *Bucket) Group(gid string) (group *Group) {
 	return
 }
 
-// DelGroup delete a room by group id.
+// DelGroup delete group instance.
 func (b *Bucket) DelGroup(group *Group) {
 	b.cLock.Lock()
 	delete(b.groups, group.ID)
@@ -171,8 +170,8 @@ func (b *Bucket) DelGroup(group *Group) {
 	group.Close()
 }
 
-// BroadcastGroup broadcast a message to specified group
-func (b *Bucket) BroadcastGroup(gid string, p *protocol.Proto) {
+// GroupCast broadcast a message in the specified group
+func (b *Bucket) GroupCast(gid string, p *protocol.Proto) {
 	num := atomic.AddUint64(&b.routinesNum, 1) % b.cfg.RoutineAmount
 	b.routines[num] <- &GroupCastReq{
 		gid:   gid,
@@ -180,7 +179,7 @@ func (b *Bucket) BroadcastGroup(gid string, p *protocol.Proto) {
 	}
 }
 
-// group proc
+// groupProc goroutine for process group push request
 func (b *Bucket) groupProc(c chan *GroupCastReq) {
 	for {
 		arg := <-c

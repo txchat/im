@@ -19,9 +19,9 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CometClient interface {
-	PushMsg(ctx context.Context, in *PushMsgReq, opts ...grpc.CallOption) (*PushMsgReply, error)
+	ListCast(ctx context.Context, in *ListCastReq, opts ...grpc.CallOption) (*ListCastReply, error)
 	Broadcast(ctx context.Context, in *BroadcastReq, opts ...grpc.CallOption) (*BroadcastReply, error)
-	BroadcastGroup(ctx context.Context, in *BroadcastGroupReq, opts ...grpc.CallOption) (*BroadcastGroupReply, error)
+	GroupCast(ctx context.Context, in *GroupCastReq, opts ...grpc.CallOption) (*GroupCastReply, error)
 	JoinGroups(ctx context.Context, in *JoinGroupsReq, opts ...grpc.CallOption) (*JoinGroupsReply, error)
 	LeaveGroups(ctx context.Context, in *LeaveGroupsReq, opts ...grpc.CallOption) (*LeaveGroupsReply, error)
 	DelGroups(ctx context.Context, in *DelGroupsReq, opts ...grpc.CallOption) (*DelGroupsReply, error)
@@ -35,9 +35,9 @@ func NewCometClient(cc grpc.ClientConnInterface) CometClient {
 	return &cometClient{cc}
 }
 
-func (c *cometClient) PushMsg(ctx context.Context, in *PushMsgReq, opts ...grpc.CallOption) (*PushMsgReply, error) {
-	out := new(PushMsgReply)
-	err := c.cc.Invoke(ctx, "/im.comet.Comet/PushMsg", in, out, opts...)
+func (c *cometClient) ListCast(ctx context.Context, in *ListCastReq, opts ...grpc.CallOption) (*ListCastReply, error) {
+	out := new(ListCastReply)
+	err := c.cc.Invoke(ctx, "/im.comet.Comet/ListCast", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -53,9 +53,9 @@ func (c *cometClient) Broadcast(ctx context.Context, in *BroadcastReq, opts ...g
 	return out, nil
 }
 
-func (c *cometClient) BroadcastGroup(ctx context.Context, in *BroadcastGroupReq, opts ...grpc.CallOption) (*BroadcastGroupReply, error) {
-	out := new(BroadcastGroupReply)
-	err := c.cc.Invoke(ctx, "/im.comet.Comet/BroadcastGroup", in, out, opts...)
+func (c *cometClient) GroupCast(ctx context.Context, in *GroupCastReq, opts ...grpc.CallOption) (*GroupCastReply, error) {
+	out := new(GroupCastReply)
+	err := c.cc.Invoke(ctx, "/im.comet.Comet/GroupCast", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -93,9 +93,9 @@ func (c *cometClient) DelGroups(ctx context.Context, in *DelGroupsReq, opts ...g
 // All implementations must embed UnimplementedCometServer
 // for forward compatibility
 type CometServer interface {
-	PushMsg(context.Context, *PushMsgReq) (*PushMsgReply, error)
+	ListCast(context.Context, *ListCastReq) (*ListCastReply, error)
 	Broadcast(context.Context, *BroadcastReq) (*BroadcastReply, error)
-	BroadcastGroup(context.Context, *BroadcastGroupReq) (*BroadcastGroupReply, error)
+	GroupCast(context.Context, *GroupCastReq) (*GroupCastReply, error)
 	JoinGroups(context.Context, *JoinGroupsReq) (*JoinGroupsReply, error)
 	LeaveGroups(context.Context, *LeaveGroupsReq) (*LeaveGroupsReply, error)
 	DelGroups(context.Context, *DelGroupsReq) (*DelGroupsReply, error)
@@ -106,14 +106,14 @@ type CometServer interface {
 type UnimplementedCometServer struct {
 }
 
-func (UnimplementedCometServer) PushMsg(context.Context, *PushMsgReq) (*PushMsgReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method PushMsg not implemented")
+func (UnimplementedCometServer) ListCast(context.Context, *ListCastReq) (*ListCastReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListCast not implemented")
 }
 func (UnimplementedCometServer) Broadcast(context.Context, *BroadcastReq) (*BroadcastReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Broadcast not implemented")
 }
-func (UnimplementedCometServer) BroadcastGroup(context.Context, *BroadcastGroupReq) (*BroadcastGroupReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method BroadcastGroup not implemented")
+func (UnimplementedCometServer) GroupCast(context.Context, *GroupCastReq) (*GroupCastReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GroupCast not implemented")
 }
 func (UnimplementedCometServer) JoinGroups(context.Context, *JoinGroupsReq) (*JoinGroupsReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method JoinGroups not implemented")
@@ -137,20 +137,20 @@ func RegisterCometServer(s grpc.ServiceRegistrar, srv CometServer) {
 	s.RegisterService(&Comet_ServiceDesc, srv)
 }
 
-func _Comet_PushMsg_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(PushMsgReq)
+func _Comet_ListCast_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListCastReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CometServer).PushMsg(ctx, in)
+		return srv.(CometServer).ListCast(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/im.comet.Comet/PushMsg",
+		FullMethod: "/im.comet.Comet/ListCast",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CometServer).PushMsg(ctx, req.(*PushMsgReq))
+		return srv.(CometServer).ListCast(ctx, req.(*ListCastReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -173,20 +173,20 @@ func _Comet_Broadcast_Handler(srv interface{}, ctx context.Context, dec func(int
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Comet_BroadcastGroup_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(BroadcastGroupReq)
+func _Comet_GroupCast_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GroupCastReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CometServer).BroadcastGroup(ctx, in)
+		return srv.(CometServer).GroupCast(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/im.comet.Comet/BroadcastGroup",
+		FullMethod: "/im.comet.Comet/GroupCast",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CometServer).BroadcastGroup(ctx, req.(*BroadcastGroupReq))
+		return srv.(CometServer).GroupCast(ctx, req.(*GroupCastReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -253,16 +253,16 @@ var Comet_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*CometServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "PushMsg",
-			Handler:    _Comet_PushMsg_Handler,
+			MethodName: "ListCast",
+			Handler:    _Comet_ListCast_Handler,
 		},
 		{
 			MethodName: "Broadcast",
 			Handler:    _Comet_Broadcast_Handler,
 		},
 		{
-			MethodName: "BroadcastGroup",
-			Handler:    _Comet_BroadcastGroup_Handler,
+			MethodName: "GroupCast",
+			Handler:    _Comet_GroupCast_Handler,
 		},
 		{
 			MethodName: "JoinGroups",

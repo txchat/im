@@ -22,19 +22,17 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// Proto 中 Op 为 OpAuth 时， body 必须可以反序列化为 AuthMsg
-type AuthMsg struct {
+type ListCastReq struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	AppId string `protobuf:"bytes,1,opt,name=appId,proto3" json:"appId,omitempty"`
-	Token string `protobuf:"bytes,2,opt,name=token,proto3" json:"token,omitempty"`
-	Ext   []byte `protobuf:"bytes,3,opt,name=ext,proto3" json:"ext,omitempty"` // 其它业务方可能需要的信息
+	Keys  []string        `protobuf:"bytes,1,rep,name=keys,proto3" json:"keys,omitempty"`
+	Proto *protocol.Proto `protobuf:"bytes,2,opt,name=proto,proto3" json:"proto,omitempty"`
 }
 
-func (x *AuthMsg) Reset() {
-	*x = AuthMsg{}
+func (x *ListCastReq) Reset() {
+	*x = ListCastReq{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_comet_comet_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -42,13 +40,13 @@ func (x *AuthMsg) Reset() {
 	}
 }
 
-func (x *AuthMsg) String() string {
+func (x *ListCastReq) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*AuthMsg) ProtoMessage() {}
+func (*ListCastReq) ProtoMessage() {}
 
-func (x *AuthMsg) ProtoReflect() protoreflect.Message {
+func (x *ListCastReq) ProtoReflect() protoreflect.Message {
 	mi := &file_comet_comet_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -60,43 +58,33 @@ func (x *AuthMsg) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use AuthMsg.ProtoReflect.Descriptor instead.
-func (*AuthMsg) Descriptor() ([]byte, []int) {
+// Deprecated: Use ListCastReq.ProtoReflect.Descriptor instead.
+func (*ListCastReq) Descriptor() ([]byte, []int) {
 	return file_comet_comet_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *AuthMsg) GetAppId() string {
+func (x *ListCastReq) GetKeys() []string {
 	if x != nil {
-		return x.AppId
-	}
-	return ""
-}
-
-func (x *AuthMsg) GetToken() string {
-	if x != nil {
-		return x.Token
-	}
-	return ""
-}
-
-func (x *AuthMsg) GetExt() []byte {
-	if x != nil {
-		return x.Ext
+		return x.Keys
 	}
 	return nil
 }
 
-// Proto 中 Op 为 SyncMsgReply 时， body 必须可以反序列化为 SyncMsg
-type SyncMsg struct {
+func (x *ListCastReq) GetProto() *protocol.Proto {
+	if x != nil {
+		return x.Proto
+	}
+	return nil
+}
+
+type ListCastReply struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
-
-	LogId int64 `protobuf:"varint,1,opt,name=logId,proto3" json:"logId,omitempty"`
 }
 
-func (x *SyncMsg) Reset() {
-	*x = SyncMsg{}
+func (x *ListCastReply) Reset() {
+	*x = ListCastReply{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_comet_comet_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -104,13 +92,13 @@ func (x *SyncMsg) Reset() {
 	}
 }
 
-func (x *SyncMsg) String() string {
+func (x *ListCastReply) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*SyncMsg) ProtoMessage() {}
+func (*ListCastReply) ProtoMessage() {}
 
-func (x *SyncMsg) ProtoReflect() protoreflect.Message {
+func (x *ListCastReply) ProtoReflect() protoreflect.Message {
 	mi := &file_comet_comet_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -122,26 +110,22 @@ func (x *SyncMsg) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use SyncMsg.ProtoReflect.Descriptor instead.
-func (*SyncMsg) Descriptor() ([]byte, []int) {
+// Deprecated: Use ListCastReply.ProtoReflect.Descriptor instead.
+func (*ListCastReply) Descriptor() ([]byte, []int) {
 	return file_comet_comet_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *SyncMsg) GetLogId() int64 {
-	if x != nil {
-		return x.LogId
-	}
-	return 0
-}
-
-type Empty struct {
+type GroupCastReq struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
+
+	Gid   string          `protobuf:"bytes,1,opt,name=gid,proto3" json:"gid,omitempty"`
+	Proto *protocol.Proto `protobuf:"bytes,2,opt,name=proto,proto3" json:"proto,omitempty"`
 }
 
-func (x *Empty) Reset() {
-	*x = Empty{}
+func (x *GroupCastReq) Reset() {
+	*x = GroupCastReq{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_comet_comet_proto_msgTypes[2]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -149,13 +133,13 @@ func (x *Empty) Reset() {
 	}
 }
 
-func (x *Empty) String() string {
+func (x *GroupCastReq) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Empty) ProtoMessage() {}
+func (*GroupCastReq) ProtoMessage() {}
 
-func (x *Empty) ProtoReflect() protoreflect.Message {
+func (x *GroupCastReq) ProtoReflect() protoreflect.Message {
 	mi := &file_comet_comet_proto_msgTypes[2]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -167,23 +151,33 @@ func (x *Empty) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Empty.ProtoReflect.Descriptor instead.
-func (*Empty) Descriptor() ([]byte, []int) {
+// Deprecated: Use GroupCastReq.ProtoReflect.Descriptor instead.
+func (*GroupCastReq) Descriptor() ([]byte, []int) {
 	return file_comet_comet_proto_rawDescGZIP(), []int{2}
 }
 
-type PushMsgReq struct {
+func (x *GroupCastReq) GetGid() string {
+	if x != nil {
+		return x.Gid
+	}
+	return ""
+}
+
+func (x *GroupCastReq) GetProto() *protocol.Proto {
+	if x != nil {
+		return x.Proto
+	}
+	return nil
+}
+
+type GroupCastReply struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
-
-	Keys    []string        `protobuf:"bytes,1,rep,name=keys,proto3" json:"keys,omitempty"`
-	ProtoOp int32           `protobuf:"varint,2,opt,name=protoOp,proto3" json:"protoOp,omitempty"`
-	Proto   *protocol.Proto `protobuf:"bytes,3,opt,name=proto,proto3" json:"proto,omitempty"`
 }
 
-func (x *PushMsgReq) Reset() {
-	*x = PushMsgReq{}
+func (x *GroupCastReply) Reset() {
+	*x = GroupCastReply{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_comet_comet_proto_msgTypes[3]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -191,13 +185,13 @@ func (x *PushMsgReq) Reset() {
 	}
 }
 
-func (x *PushMsgReq) String() string {
+func (x *GroupCastReply) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*PushMsgReq) ProtoMessage() {}
+func (*GroupCastReply) ProtoMessage() {}
 
-func (x *PushMsgReq) ProtoReflect() protoreflect.Message {
+func (x *GroupCastReply) ProtoReflect() protoreflect.Message {
 	mi := &file_comet_comet_proto_msgTypes[3]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -209,77 +203,9 @@ func (x *PushMsgReq) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use PushMsgReq.ProtoReflect.Descriptor instead.
-func (*PushMsgReq) Descriptor() ([]byte, []int) {
+// Deprecated: Use GroupCastReply.ProtoReflect.Descriptor instead.
+func (*GroupCastReply) Descriptor() ([]byte, []int) {
 	return file_comet_comet_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *PushMsgReq) GetKeys() []string {
-	if x != nil {
-		return x.Keys
-	}
-	return nil
-}
-
-func (x *PushMsgReq) GetProtoOp() int32 {
-	if x != nil {
-		return x.ProtoOp
-	}
-	return 0
-}
-
-func (x *PushMsgReq) GetProto() *protocol.Proto {
-	if x != nil {
-		return x.Proto
-	}
-	return nil
-}
-
-type PushMsgReply struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Index map[string]int32 `protobuf:"bytes,1,rep,name=index,proto3" json:"index,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"varint,2,opt,name=value,proto3"`
-}
-
-func (x *PushMsgReply) Reset() {
-	*x = PushMsgReply{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_comet_comet_proto_msgTypes[4]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *PushMsgReply) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*PushMsgReply) ProtoMessage() {}
-
-func (x *PushMsgReply) ProtoReflect() protoreflect.Message {
-	mi := &file_comet_comet_proto_msgTypes[4]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use PushMsgReply.ProtoReflect.Descriptor instead.
-func (*PushMsgReply) Descriptor() ([]byte, []int) {
-	return file_comet_comet_proto_rawDescGZIP(), []int{4}
-}
-
-func (x *PushMsgReply) GetIndex() map[string]int32 {
-	if x != nil {
-		return x.Index
-	}
-	return nil
 }
 
 type BroadcastReq struct {
@@ -287,14 +213,13 @@ type BroadcastReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProtoOp int32           `protobuf:"varint,1,opt,name=protoOp,proto3" json:"protoOp,omitempty"`
-	Proto   *protocol.Proto `protobuf:"bytes,2,opt,name=proto,proto3" json:"proto,omitempty"`
+	Proto *protocol.Proto `protobuf:"bytes,1,opt,name=proto,proto3" json:"proto,omitempty"`
 }
 
 func (x *BroadcastReq) Reset() {
 	*x = BroadcastReq{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_comet_comet_proto_msgTypes[5]
+		mi := &file_comet_comet_proto_msgTypes[4]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -307,7 +232,7 @@ func (x *BroadcastReq) String() string {
 func (*BroadcastReq) ProtoMessage() {}
 
 func (x *BroadcastReq) ProtoReflect() protoreflect.Message {
-	mi := &file_comet_comet_proto_msgTypes[5]
+	mi := &file_comet_comet_proto_msgTypes[4]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -320,14 +245,7 @@ func (x *BroadcastReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BroadcastReq.ProtoReflect.Descriptor instead.
 func (*BroadcastReq) Descriptor() ([]byte, []int) {
-	return file_comet_comet_proto_rawDescGZIP(), []int{5}
-}
-
-func (x *BroadcastReq) GetProtoOp() int32 {
-	if x != nil {
-		return x.ProtoOp
-	}
-	return 0
+	return file_comet_comet_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *BroadcastReq) GetProto() *protocol.Proto {
@@ -346,7 +264,7 @@ type BroadcastReply struct {
 func (x *BroadcastReply) Reset() {
 	*x = BroadcastReply{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_comet_comet_proto_msgTypes[6]
+		mi := &file_comet_comet_proto_msgTypes[5]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -359,7 +277,7 @@ func (x *BroadcastReply) String() string {
 func (*BroadcastReply) ProtoMessage() {}
 
 func (x *BroadcastReply) ProtoReflect() protoreflect.Message {
-	mi := &file_comet_comet_proto_msgTypes[6]
+	mi := &file_comet_comet_proto_msgTypes[5]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -372,100 +290,7 @@ func (x *BroadcastReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BroadcastReply.ProtoReflect.Descriptor instead.
 func (*BroadcastReply) Descriptor() ([]byte, []int) {
-	return file_comet_comet_proto_rawDescGZIP(), []int{6}
-}
-
-type BroadcastGroupReq struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	GroupID string          `protobuf:"bytes,1,opt,name=groupID,proto3" json:"groupID,omitempty"`
-	Proto   *protocol.Proto `protobuf:"bytes,2,opt,name=proto,proto3" json:"proto,omitempty"`
-}
-
-func (x *BroadcastGroupReq) Reset() {
-	*x = BroadcastGroupReq{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_comet_comet_proto_msgTypes[7]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *BroadcastGroupReq) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*BroadcastGroupReq) ProtoMessage() {}
-
-func (x *BroadcastGroupReq) ProtoReflect() protoreflect.Message {
-	mi := &file_comet_comet_proto_msgTypes[7]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use BroadcastGroupReq.ProtoReflect.Descriptor instead.
-func (*BroadcastGroupReq) Descriptor() ([]byte, []int) {
-	return file_comet_comet_proto_rawDescGZIP(), []int{7}
-}
-
-func (x *BroadcastGroupReq) GetGroupID() string {
-	if x != nil {
-		return x.GroupID
-	}
-	return ""
-}
-
-func (x *BroadcastGroupReq) GetProto() *protocol.Proto {
-	if x != nil {
-		return x.Proto
-	}
-	return nil
-}
-
-type BroadcastGroupReply struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-}
-
-func (x *BroadcastGroupReply) Reset() {
-	*x = BroadcastGroupReply{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_comet_comet_proto_msgTypes[8]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *BroadcastGroupReply) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*BroadcastGroupReply) ProtoMessage() {}
-
-func (x *BroadcastGroupReply) ProtoReflect() protoreflect.Message {
-	mi := &file_comet_comet_proto_msgTypes[8]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use BroadcastGroupReply.ProtoReflect.Descriptor instead.
-func (*BroadcastGroupReply) Descriptor() ([]byte, []int) {
-	return file_comet_comet_proto_rawDescGZIP(), []int{8}
+	return file_comet_comet_proto_rawDescGZIP(), []int{5}
 }
 
 type JoinGroupsReq struct {
@@ -480,7 +305,7 @@ type JoinGroupsReq struct {
 func (x *JoinGroupsReq) Reset() {
 	*x = JoinGroupsReq{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_comet_comet_proto_msgTypes[9]
+		mi := &file_comet_comet_proto_msgTypes[6]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -493,7 +318,7 @@ func (x *JoinGroupsReq) String() string {
 func (*JoinGroupsReq) ProtoMessage() {}
 
 func (x *JoinGroupsReq) ProtoReflect() protoreflect.Message {
-	mi := &file_comet_comet_proto_msgTypes[9]
+	mi := &file_comet_comet_proto_msgTypes[6]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -506,7 +331,7 @@ func (x *JoinGroupsReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use JoinGroupsReq.ProtoReflect.Descriptor instead.
 func (*JoinGroupsReq) Descriptor() ([]byte, []int) {
-	return file_comet_comet_proto_rawDescGZIP(), []int{9}
+	return file_comet_comet_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *JoinGroupsReq) GetKeys() []string {
@@ -532,7 +357,7 @@ type JoinGroupsReply struct {
 func (x *JoinGroupsReply) Reset() {
 	*x = JoinGroupsReply{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_comet_comet_proto_msgTypes[10]
+		mi := &file_comet_comet_proto_msgTypes[7]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -545,7 +370,7 @@ func (x *JoinGroupsReply) String() string {
 func (*JoinGroupsReply) ProtoMessage() {}
 
 func (x *JoinGroupsReply) ProtoReflect() protoreflect.Message {
-	mi := &file_comet_comet_proto_msgTypes[10]
+	mi := &file_comet_comet_proto_msgTypes[7]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -558,7 +383,7 @@ func (x *JoinGroupsReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use JoinGroupsReply.ProtoReflect.Descriptor instead.
 func (*JoinGroupsReply) Descriptor() ([]byte, []int) {
-	return file_comet_comet_proto_rawDescGZIP(), []int{10}
+	return file_comet_comet_proto_rawDescGZIP(), []int{7}
 }
 
 type LeaveGroupsReq struct {
@@ -573,7 +398,7 @@ type LeaveGroupsReq struct {
 func (x *LeaveGroupsReq) Reset() {
 	*x = LeaveGroupsReq{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_comet_comet_proto_msgTypes[11]
+		mi := &file_comet_comet_proto_msgTypes[8]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -586,7 +411,7 @@ func (x *LeaveGroupsReq) String() string {
 func (*LeaveGroupsReq) ProtoMessage() {}
 
 func (x *LeaveGroupsReq) ProtoReflect() protoreflect.Message {
-	mi := &file_comet_comet_proto_msgTypes[11]
+	mi := &file_comet_comet_proto_msgTypes[8]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -599,7 +424,7 @@ func (x *LeaveGroupsReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LeaveGroupsReq.ProtoReflect.Descriptor instead.
 func (*LeaveGroupsReq) Descriptor() ([]byte, []int) {
-	return file_comet_comet_proto_rawDescGZIP(), []int{11}
+	return file_comet_comet_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *LeaveGroupsReq) GetKeys() []string {
@@ -625,7 +450,7 @@ type LeaveGroupsReply struct {
 func (x *LeaveGroupsReply) Reset() {
 	*x = LeaveGroupsReply{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_comet_comet_proto_msgTypes[12]
+		mi := &file_comet_comet_proto_msgTypes[9]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -638,7 +463,7 @@ func (x *LeaveGroupsReply) String() string {
 func (*LeaveGroupsReply) ProtoMessage() {}
 
 func (x *LeaveGroupsReply) ProtoReflect() protoreflect.Message {
-	mi := &file_comet_comet_proto_msgTypes[12]
+	mi := &file_comet_comet_proto_msgTypes[9]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -651,7 +476,7 @@ func (x *LeaveGroupsReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LeaveGroupsReply.ProtoReflect.Descriptor instead.
 func (*LeaveGroupsReply) Descriptor() ([]byte, []int) {
-	return file_comet_comet_proto_rawDescGZIP(), []int{12}
+	return file_comet_comet_proto_rawDescGZIP(), []int{9}
 }
 
 type DelGroupsReq struct {
@@ -665,7 +490,7 @@ type DelGroupsReq struct {
 func (x *DelGroupsReq) Reset() {
 	*x = DelGroupsReq{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_comet_comet_proto_msgTypes[13]
+		mi := &file_comet_comet_proto_msgTypes[10]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -678,7 +503,7 @@ func (x *DelGroupsReq) String() string {
 func (*DelGroupsReq) ProtoMessage() {}
 
 func (x *DelGroupsReq) ProtoReflect() protoreflect.Message {
-	mi := &file_comet_comet_proto_msgTypes[13]
+	mi := &file_comet_comet_proto_msgTypes[10]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -691,7 +516,7 @@ func (x *DelGroupsReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DelGroupsReq.ProtoReflect.Descriptor instead.
 func (*DelGroupsReq) Descriptor() ([]byte, []int) {
-	return file_comet_comet_proto_rawDescGZIP(), []int{13}
+	return file_comet_comet_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *DelGroupsReq) GetGid() []string {
@@ -710,7 +535,7 @@ type DelGroupsReply struct {
 func (x *DelGroupsReply) Reset() {
 	*x = DelGroupsReply{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_comet_comet_proto_msgTypes[14]
+		mi := &file_comet_comet_proto_msgTypes[11]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -723,7 +548,7 @@ func (x *DelGroupsReply) String() string {
 func (*DelGroupsReply) ProtoMessage() {}
 
 func (x *DelGroupsReply) ProtoReflect() protoreflect.Message {
-	mi := &file_comet_comet_proto_msgTypes[14]
+	mi := &file_comet_comet_proto_msgTypes[11]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -736,7 +561,7 @@ func (x *DelGroupsReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DelGroupsReply.ProtoReflect.Descriptor instead.
 func (*DelGroupsReply) Descriptor() ([]byte, []int) {
-	return file_comet_comet_proto_rawDescGZIP(), []int{14}
+	return file_comet_comet_proto_rawDescGZIP(), []int{11}
 }
 
 var File_comet_comet_proto protoreflect.FileDescriptor
@@ -747,83 +572,63 @@ var file_comet_comet_proto_rawDesc = []byte{
 	0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x74, 0x78, 0x63, 0x68, 0x61, 0x74,
 	0x2f, 0x69, 0x6d, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x63, 0x6f, 0x6c,
 	0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x63, 0x6f, 0x6c, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22,
-	0x47, 0x0a, 0x07, 0x41, 0x75, 0x74, 0x68, 0x4d, 0x73, 0x67, 0x12, 0x14, 0x0a, 0x05, 0x61, 0x70,
-	0x70, 0x49, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x61, 0x70, 0x70, 0x49, 0x64,
-	0x12, 0x14, 0x0a, 0x05, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52,
-	0x05, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x12, 0x10, 0x0a, 0x03, 0x65, 0x78, 0x74, 0x18, 0x03, 0x20,
-	0x01, 0x28, 0x0c, 0x52, 0x03, 0x65, 0x78, 0x74, 0x22, 0x1f, 0x0a, 0x07, 0x53, 0x79, 0x6e, 0x63,
-	0x4d, 0x73, 0x67, 0x12, 0x14, 0x0a, 0x05, 0x6c, 0x6f, 0x67, 0x49, 0x64, 0x18, 0x01, 0x20, 0x01,
-	0x28, 0x03, 0x52, 0x05, 0x6c, 0x6f, 0x67, 0x49, 0x64, 0x22, 0x07, 0x0a, 0x05, 0x45, 0x6d, 0x70,
-	0x74, 0x79, 0x22, 0x64, 0x0a, 0x0a, 0x50, 0x75, 0x73, 0x68, 0x4d, 0x73, 0x67, 0x52, 0x65, 0x71,
-	0x12, 0x12, 0x0a, 0x04, 0x6b, 0x65, 0x79, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x09, 0x52, 0x04,
-	0x6b, 0x65, 0x79, 0x73, 0x12, 0x18, 0x0a, 0x07, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x4f, 0x70, 0x18,
-	0x02, 0x20, 0x01, 0x28, 0x05, 0x52, 0x07, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x4f, 0x70, 0x12, 0x28,
-	0x0a, 0x05, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x12, 0x2e,
-	0x69, 0x6d, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x63, 0x6f, 0x6c, 0x2e, 0x50, 0x72, 0x6f, 0x74,
-	0x6f, 0x52, 0x05, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0x81, 0x01, 0x0a, 0x0c, 0x50, 0x75, 0x73,
-	0x68, 0x4d, 0x73, 0x67, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x12, 0x37, 0x0a, 0x05, 0x69, 0x6e, 0x64,
-	0x65, 0x78, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x21, 0x2e, 0x69, 0x6d, 0x2e, 0x63, 0x6f,
-	0x6d, 0x65, 0x74, 0x2e, 0x50, 0x75, 0x73, 0x68, 0x4d, 0x73, 0x67, 0x52, 0x65, 0x70, 0x6c, 0x79,
-	0x2e, 0x49, 0x6e, 0x64, 0x65, 0x78, 0x45, 0x6e, 0x74, 0x72, 0x79, 0x52, 0x05, 0x69, 0x6e, 0x64,
-	0x65, 0x78, 0x1a, 0x38, 0x0a, 0x0a, 0x49, 0x6e, 0x64, 0x65, 0x78, 0x45, 0x6e, 0x74, 0x72, 0x79,
-	0x12, 0x10, 0x0a, 0x03, 0x6b, 0x65, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x6b,
-	0x65, 0x79, 0x12, 0x14, 0x0a, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28,
-	0x05, 0x52, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x3a, 0x02, 0x38, 0x01, 0x22, 0x52, 0x0a, 0x0c,
-	0x42, 0x72, 0x6f, 0x61, 0x64, 0x63, 0x61, 0x73, 0x74, 0x52, 0x65, 0x71, 0x12, 0x18, 0x0a, 0x07,
-	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x4f, 0x70, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x07, 0x70,
-	0x72, 0x6f, 0x74, 0x6f, 0x4f, 0x70, 0x12, 0x28, 0x0a, 0x05, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x18,
-	0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x12, 0x2e, 0x69, 0x6d, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f,
-	0x63, 0x6f, 0x6c, 0x2e, 0x50, 0x72, 0x6f, 0x74, 0x6f, 0x52, 0x05, 0x70, 0x72, 0x6f, 0x74, 0x6f,
-	0x22, 0x10, 0x0a, 0x0e, 0x42, 0x72, 0x6f, 0x61, 0x64, 0x63, 0x61, 0x73, 0x74, 0x52, 0x65, 0x70,
-	0x6c, 0x79, 0x22, 0x57, 0x0a, 0x11, 0x42, 0x72, 0x6f, 0x61, 0x64, 0x63, 0x61, 0x73, 0x74, 0x47,
-	0x72, 0x6f, 0x75, 0x70, 0x52, 0x65, 0x71, 0x12, 0x18, 0x0a, 0x07, 0x67, 0x72, 0x6f, 0x75, 0x70,
-	0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x67, 0x72, 0x6f, 0x75, 0x70, 0x49,
-	0x44, 0x12, 0x28, 0x0a, 0x05, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b,
-	0x32, 0x12, 0x2e, 0x69, 0x6d, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x63, 0x6f, 0x6c, 0x2e, 0x50,
-	0x72, 0x6f, 0x74, 0x6f, 0x52, 0x05, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0x15, 0x0a, 0x13, 0x42,
-	0x72, 0x6f, 0x61, 0x64, 0x63, 0x61, 0x73, 0x74, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x52, 0x65, 0x70,
-	0x6c, 0x79, 0x22, 0x35, 0x0a, 0x0d, 0x4a, 0x6f, 0x69, 0x6e, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x73,
+	0x4b, 0x0a, 0x0b, 0x4c, 0x69, 0x73, 0x74, 0x43, 0x61, 0x73, 0x74, 0x52, 0x65, 0x71, 0x12, 0x12,
+	0x0a, 0x04, 0x6b, 0x65, 0x79, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x09, 0x52, 0x04, 0x6b, 0x65,
+	0x79, 0x73, 0x12, 0x28, 0x0a, 0x05, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x18, 0x02, 0x20, 0x01, 0x28,
+	0x0b, 0x32, 0x12, 0x2e, 0x69, 0x6d, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x63, 0x6f, 0x6c, 0x2e,
+	0x50, 0x72, 0x6f, 0x74, 0x6f, 0x52, 0x05, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0x0f, 0x0a, 0x0d,
+	0x4c, 0x69, 0x73, 0x74, 0x43, 0x61, 0x73, 0x74, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x4a, 0x0a,
+	0x0c, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x43, 0x61, 0x73, 0x74, 0x52, 0x65, 0x71, 0x12, 0x10, 0x0a,
+	0x03, 0x67, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x67, 0x69, 0x64, 0x12,
+	0x28, 0x0a, 0x05, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x12,
+	0x2e, 0x69, 0x6d, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x63, 0x6f, 0x6c, 0x2e, 0x50, 0x72, 0x6f,
+	0x74, 0x6f, 0x52, 0x05, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0x10, 0x0a, 0x0e, 0x47, 0x72, 0x6f,
+	0x75, 0x70, 0x43, 0x61, 0x73, 0x74, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x38, 0x0a, 0x0c, 0x42,
+	0x72, 0x6f, 0x61, 0x64, 0x63, 0x61, 0x73, 0x74, 0x52, 0x65, 0x71, 0x12, 0x28, 0x0a, 0x05, 0x70,
+	0x72, 0x6f, 0x74, 0x6f, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x12, 0x2e, 0x69, 0x6d, 0x2e,
+	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x63, 0x6f, 0x6c, 0x2e, 0x50, 0x72, 0x6f, 0x74, 0x6f, 0x52, 0x05,
+	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0x10, 0x0a, 0x0e, 0x42, 0x72, 0x6f, 0x61, 0x64, 0x63, 0x61,
+	0x73, 0x74, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x35, 0x0a, 0x0d, 0x4a, 0x6f, 0x69, 0x6e, 0x47,
+	0x72, 0x6f, 0x75, 0x70, 0x73, 0x52, 0x65, 0x71, 0x12, 0x12, 0x0a, 0x04, 0x6b, 0x65, 0x79, 0x73,
+	0x18, 0x01, 0x20, 0x03, 0x28, 0x09, 0x52, 0x04, 0x6b, 0x65, 0x79, 0x73, 0x12, 0x10, 0x0a, 0x03,
+	0x67, 0x69, 0x64, 0x18, 0x02, 0x20, 0x03, 0x28, 0x09, 0x52, 0x03, 0x67, 0x69, 0x64, 0x22, 0x11,
+	0x0a, 0x0f, 0x4a, 0x6f, 0x69, 0x6e, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x73, 0x52, 0x65, 0x70, 0x6c,
+	0x79, 0x22, 0x36, 0x0a, 0x0e, 0x4c, 0x65, 0x61, 0x76, 0x65, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x73,
 	0x52, 0x65, 0x71, 0x12, 0x12, 0x0a, 0x04, 0x6b, 0x65, 0x79, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28,
 	0x09, 0x52, 0x04, 0x6b, 0x65, 0x79, 0x73, 0x12, 0x10, 0x0a, 0x03, 0x67, 0x69, 0x64, 0x18, 0x02,
-	0x20, 0x03, 0x28, 0x09, 0x52, 0x03, 0x67, 0x69, 0x64, 0x22, 0x11, 0x0a, 0x0f, 0x4a, 0x6f, 0x69,
-	0x6e, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x73, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x36, 0x0a, 0x0e,
-	0x4c, 0x65, 0x61, 0x76, 0x65, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x73, 0x52, 0x65, 0x71, 0x12, 0x12,
-	0x0a, 0x04, 0x6b, 0x65, 0x79, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x09, 0x52, 0x04, 0x6b, 0x65,
-	0x79, 0x73, 0x12, 0x10, 0x0a, 0x03, 0x67, 0x69, 0x64, 0x18, 0x02, 0x20, 0x03, 0x28, 0x09, 0x52,
-	0x03, 0x67, 0x69, 0x64, 0x22, 0x12, 0x0a, 0x10, 0x4c, 0x65, 0x61, 0x76, 0x65, 0x47, 0x72, 0x6f,
-	0x75, 0x70, 0x73, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x20, 0x0a, 0x0c, 0x44, 0x65, 0x6c, 0x47,
-	0x72, 0x6f, 0x75, 0x70, 0x73, 0x52, 0x65, 0x71, 0x12, 0x10, 0x0a, 0x03, 0x67, 0x69, 0x64, 0x18,
-	0x01, 0x20, 0x03, 0x28, 0x09, 0x52, 0x03, 0x67, 0x69, 0x64, 0x22, 0x10, 0x0a, 0x0e, 0x44, 0x65,
-	0x6c, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x73, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x32, 0x93, 0x03, 0x0a,
-	0x05, 0x43, 0x6f, 0x6d, 0x65, 0x74, 0x12, 0x37, 0x0a, 0x07, 0x50, 0x75, 0x73, 0x68, 0x4d, 0x73,
-	0x67, 0x12, 0x14, 0x2e, 0x69, 0x6d, 0x2e, 0x63, 0x6f, 0x6d, 0x65, 0x74, 0x2e, 0x50, 0x75, 0x73,
-	0x68, 0x4d, 0x73, 0x67, 0x52, 0x65, 0x71, 0x1a, 0x16, 0x2e, 0x69, 0x6d, 0x2e, 0x63, 0x6f, 0x6d,
-	0x65, 0x74, 0x2e, 0x50, 0x75, 0x73, 0x68, 0x4d, 0x73, 0x67, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x12,
-	0x3d, 0x0a, 0x09, 0x42, 0x72, 0x6f, 0x61, 0x64, 0x63, 0x61, 0x73, 0x74, 0x12, 0x16, 0x2e, 0x69,
+	0x20, 0x03, 0x28, 0x09, 0x52, 0x03, 0x67, 0x69, 0x64, 0x22, 0x12, 0x0a, 0x10, 0x4c, 0x65, 0x61,
+	0x76, 0x65, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x73, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x20, 0x0a,
+	0x0c, 0x44, 0x65, 0x6c, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x73, 0x52, 0x65, 0x71, 0x12, 0x10, 0x0a,
+	0x03, 0x67, 0x69, 0x64, 0x18, 0x01, 0x20, 0x03, 0x28, 0x09, 0x52, 0x03, 0x67, 0x69, 0x64, 0x22,
+	0x10, 0x0a, 0x0e, 0x44, 0x65, 0x6c, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x73, 0x52, 0x65, 0x70, 0x6c,
+	0x79, 0x32, 0x87, 0x03, 0x0a, 0x05, 0x43, 0x6f, 0x6d, 0x65, 0x74, 0x12, 0x3a, 0x0a, 0x08, 0x4c,
+	0x69, 0x73, 0x74, 0x43, 0x61, 0x73, 0x74, 0x12, 0x15, 0x2e, 0x69, 0x6d, 0x2e, 0x63, 0x6f, 0x6d,
+	0x65, 0x74, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x43, 0x61, 0x73, 0x74, 0x52, 0x65, 0x71, 0x1a, 0x17,
+	0x2e, 0x69, 0x6d, 0x2e, 0x63, 0x6f, 0x6d, 0x65, 0x74, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x43, 0x61,
+	0x73, 0x74, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x12, 0x3d, 0x0a, 0x09, 0x42, 0x72, 0x6f, 0x61, 0x64,
+	0x63, 0x61, 0x73, 0x74, 0x12, 0x16, 0x2e, 0x69, 0x6d, 0x2e, 0x63, 0x6f, 0x6d, 0x65, 0x74, 0x2e,
+	0x42, 0x72, 0x6f, 0x61, 0x64, 0x63, 0x61, 0x73, 0x74, 0x52, 0x65, 0x71, 0x1a, 0x18, 0x2e, 0x69,
 	0x6d, 0x2e, 0x63, 0x6f, 0x6d, 0x65, 0x74, 0x2e, 0x42, 0x72, 0x6f, 0x61, 0x64, 0x63, 0x61, 0x73,
-	0x74, 0x52, 0x65, 0x71, 0x1a, 0x18, 0x2e, 0x69, 0x6d, 0x2e, 0x63, 0x6f, 0x6d, 0x65, 0x74, 0x2e,
-	0x42, 0x72, 0x6f, 0x61, 0x64, 0x63, 0x61, 0x73, 0x74, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x12, 0x4c,
-	0x0a, 0x0e, 0x42, 0x72, 0x6f, 0x61, 0x64, 0x63, 0x61, 0x73, 0x74, 0x47, 0x72, 0x6f, 0x75, 0x70,
-	0x12, 0x1b, 0x2e, 0x69, 0x6d, 0x2e, 0x63, 0x6f, 0x6d, 0x65, 0x74, 0x2e, 0x42, 0x72, 0x6f, 0x61,
-	0x64, 0x63, 0x61, 0x73, 0x74, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x52, 0x65, 0x71, 0x1a, 0x1d, 0x2e,
-	0x69, 0x6d, 0x2e, 0x63, 0x6f, 0x6d, 0x65, 0x74, 0x2e, 0x42, 0x72, 0x6f, 0x61, 0x64, 0x63, 0x61,
-	0x73, 0x74, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x12, 0x40, 0x0a, 0x0a,
-	0x4a, 0x6f, 0x69, 0x6e, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x73, 0x12, 0x17, 0x2e, 0x69, 0x6d, 0x2e,
-	0x63, 0x6f, 0x6d, 0x65, 0x74, 0x2e, 0x4a, 0x6f, 0x69, 0x6e, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x73,
-	0x52, 0x65, 0x71, 0x1a, 0x19, 0x2e, 0x69, 0x6d, 0x2e, 0x63, 0x6f, 0x6d, 0x65, 0x74, 0x2e, 0x4a,
-	0x6f, 0x69, 0x6e, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x73, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x12, 0x43,
-	0x0a, 0x0b, 0x4c, 0x65, 0x61, 0x76, 0x65, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x73, 0x12, 0x18, 0x2e,
-	0x69, 0x6d, 0x2e, 0x63, 0x6f, 0x6d, 0x65, 0x74, 0x2e, 0x4c, 0x65, 0x61, 0x76, 0x65, 0x47, 0x72,
-	0x6f, 0x75, 0x70, 0x73, 0x52, 0x65, 0x71, 0x1a, 0x1a, 0x2e, 0x69, 0x6d, 0x2e, 0x63, 0x6f, 0x6d,
-	0x65, 0x74, 0x2e, 0x4c, 0x65, 0x61, 0x76, 0x65, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x73, 0x52, 0x65,
-	0x70, 0x6c, 0x79, 0x12, 0x3d, 0x0a, 0x09, 0x44, 0x65, 0x6c, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x73,
-	0x12, 0x16, 0x2e, 0x69, 0x6d, 0x2e, 0x63, 0x6f, 0x6d, 0x65, 0x74, 0x2e, 0x44, 0x65, 0x6c, 0x47,
-	0x72, 0x6f, 0x75, 0x70, 0x73, 0x52, 0x65, 0x71, 0x1a, 0x18, 0x2e, 0x69, 0x6d, 0x2e, 0x63, 0x6f,
-	0x6d, 0x65, 0x74, 0x2e, 0x44, 0x65, 0x6c, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x73, 0x52, 0x65, 0x70,
-	0x6c, 0x79, 0x42, 0x26, 0x5a, 0x24, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d,
-	0x2f, 0x74, 0x78, 0x63, 0x68, 0x61, 0x74, 0x2f, 0x69, 0x6d, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x63,
-	0x6f, 0x6d, 0x65, 0x74, 0x3b, 0x63, 0x6f, 0x6d, 0x65, 0x74, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74,
-	0x6f, 0x33,
+	0x74, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x12, 0x3d, 0x0a, 0x09, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x43,
+	0x61, 0x73, 0x74, 0x12, 0x16, 0x2e, 0x69, 0x6d, 0x2e, 0x63, 0x6f, 0x6d, 0x65, 0x74, 0x2e, 0x47,
+	0x72, 0x6f, 0x75, 0x70, 0x43, 0x61, 0x73, 0x74, 0x52, 0x65, 0x71, 0x1a, 0x18, 0x2e, 0x69, 0x6d,
+	0x2e, 0x63, 0x6f, 0x6d, 0x65, 0x74, 0x2e, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x43, 0x61, 0x73, 0x74,
+	0x52, 0x65, 0x70, 0x6c, 0x79, 0x12, 0x40, 0x0a, 0x0a, 0x4a, 0x6f, 0x69, 0x6e, 0x47, 0x72, 0x6f,
+	0x75, 0x70, 0x73, 0x12, 0x17, 0x2e, 0x69, 0x6d, 0x2e, 0x63, 0x6f, 0x6d, 0x65, 0x74, 0x2e, 0x4a,
+	0x6f, 0x69, 0x6e, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x73, 0x52, 0x65, 0x71, 0x1a, 0x19, 0x2e, 0x69,
+	0x6d, 0x2e, 0x63, 0x6f, 0x6d, 0x65, 0x74, 0x2e, 0x4a, 0x6f, 0x69, 0x6e, 0x47, 0x72, 0x6f, 0x75,
+	0x70, 0x73, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x12, 0x43, 0x0a, 0x0b, 0x4c, 0x65, 0x61, 0x76, 0x65,
+	0x47, 0x72, 0x6f, 0x75, 0x70, 0x73, 0x12, 0x18, 0x2e, 0x69, 0x6d, 0x2e, 0x63, 0x6f, 0x6d, 0x65,
+	0x74, 0x2e, 0x4c, 0x65, 0x61, 0x76, 0x65, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x73, 0x52, 0x65, 0x71,
+	0x1a, 0x1a, 0x2e, 0x69, 0x6d, 0x2e, 0x63, 0x6f, 0x6d, 0x65, 0x74, 0x2e, 0x4c, 0x65, 0x61, 0x76,
+	0x65, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x73, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x12, 0x3d, 0x0a, 0x09,
+	0x44, 0x65, 0x6c, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x73, 0x12, 0x16, 0x2e, 0x69, 0x6d, 0x2e, 0x63,
+	0x6f, 0x6d, 0x65, 0x74, 0x2e, 0x44, 0x65, 0x6c, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x73, 0x52, 0x65,
+	0x71, 0x1a, 0x18, 0x2e, 0x69, 0x6d, 0x2e, 0x63, 0x6f, 0x6d, 0x65, 0x74, 0x2e, 0x44, 0x65, 0x6c,
+	0x47, 0x72, 0x6f, 0x75, 0x70, 0x73, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x42, 0x26, 0x5a, 0x24, 0x67,
+	0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x74, 0x78, 0x63, 0x68, 0x61, 0x74,
+	0x2f, 0x69, 0x6d, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x63, 0x6f, 0x6d, 0x65, 0x74, 0x3b, 0x63, 0x6f,
+	0x6d, 0x65, 0x74, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -838,48 +643,43 @@ func file_comet_comet_proto_rawDescGZIP() []byte {
 	return file_comet_comet_proto_rawDescData
 }
 
-var file_comet_comet_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
+var file_comet_comet_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
 var file_comet_comet_proto_goTypes = []interface{}{
-	(*AuthMsg)(nil),             // 0: im.comet.AuthMsg
-	(*SyncMsg)(nil),             // 1: im.comet.SyncMsg
-	(*Empty)(nil),               // 2: im.comet.Empty
-	(*PushMsgReq)(nil),          // 3: im.comet.PushMsgReq
-	(*PushMsgReply)(nil),        // 4: im.comet.PushMsgReply
-	(*BroadcastReq)(nil),        // 5: im.comet.BroadcastReq
-	(*BroadcastReply)(nil),      // 6: im.comet.BroadcastReply
-	(*BroadcastGroupReq)(nil),   // 7: im.comet.BroadcastGroupReq
-	(*BroadcastGroupReply)(nil), // 8: im.comet.BroadcastGroupReply
-	(*JoinGroupsReq)(nil),       // 9: im.comet.JoinGroupsReq
-	(*JoinGroupsReply)(nil),     // 10: im.comet.JoinGroupsReply
-	(*LeaveGroupsReq)(nil),      // 11: im.comet.LeaveGroupsReq
-	(*LeaveGroupsReply)(nil),    // 12: im.comet.LeaveGroupsReply
-	(*DelGroupsReq)(nil),        // 13: im.comet.DelGroupsReq
-	(*DelGroupsReply)(nil),      // 14: im.comet.DelGroupsReply
-	nil,                         // 15: im.comet.PushMsgReply.IndexEntry
-	(*protocol.Proto)(nil),      // 16: im.protocol.Proto
+	(*ListCastReq)(nil),      // 0: im.comet.ListCastReq
+	(*ListCastReply)(nil),    // 1: im.comet.ListCastReply
+	(*GroupCastReq)(nil),     // 2: im.comet.GroupCastReq
+	(*GroupCastReply)(nil),   // 3: im.comet.GroupCastReply
+	(*BroadcastReq)(nil),     // 4: im.comet.BroadcastReq
+	(*BroadcastReply)(nil),   // 5: im.comet.BroadcastReply
+	(*JoinGroupsReq)(nil),    // 6: im.comet.JoinGroupsReq
+	(*JoinGroupsReply)(nil),  // 7: im.comet.JoinGroupsReply
+	(*LeaveGroupsReq)(nil),   // 8: im.comet.LeaveGroupsReq
+	(*LeaveGroupsReply)(nil), // 9: im.comet.LeaveGroupsReply
+	(*DelGroupsReq)(nil),     // 10: im.comet.DelGroupsReq
+	(*DelGroupsReply)(nil),   // 11: im.comet.DelGroupsReply
+	(*protocol.Proto)(nil),   // 12: im.protocol.Proto
 }
 var file_comet_comet_proto_depIdxs = []int32{
-	16, // 0: im.comet.PushMsgReq.proto:type_name -> im.protocol.Proto
-	15, // 1: im.comet.PushMsgReply.index:type_name -> im.comet.PushMsgReply.IndexEntry
-	16, // 2: im.comet.BroadcastReq.proto:type_name -> im.protocol.Proto
-	16, // 3: im.comet.BroadcastGroupReq.proto:type_name -> im.protocol.Proto
-	3,  // 4: im.comet.Comet.PushMsg:input_type -> im.comet.PushMsgReq
-	5,  // 5: im.comet.Comet.Broadcast:input_type -> im.comet.BroadcastReq
-	7,  // 6: im.comet.Comet.BroadcastGroup:input_type -> im.comet.BroadcastGroupReq
-	9,  // 7: im.comet.Comet.JoinGroups:input_type -> im.comet.JoinGroupsReq
-	11, // 8: im.comet.Comet.LeaveGroups:input_type -> im.comet.LeaveGroupsReq
-	13, // 9: im.comet.Comet.DelGroups:input_type -> im.comet.DelGroupsReq
-	4,  // 10: im.comet.Comet.PushMsg:output_type -> im.comet.PushMsgReply
-	6,  // 11: im.comet.Comet.Broadcast:output_type -> im.comet.BroadcastReply
-	8,  // 12: im.comet.Comet.BroadcastGroup:output_type -> im.comet.BroadcastGroupReply
-	10, // 13: im.comet.Comet.JoinGroups:output_type -> im.comet.JoinGroupsReply
-	12, // 14: im.comet.Comet.LeaveGroups:output_type -> im.comet.LeaveGroupsReply
-	14, // 15: im.comet.Comet.DelGroups:output_type -> im.comet.DelGroupsReply
-	10, // [10:16] is the sub-list for method output_type
-	4,  // [4:10] is the sub-list for method input_type
-	4,  // [4:4] is the sub-list for extension type_name
-	4,  // [4:4] is the sub-list for extension extendee
-	0,  // [0:4] is the sub-list for field type_name
+	12, // 0: im.comet.ListCastReq.proto:type_name -> im.protocol.Proto
+	12, // 1: im.comet.GroupCastReq.proto:type_name -> im.protocol.Proto
+	12, // 2: im.comet.BroadcastReq.proto:type_name -> im.protocol.Proto
+	0,  // 3: im.comet.Comet.ListCast:input_type -> im.comet.ListCastReq
+	4,  // 4: im.comet.Comet.Broadcast:input_type -> im.comet.BroadcastReq
+	2,  // 5: im.comet.Comet.GroupCast:input_type -> im.comet.GroupCastReq
+	6,  // 6: im.comet.Comet.JoinGroups:input_type -> im.comet.JoinGroupsReq
+	8,  // 7: im.comet.Comet.LeaveGroups:input_type -> im.comet.LeaveGroupsReq
+	10, // 8: im.comet.Comet.DelGroups:input_type -> im.comet.DelGroupsReq
+	1,  // 9: im.comet.Comet.ListCast:output_type -> im.comet.ListCastReply
+	5,  // 10: im.comet.Comet.Broadcast:output_type -> im.comet.BroadcastReply
+	3,  // 11: im.comet.Comet.GroupCast:output_type -> im.comet.GroupCastReply
+	7,  // 12: im.comet.Comet.JoinGroups:output_type -> im.comet.JoinGroupsReply
+	9,  // 13: im.comet.Comet.LeaveGroups:output_type -> im.comet.LeaveGroupsReply
+	11, // 14: im.comet.Comet.DelGroups:output_type -> im.comet.DelGroupsReply
+	9,  // [9:15] is the sub-list for method output_type
+	3,  // [3:9] is the sub-list for method input_type
+	3,  // [3:3] is the sub-list for extension type_name
+	3,  // [3:3] is the sub-list for extension extendee
+	0,  // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_comet_comet_proto_init() }
@@ -889,7 +689,7 @@ func file_comet_comet_proto_init() {
 	}
 	if !protoimpl.UnsafeEnabled {
 		file_comet_comet_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*AuthMsg); i {
+			switch v := v.(*ListCastReq); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -901,7 +701,7 @@ func file_comet_comet_proto_init() {
 			}
 		}
 		file_comet_comet_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*SyncMsg); i {
+			switch v := v.(*ListCastReply); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -913,7 +713,7 @@ func file_comet_comet_proto_init() {
 			}
 		}
 		file_comet_comet_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Empty); i {
+			switch v := v.(*GroupCastReq); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -925,7 +725,7 @@ func file_comet_comet_proto_init() {
 			}
 		}
 		file_comet_comet_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*PushMsgReq); i {
+			switch v := v.(*GroupCastReply); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -937,18 +737,6 @@ func file_comet_comet_proto_init() {
 			}
 		}
 		file_comet_comet_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*PushMsgReply); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_comet_comet_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*BroadcastReq); i {
 			case 0:
 				return &v.state
@@ -960,7 +748,7 @@ func file_comet_comet_proto_init() {
 				return nil
 			}
 		}
-		file_comet_comet_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
+		file_comet_comet_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*BroadcastReply); i {
 			case 0:
 				return &v.state
@@ -972,31 +760,7 @@ func file_comet_comet_proto_init() {
 				return nil
 			}
 		}
-		file_comet_comet_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*BroadcastGroupReq); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_comet_comet_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*BroadcastGroupReply); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_comet_comet_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
+		file_comet_comet_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*JoinGroupsReq); i {
 			case 0:
 				return &v.state
@@ -1008,7 +772,7 @@ func file_comet_comet_proto_init() {
 				return nil
 			}
 		}
-		file_comet_comet_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
+		file_comet_comet_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*JoinGroupsReply); i {
 			case 0:
 				return &v.state
@@ -1020,7 +784,7 @@ func file_comet_comet_proto_init() {
 				return nil
 			}
 		}
-		file_comet_comet_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
+		file_comet_comet_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*LeaveGroupsReq); i {
 			case 0:
 				return &v.state
@@ -1032,7 +796,7 @@ func file_comet_comet_proto_init() {
 				return nil
 			}
 		}
-		file_comet_comet_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
+		file_comet_comet_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*LeaveGroupsReply); i {
 			case 0:
 				return &v.state
@@ -1044,7 +808,7 @@ func file_comet_comet_proto_init() {
 				return nil
 			}
 		}
-		file_comet_comet_proto_msgTypes[13].Exporter = func(v interface{}, i int) interface{} {
+		file_comet_comet_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*DelGroupsReq); i {
 			case 0:
 				return &v.state
@@ -1056,7 +820,7 @@ func file_comet_comet_proto_init() {
 				return nil
 			}
 		}
-		file_comet_comet_proto_msgTypes[14].Exporter = func(v interface{}, i int) interface{} {
+		file_comet_comet_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*DelGroupsReply); i {
 			case 0:
 				return &v.state
@@ -1075,7 +839,7 @@ func file_comet_comet_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_comet_comet_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   16,
+			NumMessages:   12,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

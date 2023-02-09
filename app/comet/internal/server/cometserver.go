@@ -19,19 +19,19 @@ func NewCometServer(svcCtx *svc.ServiceContext) *CometServer {
 	}
 }
 
-func (s *CometServer) PushMsg(ctx context.Context, in *comet.PushMsgReq) (*comet.PushMsgReply, error) {
-	l := logic.NewPushMsgLogic(ctx, s.svcCtx)
-	return l.PushMsg(in)
+func (s *CometServer) ListCast(ctx context.Context, in *comet.ListCastReq) (*comet.ListCastReply, error) {
+	l := logic.NewListCastLogic(ctx, s.svcCtx)
+	return l.ListCast(in)
+}
+
+func (s *CometServer) GroupCast(ctx context.Context, in *comet.GroupCastReq) (*comet.GroupCastReply, error) {
+	l := logic.NewGroupCastLogic(ctx, s.svcCtx)
+	return l.GroupCast(in)
 }
 
 func (s *CometServer) Broadcast(ctx context.Context, in *comet.BroadcastReq) (*comet.BroadcastReply, error) {
 	l := logic.NewBroadcastLogic(ctx, s.svcCtx)
 	return l.Broadcast(in)
-}
-
-func (s *CometServer) BroadcastGroup(ctx context.Context, in *comet.BroadcastGroupReq) (*comet.BroadcastGroupReply, error) {
-	l := logic.NewBroadcastGroupLogic(ctx, s.svcCtx)
-	return l.BroadcastGroup(in)
 }
 
 func (s *CometServer) JoinGroups(ctx context.Context, in *comet.JoinGroupsReq) (*comet.JoinGroupsReply, error) {
