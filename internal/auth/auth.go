@@ -19,5 +19,5 @@ func Load(name string) (CreateFunc, error) {
 }
 
 type Auth interface {
-	DoAuth(token string, ext []byte) (string, string, error)
+	DoAuth(token string, ext []byte) (string, error)
 }

@@ -30,17 +30,35 @@ type EndpointRejectResp struct {
 	} `json:"data"`
 }
 
-func errorMetaData(respData *AuthErrorDataReconnectNotAllowed) (string, error) {
-	data, err := proto.Marshal(&signal.SignalEndpointLogin{
-		Uuid:       respData.Message.Uuid,
-		Device:     auth.Device(respData.Message.Device),
-		DeviceName: respData.Message.DeviceName,
-		Datetime:   uint64(respData.Message.Datetime),
-	})
+type ErrorReject signal.SignalEndpointLogin
+
+func (e *ErrorReject) Error() string {
+	return "reconnect not be allowed code -1016"
+}
+
+func (e *ErrorReject) Domain() string {
+	return Name
+}
+
+func (e *ErrorReject) Encoding() (string, error) {
+	data, err := proto.Marshal((*signal.SignalEndpointLogin)(e))
 	if err != nil {
 		return "", err
 	}
 	return base64.StdEncoding.EncodeToString(data), nil
+}
+
+func errorDetail(respData *AuthErrorDataReconnectNotAllowed) *ErrorReject {
+	return &ErrorReject{
+		Uuid:       respData.Message.Uuid,
+		Device:     auth.Device(respData.Message.Device),
+		DeviceName: respData.Message.DeviceName,
+		Datetime:   uint64(respData.Message.Datetime),
+	}
+}
+
+func DecodingErrorReject(src string) ([]byte, error) {
+	return base64.StdEncoding.DecodeString(src)
 }
 
 type talkClient struct {
@@ -48,7 +66,7 @@ type talkClient struct {
 	timeout time.Duration
 }
 
-func (a *talkClient) DoAuth(token string, ext []byte) (uid, errMsg string, err error) {
+func (a *talkClient) DoAuth(token string, ext []byte) (uid string, err error) {
 	var (
 		bytes     []byte
 		strParams string
@@ -60,7 +78,7 @@ func (a *talkClient) DoAuth(token string, ext []byte) (uid, errMsg string, err e
 		var device auth.Login
 		err = proto.Unmarshal(ext, &device)
 		if err != nil {
-			return "", "", err
+			return "", err
 		}
 
 		headers["FZM-UUID"] = device.Uuid
@@ -72,7 +90,7 @@ func (a *talkClient) DoAuth(token string, ext []byte) (uid, errMsg string, err e
 		}
 		reqData, err := json.Marshal(reqBody)
 		if err != nil {
-			return "", "", err
+			return "", err
 		}
 		strParams = string(reqData)
 	}
@@ -102,23 +120,16 @@ func (a *talkClient) DoAuth(token string, ext []byte) (uid, errMsg string, err e
 			err = errors.New("invalid auth success data")
 			return
 		}
-		errMsg = ""
 		uid = success.Address
 	case -1016:
 		var errNotAllowed AuthErrorDataReconnectNotAllowed
 		if err = mapstructure.Decode(res.Data, &errNotAllowed); err != nil {
 			return
 		}
-		emsg := ""
-		if emsg, err = errorMetaData(&errNotAllowed); err != nil {
-			return
-		}
-		errMsg = emsg
-		err = errors.New(res.Message)
+		err = errorDetail(&errNotAllowed)
 	default:
-		errMsg = ""
 		err = errors.New(res.Message)
 	}
-	log.Debug().Str("errMsg", errMsg).Interface("err", err).Msg("auth reply code")
+	log.Debug().Interface("err", err).Msg("auth reply code")
 	return
 }

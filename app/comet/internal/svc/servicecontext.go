@@ -17,9 +17,6 @@ import (
 	"github.com/txchat/im/internal/comet"
 	"github.com/zeromicro/go-zero/zrpc"
 	"github.com/zhenjl/cityhash"
-	"google.golang.org/genproto/googleapis/rpc/errdetails"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 type ServiceContext struct {
@@ -95,27 +92,16 @@ func (s *ServiceContext) RandServerHeartbeat() time.Duration {
 }
 
 // Connect connected a connection.
-func (s *ServiceContext) Connect(c context.Context, p *protocol.Proto) (key string, hb time.Duration, errMsg string, err error) {
+func (s *ServiceContext) Connect(c context.Context, p *protocol.Proto) (key string, hb time.Duration, err error) {
 	reply, err := s.LogicRPC.Connect(c, &logicclient.ConnectReq{
 		Server: s.serverID,
 		Proto:  p,
 	})
 	if err != nil {
-		errStatus, ok := status.FromError(err)
-		if !ok {
-			return
-		}
-		if errStatus.Code() == codes.Unauthenticated {
-			for _, detail := range errStatus.Details() {
-				if d, ok := detail.(*errdetails.ErrorInfo); ok && d.GetReason() == "DEVICE_REJECT" {
-					errMsg = d.Metadata["resp_data"]
-				}
-			}
-		}
 		return
 	}
 
-	return reply.Key, time.Duration(reply.Heartbeat), errMsg, nil
+	return reply.Key, time.Duration(reply.Heartbeat), nil
 }
 
 // Disconnect disconnected a connection.

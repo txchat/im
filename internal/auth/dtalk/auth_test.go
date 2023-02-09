@@ -5,6 +5,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/txchat/imparse/proto/signal"
+
 	"github.com/golang/protobuf/proto"
 	authProto "github.com/txchat/imparse/proto/auth"
 	"github.com/txchat/pkg/auth"
@@ -38,10 +41,9 @@ func Test_talkClient_DoAuthReConnect(t *testing.T) {
 		DeviceName:  "虚拟驱动测试",
 	}
 	extData, _ := proto.Marshal(devInfo)
-	gotUid, gotErrMsg, err := a.DoAuth(token, extData)
+	gotUid, err := a.DoAuth(token, extData)
 	t.Log(err)
 	t.Log(gotUid)
-	t.Log(gotErrMsg)
 }
 
 func Test_talkClient_DoAuthReConnect2(t *testing.T) {
@@ -63,10 +65,9 @@ func Test_talkClient_DoAuthReConnect2(t *testing.T) {
 	authenticator := auth.NewDefaultAPIAuthenticator()
 	token := authenticator.Request("", pubKey, privKey)
 
-	gotUid, gotErrMsg, err := a.DoAuth(token, nil)
+	gotUid, err := a.DoAuth(token, nil)
 	t.Log(err)
 	t.Log(gotUid)
-	t.Log(gotErrMsg)
 }
 
 func Test_talkClient_DoAuthConnect(t *testing.T) {
@@ -97,8 +98,39 @@ func Test_talkClient_DoAuthConnect(t *testing.T) {
 		DeviceName:  "虚拟驱动",
 	}
 	extData, _ := proto.Marshal(devInfo)
-	gotUid, gotErrMsg, err := a.DoAuth(token, extData)
+	gotUid, err := a.DoAuth(token, extData)
 	t.Log(err)
 	t.Log(gotUid)
-	t.Log(gotErrMsg)
+}
+
+func TestErrorReject_Encoding(t *testing.T) {
+	s := &signal.SignalEndpointLogin{
+		Datetime:   0,
+		Device:     0,
+		DeviceName: "test device",
+		Uuid:       "123456789",
+	}
+	respData := &AuthErrorDataReconnectNotAllowed{
+		Code: 0,
+		Message: struct {
+			Datetime   int64  `json:"datetime"`
+			Device     int    `json:"device"`
+			DeviceName string `json:"deviceName"`
+			Uuid       string `json:"uuid"`
+		}{
+			Datetime:   0,
+			Device:     0,
+			DeviceName: "test device",
+			Uuid:       "123456789",
+		},
+		Service: "",
+	}
+	e := errorDetail(respData)
+	srcStr, err := e.Encoding()
+	assert.Nil(t, err)
+	decoded, err := DecodingErrorReject(srcStr)
+	assert.Nil(t, err)
+	data, err := proto.Marshal(s)
+	assert.Nil(t, err)
+	assert.Equal(t, data, decoded)
 }

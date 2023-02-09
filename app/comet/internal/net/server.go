@@ -2,7 +2,6 @@ package net
 
 import (
 	"context"
-	"encoding/base64"
 	"errors"
 	"fmt"
 	"io"
@@ -11,6 +10,8 @@ import (
 	"runtime"
 	"strings"
 	"time"
+
+	"github.com/txchat/im/internal/auth"
 
 	"github.com/Terry-Mao/goim/pkg/bytes"
 	xtime "github.com/Terry-Mao/goim/pkg/time"
@@ -247,7 +248,9 @@ func (s *CometServer) Serve(cometConn Conn, conn net.Conn, rp, wp *bytes.Pool, t
 
 // auth for goim handshake with client, use rsa & aes.
 func (s *CometServer) auth(ctx context.Context, conn Conn, p *protocol.Proto) (key string, hb time.Duration, err error) {
-reauth:
+auth:
+	var authReplyBody []byte
+	success := true
 	for {
 		if err = conn.ReadProto(p); err != nil {
 			return
@@ -257,34 +260,24 @@ reauth:
 		}
 		log.Error().Int32("operation", p.Op).Msg("comet conn request operation not auth")
 	}
-	var errMsg string
-	if key, hb, errMsg, err = s.svcCtx.Connect(ctx, p); err != nil {
-		if errMsg != "" {
-			//error result
-			log.Debug().Str("errMsg", errMsg).Msg("Connect reject")
-			var body []byte
-			body, err = base64.StdEncoding.DecodeString(errMsg)
-			if err != nil {
-				log.Error().Err(err).Str("errMsg", errMsg).Msg("base64 Decode errMsg String failed")
-				return
-			}
-			p.Op = int32(protocol.Op_AuthReply)
-			p.Body = body
-			if err = conn.WriteProto(p); err != nil {
-				return
-			}
-			err = conn.Flush()
-			goto reauth
+	if key, hb, err = s.svcCtx.Connect(ctx, p); err != nil {
+		success = false
+		// set authReplyBody
+		authReplyBody, err = auth.ParseGRPCErr(err)
+		if err != nil {
+			return
 		}
-		log.Error().Err(err).Msg("can not call logic.Connect")
-		return
 	}
 	p.Op = int32(protocol.Op_AuthReply)
-	p.Body = nil
+	p.Ack = p.Seq
+	p.Body = authReplyBody
 	if err = conn.WriteProto(p); err != nil {
 		return
 	}
 	err = conn.Flush()
+	if !success {
+		goto auth
+	}
 	return
 }
 
@@ -394,6 +387,7 @@ func (s *CometServer) operate(ctx context.Context, p *protocol.Proto, ch *comet.
 			//下层业务调用失败，返回error的话会直接断开连接
 			return err
 		}
+		p.Ack = p.Seq
 		p.Op = int32(protocol.Op_SyncMsgReply)
 	default:
 		return s.svcCtx.Receive(ctx, ch.Key, p)

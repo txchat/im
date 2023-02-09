@@ -17,6 +17,7 @@ import (
 	xnet "github.com/txchat/im/app/comet/internal/net"
 	"github.com/txchat/im/app/comet/internal/server"
 	"github.com/txchat/im/app/comet/internal/svc"
+	_ "github.com/txchat/im/internal/auth/dtalk"
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/service"
 	"github.com/zeromicro/go-zero/zrpc"

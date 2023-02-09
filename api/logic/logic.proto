@@ -101,16 +101,17 @@ message DelGroupsReq {
 }
 
 service Logic {
-  rpc Connect(ConnectReq) returns (ConnectReply);   // comet
-  rpc Disconnect(DisconnectReq) returns (Reply);    // comet
-  rpc Heartbeat(HeartbeatReq) returns (Reply);      // comet
-  rpc Receive(ReceiveReq) returns (Reply);          // comet
-  rpc PushByMids(MidsMsg) returns (Reply);          // biz
-  rpc PushByKeys(KeysMsg) returns (Reply);          // biz
-  rpc PushGroup(GroupMsg) returns (Reply);          // biz
-  rpc JoinGroupsByKeys(GroupsKey) returns (Reply);  // biz
-  rpc JoinGroupsByMids(GroupsMid) returns (Reply);  // biz
-  rpc LeaveGroupsByKeys(GroupsKey) returns (Reply); // biz
-  rpc LeaveGroupsByMids(GroupsMid) returns (Reply); // biz
-  rpc DelGroups(DelGroupsReq) returns (Reply);      // biz
+  rpc Connect(ConnectReq) returns (ConnectReply); // for comet
+  rpc Disconnect(DisconnectReq) returns (Reply);  // for comet
+  rpc Heartbeat(HeartbeatReq) returns (Reply);    // for comet
+  rpc Receive(ReceiveReq) returns (Reply);        // for comet
+
+  rpc PushByMids(MidsMsg) returns (Reply);          // for biz
+  rpc PushByKeys(KeysMsg) returns (Reply);          // for biz
+  rpc PushGroup(GroupMsg) returns (Reply);          // for biz
+  rpc JoinGroupsByKeys(GroupsKey) returns (Reply);  // for biz
+  rpc JoinGroupsByMids(GroupsMid) returns (Reply);  // for biz
+  rpc LeaveGroupsByKeys(GroupsKey) returns (Reply); // for biz
+  rpc LeaveGroupsByMids(GroupsMid) returns (Reply); // for biz
+  rpc DelGroups(DelGroupsReq) returns (Reply);      // for biz
 }
