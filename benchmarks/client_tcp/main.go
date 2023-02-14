@@ -20,7 +20,6 @@ import (
 	"time"
 
 	"github.com/golang/protobuf/proto"
-	"github.com/txchat/im/api/comet"
 	"github.com/txchat/im/api/protocol"
 )
 
@@ -78,9 +77,9 @@ func result() {
 	}
 }
 
-func client(mid int64) {
+func client(uid int64) {
 	for {
-		startClient(mid)
+		startClient(uid)
 		time.Sleep(time.Duration(rand.Intn(10)) * time.Second)
 	}
 }
@@ -102,7 +101,7 @@ func startClient(key int64) {
 	seq := int32(0)
 	wr := bufio.NewWriter(conn)
 	rd := bufio.NewReader(conn)
-	authMsg := &comet.AuthMsg{
+	authMsg := &protocol.AuthBody{
 		AppId: "echo",
 		Token: "fdasfdsaf",
 	}

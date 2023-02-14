@@ -43,42 +43,42 @@ func (s *LogicServer) Receive(ctx context.Context, in *xlogic.ReceiveReq) (*xlog
 	return l.Receive(in)
 }
 
-func (s *LogicServer) PushByMids(ctx context.Context, in *xlogic.MidsMsg) (*xlogic.Reply, error) {
-	l := logic.NewPushByMidsLogic(ctx, s.svcCtx)
-	return l.PushByMids(in)
+func (s *LogicServer) PushByUID(ctx context.Context, in *xlogic.PushByUIDReq) (*xlogic.Reply, error) {
+	l := logic.NewPushByUIDLogic(ctx, s.svcCtx)
+	return l.PushByUID(in)
 }
 
-func (s *LogicServer) PushByKeys(ctx context.Context, in *xlogic.KeysMsg) (*xlogic.Reply, error) {
-	l := logic.NewPushByKeysLogic(ctx, s.svcCtx)
-	return l.PushByKeys(in)
+func (s *LogicServer) PushByKey(ctx context.Context, in *xlogic.PushByKeyReq) (*xlogic.Reply, error) {
+	l := logic.NewPushByKeyLogic(ctx, s.svcCtx)
+	return l.PushByKey(in)
 }
 
-func (s *LogicServer) PushGroup(ctx context.Context, in *xlogic.GroupMsg) (*xlogic.Reply, error) {
+func (s *LogicServer) PushGroup(ctx context.Context, in *xlogic.PushGroupReq) (*xlogic.Reply, error) {
 	l := logic.NewPushGroupLogic(ctx, s.svcCtx)
 	return l.PushGroup(in)
 }
 
-func (s *LogicServer) JoinGroupsByKeys(ctx context.Context, in *xlogic.GroupsKey) (*xlogic.Reply, error) {
-	l := logic.NewJoinGroupsByKeysLogic(ctx, s.svcCtx)
-	return l.JoinGroupsByKeys(in)
+func (s *LogicServer) JoinGroupByKey(ctx context.Context, in *xlogic.JoinGroupByKeyReq) (*xlogic.Reply, error) {
+	l := logic.NewJoinGroupByKeyLogic(ctx, s.svcCtx)
+	return l.JoinGroupByKey(in)
 }
 
-func (s *LogicServer) JoinGroupsByMids(ctx context.Context, in *xlogic.GroupsMid) (*xlogic.Reply, error) {
-	l := logic.NewJoinGroupsByMidsLogic(ctx, s.svcCtx)
-	return l.JoinGroupsByMids(in)
+func (s *LogicServer) JoinGroupByUID(ctx context.Context, in *xlogic.JoinGroupByUIDReq) (*xlogic.Reply, error) {
+	l := logic.NewJoinGroupByUIDLogic(ctx, s.svcCtx)
+	return l.JoinGroupByUID(in)
 }
 
-func (s *LogicServer) LeaveGroupsByKeys(ctx context.Context, in *xlogic.GroupsKey) (*xlogic.Reply, error) {
-	l := logic.NewLeaveGroupsByKeysLogic(ctx, s.svcCtx)
-	return l.LeaveGroupsByKeys(in)
+func (s *LogicServer) LeaveGroupByKey(ctx context.Context, in *xlogic.LeaveGroupByKeyReq) (*xlogic.Reply, error) {
+	l := logic.NewLeaveGroupByKeyLogic(ctx, s.svcCtx)
+	return l.LeaveGroupByKey(in)
 }
 
-func (s *LogicServer) LeaveGroupsByMids(ctx context.Context, in *xlogic.GroupsMid) (*xlogic.Reply, error) {
-	l := logic.NewLeaveGroupsByMidsLogic(ctx, s.svcCtx)
-	return l.LeaveGroupsByMids(in)
+func (s *LogicServer) LeaveGroupByUID(ctx context.Context, in *xlogic.LeaveGroupByUIDReq) (*xlogic.Reply, error) {
+	l := logic.NewLeaveGroupByUIDLogic(ctx, s.svcCtx)
+	return l.LeaveGroupByUID(in)
 }
 
-func (s *LogicServer) DelGroups(ctx context.Context, in *xlogic.DelGroupsReq) (*xlogic.Reply, error) {
-	l := logic.NewDelGroupsLogic(ctx, s.svcCtx)
-	return l.DelGroups(in)
+func (s *LogicServer) DelGroup(ctx context.Context, in *xlogic.DelGroupReq) (*xlogic.Reply, error) {
+	l := logic.NewDelGroupLogic(ctx, s.svcCtx)
+	return l.DelGroup(in)
 }

@@ -8,7 +8,6 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/google/uuid"
-	"github.com/rs/zerolog/log"
 	"github.com/txchat/im/api/logic"
 	"github.com/txchat/im/api/protocol"
 	"github.com/txchat/im/app/logic/internal/svc"
@@ -32,19 +31,21 @@ func NewConnectLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ConnectLo
 
 // Connect connected a conn.
 func (l *ConnectLogic) Connect(in *logic.ConnectReq) (*logic.ConnectReply, error) {
-	mid, appId, key, hb, err := l.connect(l.ctx, in.GetServer(), in.GetProto())
+	uid, appId, key, hb, err := l.connect(l.ctx, in.GetServer(), in.GetProto())
 	if err != nil {
+		l.Error("client connect failed", "err", err, "key", key, "uid", uid, "appId", appId, "comet server", in.GetServer())
 		return &logic.ConnectReply{}, auth.ToGRPCErr(err)
 	}
+	l.Info("client connected", "key", key, "uid", uid, "appId", appId, "comet server", in.GetServer())
 	return &logic.ConnectReply{
 		Key:       key,
 		AppId:     appId,
-		Mid:       mid,
+		Uid:       uid,
 		Heartbeat: hb,
 	}, nil
 }
 
-func (l *ConnectLogic) connect(c context.Context, server string, p *protocol.Proto) (mid string, appId string, key string, hb int64, err error) {
+func (l *ConnectLogic) connect(c context.Context, server string, p *protocol.Proto) (uid string, appId string, key string, hb int64, err error) {
 	var (
 		authBody protocol.AuthBody
 		bytes    []byte
@@ -65,23 +66,22 @@ func (l *ConnectLogic) connect(c context.Context, server string, p *protocol.Pro
 		return
 	}
 
-	mid, err = authExec.DoAuth(authBody.Token, authBody.Ext)
+	uid, err = authExec.DoAuth(authBody.Token, authBody.Ext)
 	if err != nil {
 		return
 	}
 
 	hb = int64(l.svcCtx.Config.Node.Heartbeat) * int64(l.svcCtx.Config.Node.HeartbeatMax)
 	key = uuid.New().String() //连接标识
-	if err = l.svcCtx.Repo.AddMapping(c, mid, appId, key, server); err != nil {
-		log.Error().Err(err).Msg(fmt.Sprintf("l.dao.AddMapping(%s,%s,%s) error", mid, key, server))
+	if err = l.svcCtx.Repo.AddMapping(c, uid, appId, key, server); err != nil {
+		l.Error(fmt.Sprintf("l.dao.AddMapping(%s,%s,%s) error", uid, key, server), "err", err)
 		return
 	}
-	log.Info().Str("key", key).Str("mid", mid).Str("appId", appId).Str("comet", server).Msg("conn connected")
 	// notify biz user connected
 	bytes, err = proto.Marshal(p)
 	if err != nil {
 		return
 	}
-	err = l.svcCtx.PublishMsg(c, appId, mid, protocol.Op_Auth, key, bytes)
+	err = l.svcCtx.PublishConnection(c, appId, uid, protocol.Op_Auth, key, bytes)
 	return
 }

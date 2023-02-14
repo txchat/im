@@ -11,8 +11,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/txchat/im/internal/auth"
-
 	"github.com/Terry-Mao/goim/pkg/bytes"
 	xtime "github.com/Terry-Mao/goim/pkg/time"
 	"github.com/Terry-Mao/goim/pkg/websocket"
@@ -20,6 +18,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/txchat/im/api/protocol"
 	"github.com/txchat/im/app/comet/internal/svc"
+	"github.com/txchat/im/internal/auth"
 	"github.com/txchat/im/internal/comet"
 )
 

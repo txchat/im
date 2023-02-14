@@ -12,22 +12,22 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-type DelGroupsLogic struct {
+type DelGroupLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 	logx.Logger
 }
 
-func NewDelGroupsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DelGroupsLogic {
-	return &DelGroupsLogic{
+func NewDelGroupLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DelGroupLogic {
+	return &DelGroupLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
 		Logger: logx.WithContext(ctx),
 	}
 }
 
-func (l *DelGroupsLogic) DelGroups(in *logic.DelGroupsReq) (*logic.Reply, error) {
-	reply, err := l.delGroups(l.ctx, in.GetAppId(), in.GetGid())
+func (l *DelGroupLogic) DelGroup(in *logic.DelGroupReq) (*logic.Reply, error) {
+	reply, err := l.delGroup(l.ctx, in.GetAppId(), in.GetGid())
 	if err != nil {
 		return nil, err
 	}
@@ -38,16 +38,15 @@ func (l *DelGroupsLogic) DelGroups(in *logic.DelGroupsReq) (*logic.Reply, error)
 	return &logic.Reply{IsOk: true, Msg: msg}, nil
 }
 
-// DelGroups Push push a biz message to client.
-func (l *DelGroupsLogic) delGroups(ctx context.Context, appId string, gids []string) (reply *comet.DelGroupsReply, err error) {
-	servers, err := l.svcCtx.Repo.ServersByGids(ctx, appId, gids)
+func (l *DelGroupLogic) delGroup(ctx context.Context, appId string, gid []string) (reply *comet.DelGroupsReply, err error) {
+	servers, err := l.svcCtx.Repo.ServersByGids(ctx, appId, gid)
 	if err != nil {
 		return
 	}
 
-	for server, gid := range servers {
+	for server, g := range servers {
 		reply, err = l.svcCtx.CometRPC.DelGroups(context.WithValue(ctx, model.CtxKeyTODO, server), &cometclient.DelGroupsReq{
-			Gid: l.svcCtx.CometGroupsID(appId, gid),
+			Gid: l.svcCtx.CometGroupsID(appId, g),
 		})
 		if err != nil {
 			return

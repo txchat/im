@@ -27,7 +27,8 @@ func NewPushGroupLogic(ctx context.Context, svcCtx *svc.ServiceContext) *PushGro
 	}
 }
 
-func (l *PushGroupLogic) PushGroup(in *logic.GroupMsg) (*logic.Reply, error) {
+// PushGroup push message from biz level to group clients.
+func (l *PushGroupLogic) PushGroup(in *logic.PushGroupReq) (*logic.Reply, error) {
 	reply, err := l.pushGroup(l.ctx, in.GetAppId(), in.GetGroup(), in.GetMsg())
 	if err != nil {
 		return nil, err
@@ -39,8 +40,7 @@ func (l *PushGroupLogic) PushGroup(in *logic.GroupMsg) (*logic.Reply, error) {
 	return &logic.Reply{IsOk: true, Msg: msg}, nil
 }
 
-// PushGroup Push push a biz message to client.
-func (l *PushGroupLogic) pushGroup(c context.Context, appId string, group string, msg []byte) (reply *cometclient.BroadcastGroupReply, err error) {
+func (l *PushGroupLogic) pushGroup(c context.Context, appId string, group string, msg []byte) (reply *cometclient.GroupCastReply, err error) {
 	var p protocol.Proto
 	err = proto.Unmarshal(msg, &p)
 	if err != nil {
@@ -53,7 +53,7 @@ func (l *PushGroupLogic) pushGroup(c context.Context, appId string, group string
 	}
 
 	for _, server := range servers {
-		if reply, err = l.svcCtx.CometRPC.BroadcastGroup(context.WithValue(c, model.CtxKeyTODO, server), &cometclient.BroadcastGroupReq{GroupID: l.svcCtx.CometGid(appId, group), Proto: &p}); err != nil {
+		if reply, err = l.svcCtx.CometRPC.GroupCast(context.WithValue(c, model.CtxKeyTODO, server), &cometclient.GroupCastReq{Gid: l.svcCtx.CometGid(appId, group), Proto: &p}); err != nil {
 			return
 		}
 	}

@@ -154,7 +154,7 @@ func TestDao_ServersByGid(t *testing.T) {
 	}
 }
 
-func TestDao_KeysByMids(t *testing.T) {
+func TestDao_KeysByUIDs(t *testing.T) {
 	type fields struct {
 		c           *config.Redis
 		kafkaPub    sarama.SyncProducer
@@ -164,14 +164,14 @@ func TestDao_KeysByMids(t *testing.T) {
 	type args struct {
 		c     context.Context
 		appId string
-		mids  []string
+		uids  []string
 	}
 	tests := []struct {
 		name       string
 		fields     fields
 		args       args
 		wantRess   map[string]string
-		wantOlMids []string
+		wantOlUIDs []string
 		wantErr    bool
 	}{
 		{
@@ -185,22 +185,22 @@ func TestDao_KeysByMids(t *testing.T) {
 			args: args{
 				c:     context.Background(),
 				appId: "dtalk",
-				mids:  []string{"1ygj6Un2UzL2rev6ub6NukWrGcKjW8LoG", "1LNaxM1BtkkRpWEGty8bDxmvWwRwxsCy1B", "14si8HGSBKN2B4Ps7QQJeRLvqWoXHX2NwB", ""},
+				uids:  []string{"1ygj6Un2UzL2rev6ub6NukWrGcKjW8LoG", "1LNaxM1BtkkRpWEGty8bDxmvWwRwxsCy1B", "14si8HGSBKN2B4Ps7QQJeRLvqWoXHX2NwB", ""},
 			},
 			wantRess:   nil,
-			wantOlMids: nil,
+			wantOlUIDs: nil,
 			wantErr:    false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			repo := NewLogicRepositoryRedis(*tt.fields.c)
-			gotRess, gotOlMids, err := repo.KeysByMids(tt.args.c, tt.args.appId, tt.args.mids)
+			gotRess, gotOlUIDs, err := repo.KeysByUIDs(tt.args.c, tt.args.appId, tt.args.uids)
 			if err != nil {
 				t.Error(err)
 			}
 			t.Log(gotRess)
-			t.Log(gotOlMids)
+			t.Log(gotOlUIDs)
 		})
 	}
 }

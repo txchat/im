@@ -24,6 +24,7 @@ func NewReceiveLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ReceiveLo
 	}
 }
 
+// Receive got message from user client A transfer to biz service.
 func (l *ReceiveLogic) Receive(in *logic.ReceiveReq) (*logic.Reply, error) {
 	if err := l.receive(l.ctx, in.GetKey(), in.GetProto()); err != nil {
 		return nil, err
@@ -31,9 +32,8 @@ func (l *ReceiveLogic) Receive(in *logic.ReceiveReq) (*logic.Reply, error) {
 	return &logic.Reply{IsOk: true}, nil
 }
 
-// Receive receive a message from client.
 func (l *ReceiveLogic) receive(c context.Context, key string, p *protocol.Proto) error {
-	appId, mid, err := l.svcCtx.Repo.GetMember(c, key)
+	appId, uid, err := l.svcCtx.Repo.GetMember(c, key)
 	if err != nil {
 		return err
 	}
@@ -42,5 +42,5 @@ func (l *ReceiveLogic) receive(c context.Context, key string, p *protocol.Proto)
 	if err != nil {
 		return err
 	}
-	return l.svcCtx.PublishMsg(c, appId, mid, protocol.Op(p.Op), key, msg)
+	return l.svcCtx.PublishReceiveMessage(c, appId, uid, key, msg)
 }

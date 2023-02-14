@@ -47,22 +47,37 @@ func loadApps(c config.Config, svc *ServiceContext) {
 	}
 }
 
-// PublishMsg push a message to MQ.
-func (s *ServiceContext) PublishMsg(ctx context.Context, appId string, fromId string, op protocol.Op, key string, msg []byte) (err error) {
-	pushMsg := &logic.BizMsg{
-		AppId:  appId,
-		FromId: fromId,
-		Op:     int32(op),
-		Key:    key,
-		Msg:    msg,
+// PublishReceiveMessage received from A publishing to MQ.
+func (s *ServiceContext) PublishReceiveMessage(ctx context.Context, appId, fromId, key string, body []byte) error {
+	msg := &logic.ReceivedMessage{
+		AppId: appId,
+		Key:   key,
+		From:  fromId,
+		Body:  body,
 	}
-	b, err := proto.Marshal(pushMsg)
+	data, err := proto.Marshal(msg)
+	if err != nil {
+		return err
+	}
+	topic := fmt.Sprintf("goim-%s-receive", appId)
+	_, _, err = s.Producer.Publish(topic, fromId, data)
+	return err
+}
+
+// PublishConnection connect and disconnect from comet publishing to MQ.
+func (s *ServiceContext) PublishConnection(ctx context.Context, appId string, fromId string, op protocol.Op, key string, body []byte) (err error) {
+	msg := &logic.ReceivedMessage{
+		AppId: appId,
+		Key:   key,
+		From:  fromId,
+		Body:  body,
+	}
+	data, err := proto.Marshal(msg)
 	if err != nil {
 		return
 	}
-	topic := fmt.Sprintf("goim-%s-topic", appId)
-
-	_, _, err = s.Producer.Publish(topic, fromId, b)
+	topic := fmt.Sprintf("goim-%s-connection", appId)
+	_, _, err = s.Producer.Publish(topic, fromId, data)
 	return
 }
 
@@ -81,8 +96,8 @@ func (s *ServiceContext) KeysWithServers(ctx context.Context, keys []string) (ma
 	return pushKeys, nil
 }
 
-func (s *ServiceContext) KeysWithServersByMid(ctx context.Context, appId string, mid []string) (map[string][]string, error) {
-	keyServers, _, err := s.Repo.KeysByMids(ctx, appId, mid)
+func (s *ServiceContext) KeysWithServersByUID(ctx context.Context, appId string, uid []string) (map[string][]string, error) {
+	keyServers, _, err := s.Repo.KeysByUIDs(ctx, appId, uid)
 	if err != nil {
 		return nil, err
 	}
