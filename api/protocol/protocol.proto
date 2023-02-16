@@ -22,19 +22,14 @@ enum Op {
   ReceiveMsg = 9;
   ReceiveMsgReply = 10;
 
-  SyncMsgReq = 11;
-  SyncMsgReply = 12;
+  Transparent = 11;
+  TransparentReply = 12;
 
   ProtoReady = 20;
   ProtoFinish = 21;
   ProtoResend = 22;
 
   Raw = 23;
-}
-
-enum Channel {
-  Private = 0;
-  Group = 1;
 }
 
 // Proto 中 Op 为 OpAuth 时， body 必须可以反序列化为 AuthMsg
@@ -55,17 +50,10 @@ message SendMsgReplyBody {
   string msg = 2;
 }
 
-// Proto 中 Op 为 SyncMsgReply 时， body 必须可以反序列化为 SyncMsg
-message SyncMsg { int64 logId = 1; }
-
 message Proto {
   int32 ver = 1;
   int32 op = 2;
   int32 seq = 3;
   int32 ack = 4;
-  int64 mid = 5;
-  Channel channel = 6;
-  string target = 7;
-  int64 time = 8;
-  bytes body = 9;
+  bytes body = 5;
 }

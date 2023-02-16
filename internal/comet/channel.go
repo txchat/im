@@ -2,6 +2,7 @@ package comet
 
 import (
 	"sync"
+	"sync/atomic"
 
 	"github.com/Terry-Mao/goim/pkg/bufio"
 	"github.com/txchat/im/api/protocol"
@@ -14,6 +15,7 @@ type Channel struct {
 	Writer   bufio.Writer
 	Reader   bufio.Reader
 
+	Seq  int32
 	Key  string
 	IP   string
 	Port string
@@ -31,8 +33,13 @@ func NewChannel(cli, svr int) *Channel {
 	return c
 }
 
+func (c *Channel) seqInc() int32 {
+	return atomic.AddInt32(&c.Seq, 1)
+}
+
 // Push server push message.
 func (c *Channel) Push(p *protocol.Proto) (err error) {
+	p.Seq = c.seqInc()
 	select {
 	case c.signal <- p:
 	default:
@@ -86,6 +93,9 @@ func (c *Channel) GetNode(id string) *Node {
 	return c.nodes[id]
 }
 
+func (c *Channel) GetSeq() int32 {
+	return c.Seq
+}
 func (c *Channel) GetKey() string {
 	return c.Key
 }

@@ -42,7 +42,8 @@ message ReceivedMessage {
   string appId = 1;
   string key = 2;
   string from = 3;
-  bytes body = 4;
+  im.protocol.Op op = 4;
+  bytes body = 5;
 }
 
 // biz --> logic

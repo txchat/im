@@ -6,44 +6,18 @@ import (
 	"sync/atomic"
 	"time"
 
-	lru "github.com/hashicorp/golang-lru/v2"
 	"github.com/txchat/im/api/protocol"
-	"github.com/txchat/pkg/identity"
 	dtask "github.com/txchat/task"
 )
 
 var ErrTaskJobCantInit = errors.New("task job can not init")
 
-type MidGen struct {
-	idGen *identity.Snowflake
-	cache *lru.Cache
-}
-
-func NewMidGen(idGen *identity.Snowflake, maxEntries int) *MidGen {
-	cache, err := lru.New(maxEntries)
-	if err != nil {
-
-	}
-	return &MidGen{
-		idGen: idGen,
-		cache: cache,
-	}
-}
-
-func (t *MidGen) GetMid(seq int32) int64 {
-	if mid, ok := t.cache.Get(seq); ok {
-		return mid
-	}
-	mid := t.idGen.NextId()
-	t.cache.Add(seq, mid)
-	return mid
-}
-
 type Resend struct {
 	sync.RWMutex
 	connID    string
 	isOnClock int32
-	items     map[int32]*protocol.Proto
+	// items key=seq value=proto
+	items map[int32]*protocol.Proto
 
 	repeatJob func()
 	rto       time.Duration

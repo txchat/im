@@ -14,7 +14,6 @@ import (
 	"github.com/Terry-Mao/goim/pkg/bytes"
 	xtime "github.com/Terry-Mao/goim/pkg/time"
 	"github.com/Terry-Mao/goim/pkg/websocket"
-	"github.com/golang/protobuf/proto"
 	"github.com/rs/zerolog/log"
 	"github.com/txchat/im/api/protocol"
 	"github.com/txchat/im/app/comet/internal/svc"
@@ -118,8 +117,6 @@ func serve(svcCtx *svc.ServiceContext, conn net.Conn, r int, scheme CometConnCre
 type CometServer struct {
 	svcCtx *svc.ServiceContext
 
-	filter *comet.Filter
-	midGen *comet.MidGen
 	resend *comet.Resend
 }
 
@@ -199,8 +196,6 @@ func (s *CometServer) Serve(cometConn Conn, conn net.Conn, rp, wp *bytes.Pool, t
 	s.resend = comet.NewResend(ch.Key, s.svcCtx.Config.Protocol.Rto, s.svcCtx.TaskPool, func() {
 		ch.Resend()
 	})
-	s.filter = comet.NewFilter(ch)
-	s.midGen = comet.NewMidGen(s.svcCtx.IDGen, s.svcCtx.Config.Protocol.LRUSize)
 
 	go s.dispatch(cometConn, wp, wb, ch)
 
@@ -332,6 +327,10 @@ func (s *CometServer) dispatch(conn Conn, wp *bytes.Pool, wb *bytes.Buffer, ch *
 					log.Error().Err(err).Msg("tsk.AddJobRepeat error")
 					goto failed
 				}
+			case int32(protocol.Op_Transparent):
+				if err = conn.WriteProto(p); err != nil {
+					goto failed
+				}
 			default:
 				continue
 			}
@@ -358,53 +357,23 @@ failed:
 func (s *CometServer) operate(ctx context.Context, p *protocol.Proto, ch *comet.Channel) error {
 	switch p.Op {
 	case int32(protocol.Op_SendMsg):
-		//filter
-		err := s.filter.Filter(p.GetChannel(), p.GetTarget())
-		if err == nil {
-			//gen mid
-			mid := s.midGen.GetMid(p.GetSeq())
-			p.Mid = mid
-			err = s.svcCtx.Receive(ctx, ch.Key, p)
-			if err != nil {
-				//下层业务调用失败，返回error的话会直接断开连接
-				return err
-			}
+		err := s.svcCtx.Receive(ctx, ch.Key, p)
+		if err != nil {
+			//下层业务调用失败，返回error的话会直接断开连接
+			return err
 		}
 		//标明Ack的消息序列
 		p.Ack = p.Seq
 		p.Op = int32(protocol.Op_SendMsgReply)
-		p.Body = convertAckBody(err)
+		p.Body = nil
 	case int32(protocol.Op_ReceiveMsgReply):
 		err := s.svcCtx.Receive(ctx, ch.Key, p)
 		if err != nil {
 			//下层业务调用失败，返回error的话会直接断开连接
 			return err
 		}
-	case int32(protocol.Op_SyncMsgReq):
-		err := s.svcCtx.Receive(ctx, ch.Key, p)
-		if err != nil {
-			//下层业务调用失败，返回error的话会直接断开连接
-			return err
-		}
-		p.Ack = p.Seq
-		p.Op = int32(protocol.Op_SyncMsgReply)
 	default:
 		return s.svcCtx.Receive(ctx, ch.Key, p)
 	}
 	return nil
-}
-
-func convertAckBody(err error) []byte {
-	switch err {
-	case comet.ErrNotFriend:
-	case comet.ErrNotGroupMember:
-	case comet.ErrUnsupportedChannel:
-	case nil:
-		return nil
-	}
-	ackBody, _ := proto.Marshal(&protocol.SendMsgReplyBody{
-		Type: 0,
-		Msg:  "",
-	})
-	return ackBody
 }
