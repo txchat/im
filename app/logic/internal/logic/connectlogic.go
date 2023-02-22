@@ -82,6 +82,6 @@ func (l *ConnectLogic) connect(c context.Context, server string, p *protocol.Pro
 	if err != nil {
 		return
 	}
-	err = l.svcCtx.PublishConnection(c, appId, uid, protocol.Op_Auth, key, bytes)
+	err = l.svcCtx.PublishConnection(c, appId, uid, key, protocol.Op_Auth, bytes)
 	return
 }

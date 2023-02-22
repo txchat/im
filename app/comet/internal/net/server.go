@@ -300,7 +300,7 @@ func (s *CometServer) dispatch(conn Conn, wp *bytes.Pool, wb *bytes.Buffer, ch *
 					if err = conn.WriteHeart(p, online); err != nil {
 						goto failed
 					}
-				} else if p.Op == int32(protocol.Op_ReceiveMsgReply) {
+				} else if p.Op == int32(protocol.Op_MessageReply) {
 					//del resend but skip conn write
 					s.resend.Del(p.GetAck())
 				} else {
@@ -319,16 +319,12 @@ func (s *CometServer) dispatch(conn Conn, wp *bytes.Pool, wb *bytes.Buffer, ch *
 			}
 		default:
 			switch p.Op {
-			case int32(protocol.Op_ReceiveMsg):
+			case int32(protocol.Op_Message):
 				if err = conn.WriteProto(p); err != nil {
 					goto failed
 				}
 				if err = s.resend.Add(p); err != nil {
 					log.Error().Err(err).Msg("tsk.AddJobRepeat error")
-					goto failed
-				}
-			case int32(protocol.Op_Transparent):
-				if err = conn.WriteProto(p); err != nil {
 					goto failed
 				}
 			default:
@@ -355,25 +351,23 @@ failed:
 
 // Operate operate.
 func (s *CometServer) operate(ctx context.Context, p *protocol.Proto, ch *comet.Channel) error {
-	switch p.Op {
-	case int32(protocol.Op_SendMsg):
-		err := s.svcCtx.Receive(ctx, ch.Key, p)
-		if err != nil {
-			//下层业务调用失败，返回error的话会直接断开连接
-			return err
-		}
-		//标明Ack的消息序列
-		p.Ack = p.Seq
-		p.Op = int32(protocol.Op_SendMsgReply)
-		p.Body = nil
-	case int32(protocol.Op_ReceiveMsgReply):
-		err := s.svcCtx.Receive(ctx, ch.Key, p)
-		if err != nil {
-			//下层业务调用失败，返回error的话会直接断开连接
-			return err
-		}
-	default:
-		return s.svcCtx.Receive(ctx, ch.Key, p)
-	}
+	//switch p.Op {
+	//case int32(protocol.Op_Message):
+	//	err := s.svcCtx.Receive(ctx, ch.Key, p)
+	//	if err != nil {
+	//		//下层业务调用失败，返回error的话会直接断开连接
+	//		return err
+	//	}
+	//	//标明Ack的消息序列
+	//	p.Ack = p.Seq
+	//	p.Op = int32(protocol.Op_MessageReply)
+	//	p.Body = nil
+	//case int32(protocol.Op_MessageReply):
+	//	err := s.svcCtx.Receive(ctx, ch.Key, p)
+	//	if err != nil {
+	//		//下层业务调用失败，返回error的话会直接断开连接
+	//		return err
+	//	}
+	//}
 	return nil
 }

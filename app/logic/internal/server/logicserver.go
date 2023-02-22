@@ -43,6 +43,11 @@ func (s *LogicServer) Receive(ctx context.Context, in *xlogic.ReceiveReq) (*xlog
 	return l.Receive(in)
 }
 
+func (s *LogicServer) SendByUID(ctx context.Context, in *xlogic.SendByUIDReq) (*xlogic.Reply, error) {
+	l := logic.NewSendByUIDLogic(ctx, s.svcCtx)
+	return l.SendByUID(in)
+}
+
 func (s *LogicServer) PushByUID(ctx context.Context, in *xlogic.PushByUIDReq) (*xlogic.Reply, error) {
 	l := logic.NewPushByUIDLogic(ctx, s.svcCtx)
 	return l.PushByUID(in)

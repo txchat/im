@@ -21,6 +21,7 @@ type (
 	JoinGroupByUIDReq  = logic.JoinGroupByUIDReq
 	LeaveGroupByKeyReq = logic.LeaveGroupByKeyReq
 	LeaveGroupByUIDReq = logic.LeaveGroupByUIDReq
+	SendByUIDReq       = logic.SendByUIDReq
 	PushByKeyReq       = logic.PushByKeyReq
 	PushByUIDReq       = logic.PushByUIDReq
 	PushGroupReq       = logic.PushGroupReq
@@ -33,6 +34,7 @@ type (
 		Disconnect(ctx context.Context, in *DisconnectReq, opts ...grpc.CallOption) (*Reply, error)
 		Heartbeat(ctx context.Context, in *HeartbeatReq, opts ...grpc.CallOption) (*Reply, error)
 		Receive(ctx context.Context, in *ReceiveReq, opts ...grpc.CallOption) (*Reply, error)
+		SendByUID(ctx context.Context, in *SendByUIDReq, opts ...grpc.CallOption) (*Reply, error)
 		PushByUID(ctx context.Context, in *PushByUIDReq, opts ...grpc.CallOption) (*Reply, error)
 		PushByKey(ctx context.Context, in *PushByKeyReq, opts ...grpc.CallOption) (*Reply, error)
 		PushGroup(ctx context.Context, in *PushGroupReq, opts ...grpc.CallOption) (*Reply, error)
@@ -72,6 +74,11 @@ func (m *defaultLogic) Heartbeat(ctx context.Context, in *HeartbeatReq, opts ...
 func (m *defaultLogic) Receive(ctx context.Context, in *ReceiveReq, opts ...grpc.CallOption) (*Reply, error) {
 	client := logic.NewLogicClient(m.cli.Conn())
 	return client.Receive(ctx, in, opts...)
+}
+
+func (m *defaultLogic) SendByUID(ctx context.Context, in *SendByUIDReq, opts ...grpc.CallOption) (*Reply, error) {
+	client := logic.NewLogicClient(m.cli.Conn())
+	return client.SendByUID(ctx, in, opts...)
 }
 
 func (m *defaultLogic) PushByUID(ctx context.Context, in *PushByUIDReq, opts ...grpc.CallOption) (*Reply, error) {

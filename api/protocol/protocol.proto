@@ -16,14 +16,8 @@ enum Op {
   Disconnect = 5;
   DisconnectReply = 6;
 
-  SendMsg = 7;
-  SendMsgReply = 8; //客户端回复消息已收到
-
-  ReceiveMsg = 9;
-  ReceiveMsgReply = 10;
-
-  Transparent = 11;
-  TransparentReply = 12;
+  Message = 7;
+  MessageReply = 8;
 
   ProtoReady = 20;
   ProtoFinish = 21;
@@ -37,17 +31,6 @@ message AuthBody {
   string appId = 1;
   string token = 2;
   bytes ext = 3; // 其它业务方可能需要的信息
-}
-
-message SendMsgReplyBody {
-  enum ErrorType {
-    IsOk = 0;
-    NotFriend = 1;
-    NotGroupMember = 2;
-    UnsupportedChannel = 3;
-  }
-  ErrorType type = 1;
-  string msg = 2;
 }
 
 message Proto {

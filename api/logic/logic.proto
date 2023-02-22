@@ -47,24 +47,35 @@ message ReceivedMessage {
 }
 
 // biz --> logic
+message SendByUIDReq {
+  string appId = 1;
+  string uid = 2;
+  im.protocol.Op op = 3;
+  bytes body = 4;
+}
+
+// biz --> logic
 message PushByUIDReq {
   string appId = 1;
   repeated string toId = 2;
-  bytes msg = 3;
+  im.protocol.Op op = 3;
+  bytes body = 4;
 }
 
 // biz --> logic
 message PushByKeyReq {
   string appId = 1;
   repeated string toKey = 2;
-  bytes msg = 3;
+  im.protocol.Op op = 3;
+  bytes body = 4;
 }
 
 // biz --> logic
 message PushGroupReq {
   string appId = 1;
   string group = 2;
-  bytes msg = 3;
+  im.protocol.Op op = 3;
+  bytes body = 4;
 }
 
 // biz --> logic
@@ -105,6 +116,7 @@ service Logic {
   rpc Heartbeat(HeartbeatReq) returns (Reply);    // for comet
   rpc Receive(ReceiveReq) returns (Reply);        // for comet
 
+  rpc SendByUID(SendByUIDReq) returns (Reply);             // for biz
   rpc PushByUID(PushByUIDReq) returns (Reply);             // for biz
   rpc PushByKey(PushByKeyReq) returns (Reply);             // for biz
   rpc PushGroup(PushGroupReq) returns (Reply);             // for biz

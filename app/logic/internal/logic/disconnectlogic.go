@@ -49,6 +49,6 @@ func (l *DisconnectLogic) disconnect(c context.Context, key string, server strin
 		return
 	}
 	// notify biz user disconnected
-	err = l.svcCtx.PublishConnection(c, appId, uid, protocol.Op_Disconnect, key, nil)
+	err = l.svcCtx.PublishConnection(c, appId, uid, key, protocol.Op_Disconnect, nil)
 	return
 }

@@ -48,11 +48,12 @@ func loadApps(c config.Config, svc *ServiceContext) {
 }
 
 // PublishReceiveMessage received from A publishing to MQ.
-func (s *ServiceContext) PublishReceiveMessage(ctx context.Context, appId, fromId, key string, body []byte) error {
+func (s *ServiceContext) PublishReceiveMessage(ctx context.Context, appId, fromId, key string, op protocol.Op, body []byte) error {
 	msg := &logic.ReceivedMessage{
 		AppId: appId,
 		Key:   key,
 		From:  fromId,
+		Op:    op,
 		Body:  body,
 	}
 	data, err := proto.Marshal(msg)
@@ -65,11 +66,12 @@ func (s *ServiceContext) PublishReceiveMessage(ctx context.Context, appId, fromI
 }
 
 // PublishConnection connect and disconnect from comet publishing to MQ.
-func (s *ServiceContext) PublishConnection(ctx context.Context, appId string, fromId string, op protocol.Op, key string, body []byte) (err error) {
+func (s *ServiceContext) PublishConnection(ctx context.Context, appId string, fromId, key string, op protocol.Op, body []byte) (err error) {
 	msg := &logic.ReceivedMessage{
 		AppId: appId,
 		Key:   key,
 		From:  fromId,
+		Op:    op,
 		Body:  body,
 	}
 	data, err := proto.Marshal(msg)

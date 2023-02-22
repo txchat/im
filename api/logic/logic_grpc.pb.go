@@ -23,6 +23,7 @@ type LogicClient interface {
 	Disconnect(ctx context.Context, in *DisconnectReq, opts ...grpc.CallOption) (*Reply, error)
 	Heartbeat(ctx context.Context, in *HeartbeatReq, opts ...grpc.CallOption) (*Reply, error)
 	Receive(ctx context.Context, in *ReceiveReq, opts ...grpc.CallOption) (*Reply, error)
+	SendByUID(ctx context.Context, in *SendByUIDReq, opts ...grpc.CallOption) (*Reply, error)
 	PushByUID(ctx context.Context, in *PushByUIDReq, opts ...grpc.CallOption) (*Reply, error)
 	PushByKey(ctx context.Context, in *PushByKeyReq, opts ...grpc.CallOption) (*Reply, error)
 	PushGroup(ctx context.Context, in *PushGroupReq, opts ...grpc.CallOption) (*Reply, error)
@@ -71,6 +72,15 @@ func (c *logicClient) Heartbeat(ctx context.Context, in *HeartbeatReq, opts ...g
 func (c *logicClient) Receive(ctx context.Context, in *ReceiveReq, opts ...grpc.CallOption) (*Reply, error) {
 	out := new(Reply)
 	err := c.cc.Invoke(ctx, "/im.logic.Logic/Receive", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *logicClient) SendByUID(ctx context.Context, in *SendByUIDReq, opts ...grpc.CallOption) (*Reply, error) {
+	out := new(Reply)
+	err := c.cc.Invoke(ctx, "/im.logic.Logic/SendByUID", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -157,6 +167,7 @@ type LogicServer interface {
 	Disconnect(context.Context, *DisconnectReq) (*Reply, error)
 	Heartbeat(context.Context, *HeartbeatReq) (*Reply, error)
 	Receive(context.Context, *ReceiveReq) (*Reply, error)
+	SendByUID(context.Context, *SendByUIDReq) (*Reply, error)
 	PushByUID(context.Context, *PushByUIDReq) (*Reply, error)
 	PushByKey(context.Context, *PushByKeyReq) (*Reply, error)
 	PushGroup(context.Context, *PushGroupReq) (*Reply, error)
@@ -183,6 +194,9 @@ func (UnimplementedLogicServer) Heartbeat(context.Context, *HeartbeatReq) (*Repl
 }
 func (UnimplementedLogicServer) Receive(context.Context, *ReceiveReq) (*Reply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Receive not implemented")
+}
+func (UnimplementedLogicServer) SendByUID(context.Context, *SendByUIDReq) (*Reply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendByUID not implemented")
 }
 func (UnimplementedLogicServer) PushByUID(context.Context, *PushByUIDReq) (*Reply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PushByUID not implemented")
@@ -289,6 +303,24 @@ func _Logic_Receive_Handler(srv interface{}, ctx context.Context, dec func(inter
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(LogicServer).Receive(ctx, req.(*ReceiveReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Logic_SendByUID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SendByUIDReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LogicServer).SendByUID(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/im.logic.Logic/SendByUID",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LogicServer).SendByUID(ctx, req.(*SendByUIDReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -459,6 +491,10 @@ var Logic_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Receive",
 			Handler:    _Logic_Receive_Handler,
+		},
+		{
+			MethodName: "SendByUID",
+			Handler:    _Logic_SendByUID_Handler,
 		},
 		{
 			MethodName: "PushByUID",

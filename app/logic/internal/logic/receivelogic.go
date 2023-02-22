@@ -42,5 +42,5 @@ func (l *ReceiveLogic) receive(c context.Context, key string, p *protocol.Proto)
 	if err != nil {
 		return err
 	}
-	return l.svcCtx.PublishReceiveMessage(c, appId, uid, key, msg)
+	return l.svcCtx.PublishReceiveMessage(c, appId, uid, key, protocol.Op(p.GetOp()), msg)
 }
