@@ -1,16 +1,16 @@
 
-# 即时通讯系统接入层
+# 即时通讯系统消息网关
 
-im是即时通讯系统的接入层平台，负责维护与客户端的连接。
+im是即时通讯系统的接入层平台，负责维护与客户端的长连接。
 
 ![comet-arch](docs/comet-arch.png)
 
-- comet: 作为消息平台的网关服务，负责维护客户端的长连接，支持websocket和tcp协议。
-- logic: 用于comet节点的调度，用户在线状态、comet节点状态等处理逻辑，提供业务层访问的RPC接口。
-- cache：高可用redis集群。仅供logic节点访问， 存储用户在线状态，comet状态。
-- MQ： 消息队列。logic将消息投递到mq中对应业务方的topic队列，业务方从它订阅topic队列中消费消息，即不同业务方的消息会投递到不同的主题队列。
-- etcd：服务注册发现中心
-- App Server: 支持扩展多种通讯业务场景，目前主要是配合[dtalk即时通讯服务](https://github.com/txchat/dtalk)
+- comet: 作为消息平台的接入层服务，负责维护客户端的长连接，协议的编解码等，支持websocket和tcp协议。
+- logic: 用于comet节点的调度，用户在线状态、comet节点状态等处理逻辑，并提供用于业务层服务访问的RPC接口。
+- cache：高可用redis集群。仅供logic节点访问，存储用户在线状态，comet节点状态，以及相互间的映射关系。
+- MQ： 消息队列。
+- etcd：服务注册发现中心。
+- App Server: 业务服务，如[dtalk即时通讯服务](https://github.com/txchat/dtalk)
 
 ## 开始
 
