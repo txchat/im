@@ -82,5 +82,5 @@ buildService() {
 
 mkdir "${buildTargetDir}"
 for sName in ${serviceList}; do
-    buildService "${sName}" "${work_dir}/app/${sName}/etc" "${sName}.yaml" "${work_dir}/app/${sName}/${sName}.go"
+    buildService "${sName}" "${work_dir}/app/${sName}/etc" "${sName}.yaml" "${work_dir}/benchmarks/server/${sName}/${sName}.go"
 done

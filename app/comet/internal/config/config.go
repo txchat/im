@@ -3,8 +3,6 @@ package config
 import (
 	"time"
 
-	xlog "github.com/txchat/im-pkg/log"
-
 	"github.com/txchat/im/internal/comet"
 	"github.com/zeromicro/go-zero/zrpc"
 )
@@ -17,7 +15,6 @@ type Config struct {
 	Websocket Websocket
 	Protocol  Protocol
 	Bucket    comet.BucketConfig
-	Zlog      xlog.Config
 }
 
 // TCP is tcp config.

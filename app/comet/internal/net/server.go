@@ -7,18 +7,17 @@ import (
 	"io"
 	"math"
 	"net"
-	"runtime"
 	"strings"
 	"time"
 
 	"github.com/Terry-Mao/goim/pkg/bytes"
 	xtime "github.com/Terry-Mao/goim/pkg/time"
 	"github.com/Terry-Mao/goim/pkg/websocket"
-	"github.com/rs/zerolog/log"
 	"github.com/txchat/im/api/protocol"
 	"github.com/txchat/im/app/comet/internal/svc"
-	"github.com/txchat/im/internal/auth"
 	"github.com/txchat/im/internal/comet"
+	"github.com/txchat/im/pkg/auth"
+	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type CometConnCreator func(conn net.Conn) Conn
@@ -61,16 +60,6 @@ func InitServer(svcCtx *svc.ServiceContext, address []string, thread int, scheme
 // for each incoming connection.  Accept blocks; the caller typically
 // invokes it in a go statement.
 func accept(svcCtx *svc.ServiceContext, lis *net.TCPListener, scheme CometConnCreator) {
-	defer func() {
-		buf := make([]byte, 1024*3)
-		runtime.Stack(buf, false)
-		log.Error().Str("panic", string(buf)).Msg("accept done")
-		if r := recover(); r != nil {
-			buf := make([]byte, 1024*3)
-			runtime.Stack(buf, false)
-			log.Error().Interface("recover", r).Str("panic", string(buf)).Msg("Recovered in accept")
-		}
-	}()
 	var (
 		conn *net.TCPConn
 		err  error
@@ -79,21 +68,21 @@ func accept(svcCtx *svc.ServiceContext, lis *net.TCPListener, scheme CometConnCr
 	for {
 		if conn, err = lis.AcceptTCP(); err != nil {
 			// if listener close then return
-			log.Error().Stack().Err(err).Msg(fmt.Sprintf("listener.Accept(\"%s\")", lis.Addr().String()))
+			logx.Errorf("listener.Accept(\"%s\") error:", lis.Addr().String(), err)
 			continue
 			//return
 		}
-		log.Info().Str("remoteIP", conn.RemoteAddr().String()).Msg("accept conn")
+		logx.Info("accept conn", "remoteIP", conn.RemoteAddr().String())
 		if err = conn.SetKeepAlive(svcCtx.Config.TCP.KeepAlive); err != nil {
-			log.Error().Stack().Err(err).Msg("conn.SetKeepAlive()")
+			logx.Error("conn.SetKeepAlive()", "err", err)
 			return
 		}
 		if err = conn.SetReadBuffer(svcCtx.Config.TCP.Rcvbuf); err != nil {
-			log.Error().Stack().Err(err).Msg("conn.SetReadBuffer()")
+			logx.Error("conn.SetReadBuffer()", "err", err)
 			return
 		}
 		if err = conn.SetWriteBuffer(svcCtx.Config.TCP.Sndbuf); err != nil {
-			log.Error().Stack().Err(err).Msg("conn.SetWriteBuffer()")
+			logx.Error("conn.SetWriteBuffer()", "err", err)
 			return
 		}
 		go serve(svcCtx, conn, r, scheme)
@@ -153,7 +142,7 @@ func (s *CometServer) Serve(cometConn Conn, conn net.Conn, rp, wp *bytes.Pool, t
 		// NOTE: fix close block for tls
 		_ = conn.SetDeadline(time.Now().Add(time.Millisecond * 100))
 		_ = conn.Close()
-		log.Error().Int("step", step).Str("key", ch.Key).Str("remoteIP", conn.RemoteAddr().String()).Msg("handshake timeout")
+		logx.Error("handshake timeout", "step", step, "key", ch.Key, "remoteIP", conn.RemoteAddr().String())
 	})
 	ch.IP, ch.Port, _ = net.SplitHostPort(conn.RemoteAddr().String())
 
@@ -164,7 +153,7 @@ func (s *CometServer) Serve(cometConn Conn, conn net.Conn, rp, wp *bytes.Pool, t
 		rp.Put(rb)
 		wp.Put(wb)
 		if err != io.EOF {
-			log.Error().Err(err).Msg("websocket.NewServerConn")
+			logx.Error("cometConn.Upgrade", "err", err)
 		}
 		return
 	}
@@ -173,7 +162,7 @@ func (s *CometServer) Serve(cometConn Conn, conn net.Conn, rp, wp *bytes.Pool, t
 	step = 2
 	if p, err = ch.CliProto.Set(); err == nil {
 		if ch.Key, hb, err = s.auth(ctx, cometConn, p); err == nil {
-			log.Info().Str("key", ch.Key).Str("remoteIP", conn.RemoteAddr().String()).Msg("authoried")
+			logx.Error("authentication", "key", ch.Key, "remoteIP", conn.RemoteAddr().String())
 			b = s.svcCtx.Bucket(ch.Key)
 			err = b.Put(ch)
 		}
@@ -184,7 +173,7 @@ func (s *CometServer) Serve(cometConn Conn, conn net.Conn, rp, wp *bytes.Pool, t
 		wp.Put(wb)
 		tr.Del(trd)
 		if err != io.EOF && err != websocket.ErrMessageClose {
-			log.Error().Int("step", step).Str("key", ch.Key).Str("remoteIP", conn.RemoteAddr().String()).Msg("handshake failed")
+			logx.Error("handshake failed", "step", step, "key", ch.Key, "remoteIP", conn.RemoteAddr().String())
 		}
 		return
 	}
@@ -228,7 +217,7 @@ func (s *CometServer) Serve(cometConn Conn, conn net.Conn, rp, wp *bytes.Pool, t
 		ch.Signal()
 	}
 	if err != nil && err != io.EOF && err != websocket.ErrMessageClose && !strings.Contains(err.Error(), "closed") {
-		log.Error().Err(err).Str("key", ch.Key).Msg("server comet failed")
+		logx.Error("server comet failed", "err", err, "key", ch.Key)
 	}
 	b.Del(ch)
 	tr.Del(trd)
@@ -236,7 +225,7 @@ func (s *CometServer) Serve(cometConn Conn, conn net.Conn, rp, wp *bytes.Pool, t
 	ch.Close()
 	rp.Put(rb)
 	if err = s.svcCtx.Disconnect(ctx, ch.Key); err != nil {
-		log.Error().Str("key", ch.Key).Err(err).Msg("operator do disconnect")
+		logx.Error("operator do disconnect", "err", err, "key", ch.Key)
 	}
 }
 
@@ -252,7 +241,7 @@ auth:
 		if p.Op == int32(protocol.Op_Auth) {
 			break
 		}
-		log.Error().Int32("operation", p.Op).Msg("comet conn request operation not auth")
+		logx.Error("comet conn request operation not auth", "operation", p.Op)
 	}
 	if key, hb, err = s.svcCtx.Connect(ctx, p); err != nil {
 		success = false
@@ -324,7 +313,7 @@ func (s *CometServer) dispatch(conn Conn, wp *bytes.Pool, wb *bytes.Buffer, ch *
 					goto failed
 				}
 				if err = s.resend.Add(p); err != nil {
-					log.Error().Err(err).Msg("tsk.AddJobRepeat error")
+					logx.Error("append resend job error", "err", err)
 					goto failed
 				}
 			default:
@@ -338,7 +327,7 @@ func (s *CometServer) dispatch(conn Conn, wp *bytes.Pool, wb *bytes.Buffer, ch *
 	}
 failed:
 	if err != nil && err != io.EOF && err != websocket.ErrMessageClose {
-		log.Error().Err(err).Str("key", ch.Key).Msg("dispatch comet conn error")
+		logx.Error("dispatch comet conn error", "err", err, "key", ch.Key)
 	}
 	s.resend.Stop()
 	conn.Close()

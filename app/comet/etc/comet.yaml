@@ -41,8 +41,3 @@ Protocol:
 Bucket:
   Size: 32
   Channel: 1024
-Zlog:
-  Level: "debug"
-  Mode: "console"
-  Path: "./"
-  Display: "json"

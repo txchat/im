@@ -7,7 +7,6 @@ import (
 	"net"
 	"time"
 
-	"github.com/txchat/pkg/identity"
 	dtask "github.com/txchat/task"
 
 	"github.com/Terry-Mao/goim/pkg/ip"
@@ -23,7 +22,6 @@ type ServiceContext struct {
 	Config   config.Config
 	LogicRPC logicclient.Logic
 
-	IDGen    *identity.Snowflake
 	TaskPool *dtask.Task
 
 	serverID  string
@@ -34,14 +32,9 @@ type ServiceContext struct {
 
 func NewServiceContext(c config.Config) *ServiceContext {
 	_, port, _ := net.SplitHostPort(c.ListenOn)
-	idGen, err := identity.NewSnowflake(c.Node)
-	if err != nil {
-		panic(err)
-	}
 	svc := &ServiceContext{
 		Config:   c,
 		LogicRPC: logicclient.NewLogic(zrpc.MustNewClient(c.LogicRPC, zrpc.WithNonBlock(), zrpc.WithNonBlock())),
-		IDGen:    idGen,
 		TaskPool: dtask.NewTask(),
 		serverID: fmt.Sprintf("grpc://%s:%v", ip.InternalIP(), port),
 		round: comet.NewRound(comet.RoundOptions{

@@ -4,14 +4,13 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/txchat/im/internal/auth"
-
 	"github.com/golang/protobuf/proto"
 	"github.com/google/uuid"
 	"github.com/txchat/im/api/logic"
 	"github.com/txchat/im/api/protocol"
 	"github.com/txchat/im/app/logic/internal/svc"
 	"github.com/txchat/im/internal/errors"
+	"github.com/txchat/im/pkg/auth"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 

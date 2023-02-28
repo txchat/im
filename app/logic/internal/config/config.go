@@ -3,10 +3,8 @@ package config
 import (
 	"time"
 
-	xlog "github.com/txchat/im-pkg/log"
-
 	xtime "github.com/Terry-Mao/goim/pkg/time"
-	xkafka "github.com/txchat/pkg/mq/kafka"
+	xkafka "github.com/oofpgDLD/kafka-go"
 	"github.com/zeromicro/go-zero/zrpc"
 )
 
@@ -18,7 +16,6 @@ type Config struct {
 	Apps     []*App
 	Node     Node
 	Backoff  Backoff
-	Zlog     xlog.Config
 }
 
 type Redis struct {

@@ -10,12 +10,8 @@ require (
 	github.com/gomodule/redigo v2.0.0+incompatible
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/websocket v1.5.0
-	github.com/hashicorp/golang-lru/v2 v2.0.1
-	github.com/mitchellh/mapstructure v1.2.2
-	github.com/rs/zerolog v1.21.0
-	github.com/txchat/im-pkg v0.0.1
-	github.com/txchat/imparse v0.1.0
-	github.com/txchat/pkg v0.0.1
+	github.com/oofpgDLD/kafka-go v1.0.0
+	github.com/stretchr/testify v1.8.2
 	github.com/txchat/task v0.0.1
 	github.com/zeromicro/go-zero v1.4.3
 	github.com/zhenjl/cityhash v0.0.0-20131128155616-cdd6a94144ab
@@ -24,5 +20,3 @@ require (
 	google.golang.org/protobuf v1.28.1
 	gopkg.in/Shopify/sarama.v1 v1.19.0
 )
-
-replace github.com/txchat/pkg => ../pkg

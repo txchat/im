@@ -5,14 +5,15 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/txchat/im/pkg/auth"
+
 	"github.com/golang/protobuf/proto"
+	xkafka "github.com/oofpgDLD/kafka-go"
 	"github.com/txchat/im/api/logic"
 	"github.com/txchat/im/api/protocol"
 	"github.com/txchat/im/app/comet/cometclient"
 	"github.com/txchat/im/app/logic/internal/config"
 	"github.com/txchat/im/app/logic/internal/dao"
-	"github.com/txchat/im/internal/auth"
-	xkafka "github.com/txchat/pkg/mq/kafka"
 	"github.com/zeromicro/go-zero/zrpc"
 )
 

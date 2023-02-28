@@ -37,8 +37,3 @@ Backoff:
   BaseDelay: 3
   Factor: 1.8
   Jitter: 0.3
-Zlog:
-  Level: "debug"
-  Mode: "console"
-  Path: "./"
-  Display: "json"
