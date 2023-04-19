@@ -10,6 +10,7 @@ import (
 )
 
 type Conn interface {
+	SchemeName() string
 	Upgrade(rr *bufio.Reader, wr *bufio.Writer) error
 	Close() error
 	Flush() error
@@ -28,6 +29,10 @@ func NewWebsocket(conn net.Conn) *Websocket {
 	return &Websocket{
 		conn: conn,
 	}
+}
+
+func (ws *Websocket) SchemeName() string {
+	return "websocket"
 }
 
 func (ws *Websocket) Upgrade(rr *bufio.Reader, wr *bufio.Writer) error {
@@ -71,6 +76,10 @@ func NewTCP(rwc io.ReadWriteCloser) *TCP {
 	return &TCP{
 		rwc: rwc,
 	}
+}
+
+func (tcp *TCP) SchemeName() string {
+	return "tcp"
 }
 
 func (tcp *TCP) Upgrade(rr *bufio.Reader, wr *bufio.Writer) error {

@@ -20,17 +20,34 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-type CometConnCreator func(conn net.Conn) Conn
+type CometScheme interface {
+	Name() string
+	GetConn(conn net.Conn) Conn
+}
 
-var WebsocketServer = func(conn net.Conn) Conn {
+type websocketScheme struct{}
+
+func (ws *websocketScheme) Name() string {
+	return "websocket"
+}
+func (ws *websocketScheme) GetConn(conn net.Conn) Conn {
 	return NewWebsocket(conn)
 }
-var TCPServer = func(conn net.Conn) Conn {
+
+type tcpScheme struct{}
+
+func (tcp *tcpScheme) Name() string {
+	return "tcp"
+}
+func (tcp *tcpScheme) GetConn(conn net.Conn) Conn {
 	return NewTCP(conn)
 }
 
+var WebsocketServer = &websocketScheme{}
+var TCPServer = &tcpScheme{}
+
 // InitServer listen all tcp.bind and start accept connections.
-func InitServer(svcCtx *svc.ServiceContext, address []string, thread int, scheme CometConnCreator) (err error) {
+func InitServer(svcCtx *svc.ServiceContext, address []string, thread int, scheme CometScheme) (err error) {
 	var (
 		bind     string
 		listener *net.TCPListener
@@ -59,12 +76,13 @@ func InitServer(svcCtx *svc.ServiceContext, address []string, thread int, scheme
 // Accept accepts connections on the listener and serves requests
 // for each incoming connection.  Accept blocks; the caller typically
 // invokes it in a go statement.
-func accept(svcCtx *svc.ServiceContext, lis *net.TCPListener, scheme CometConnCreator) {
+func accept(svcCtx *svc.ServiceContext, lis *net.TCPListener, scheme CometScheme) {
 	var (
 		conn *net.TCPConn
 		err  error
 		r    int
 	)
+	logx.Infof("Starting %s server at %s...", scheme.Name(), lis.Addr().String())
 	for {
 		if conn, err = lis.AcceptTCP(); err != nil {
 			// if listener close then return
@@ -92,7 +110,7 @@ func accept(svcCtx *svc.ServiceContext, lis *net.TCPListener, scheme CometConnCr
 	}
 }
 
-func serve(svcCtx *svc.ServiceContext, conn net.Conn, r int, scheme CometConnCreator) {
+func serve(svcCtx *svc.ServiceContext, conn net.Conn, r int, scheme CometScheme) {
 	var (
 		// timer
 		tr = svcCtx.Round().Timer(r)
@@ -100,7 +118,7 @@ func serve(svcCtx *svc.ServiceContext, conn net.Conn, r int, scheme CometConnCre
 		wp = svcCtx.Round().Writer(r)
 	)
 
-	NewCometServer(svcCtx).Serve(scheme(conn), conn, rp, wp, tr)
+	NewCometServer(svcCtx).Serve(scheme.GetConn(conn), conn, rp, wp, tr)
 }
 
 type CometServer struct {

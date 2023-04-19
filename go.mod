@@ -10,7 +10,7 @@ require (
 	github.com/gomodule/redigo v2.0.0+incompatible
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/websocket v1.5.0
-	github.com/oofpgDLD/kafka-go v1.0.0
+	github.com/oofpgDLD/kafka-go v1.1.0
 	github.com/stretchr/testify v1.8.2
 	github.com/txchat/task v0.0.1
 	github.com/zeromicro/go-zero v1.4.3

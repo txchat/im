@@ -1,11 +1,14 @@
 package logic
 
 import (
+	"context"
 	"flag"
 	"fmt"
+	"time"
 
 	"github.com/txchat/im/api/logic"
 	"github.com/txchat/im/app/logic/internal/config"
+	"github.com/txchat/im/app/logic/internal/http"
 	"github.com/txchat/im/app/logic/internal/server"
 	"github.com/txchat/im/app/logic/internal/svc"
 	"github.com/zeromicro/go-zero/core/conf"
@@ -23,6 +26,12 @@ func Main() {
 	conf.MustLoad(*configFile, &c, conf.UseEnv())
 
 	ctx := svc.NewServiceContext(c)
+
+	httpSrv := http.Start(":8001", ctx)
+	defer func() {
+		ctxTO, _ := context.WithTimeout(context.Background(), 5*time.Second)
+		httpSrv.Shutdown(ctxTO)
+	}()
 
 	s := zrpc.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {
 		logic.RegisterLogicServer(grpcServer, server.NewLogicServer(ctx))

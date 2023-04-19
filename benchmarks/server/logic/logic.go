@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 
+	_ "net/http/pprof"
+
 	"github.com/txchat/im/app/logic"
 )
 
