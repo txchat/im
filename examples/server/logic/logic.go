@@ -3,14 +3,16 @@ package main
 import (
 	"flag"
 	"fmt"
+	_ "net/http/pprof"
 	"os"
 
-	"github.com/txchat/im/app/comet"
+	"github.com/txchat/im/app/logic"
+	_ "github.com/txchat/im/examples/server"
 )
 
 var (
 	// projectName 项目名称
-	projectName = "comet"
+	projectName = "logic"
 	// projectVersion 项目版本
 	projectVersion = "0.0.1"
 	// goVersion go版本
@@ -29,7 +31,7 @@ func main() {
 	flag.Parse()
 	showVersion(*isShowVersion)
 
-	comet.Main()
+	logic.Main()
 }
 
 // showVersion 显示项目版本信息

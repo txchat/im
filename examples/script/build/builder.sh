@@ -2,7 +2,7 @@
 work_dir=$(
     cd "$(dirname "$0")" || exit
     pwd
-)/../..
+)/../../
 # import .sh files
 
 targetDir=$1
@@ -82,5 +82,5 @@ buildService() {
 
 mkdir "${buildTargetDir}"
 for sName in ${serviceList}; do
-    buildService "${sName}" "${work_dir}/app/${sName}/etc" "${sName}.yaml" "${work_dir}/benchmarks/server/${sName}/${sName}.go"
+    buildService "${sName}" "${work_dir}/server/${sName}/etc" "${sName}.yaml" "${work_dir}/server/${sName}/${sName}.go"
 done

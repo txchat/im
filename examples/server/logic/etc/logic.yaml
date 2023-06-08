@@ -1,0 +1,48 @@
+Name: logic.rpc
+ListenOn: 0.0.0.0:3119
+Prometheus:
+  Host: 0.0.0.0
+  Port: 9091
+  Path: /metrics
+Telemetry:
+  Name: ${SERVER_NAME}
+  Endpoint: http://${TELEMETRY_HOST}:14268/api/traces
+  Sampler: 1.0
+  Batcher: jaeger
+Etcd:
+  Hosts:
+  - ${ETCD_HOST}:2379
+  Key: logic.rpc
+CometRPC:
+  Etcd:
+    Hosts:
+      - "${ETCD_HOST}:2379"
+    Key: "comet.rpc"
+    Timeout: 60000 # 60s
+RedisDB:
+  Network: "tcp"
+  Addr: "${REDIS_HOST}:6379"
+  Auth: ""
+  Active: 60000
+  Idle: 1024
+  DialTimeout: "200ms"
+  ReadTimeout: "500ms"
+  WriteTimeout: "500ms"
+  IdleTimeout: "120s"
+  Expire: "30m"
+Producer:
+  Version: ""
+  Brokers: ["${KAFKA_HOST}:9092"]
+Apps:
+  -
+    AppId: "mock"
+    AuthURL: "http://${CHAT_API_HOST}:8888/app/user/login"
+    Timeout: "5s"
+Node:
+  Heartbeat: "4m"
+  HeartbeatMax: 2
+Backoff:
+  MaxDelay: 300
+  BaseDelay: 3
+  Factor: 1.8
+  Jitter: 0.3

@@ -5,9 +5,9 @@ services:
     container_name: ${ZOOKEEPER_CONTAINER_NAME}
     restart: unless-stopped
     volumes:
-      - txchat-zookeeper:/data
+      - zookeeper_data:/data
     networks:
-      - txchat-components
+      - components
     ports:
       - "2181:2181"
   # kafka version: 1.1.0
@@ -32,14 +32,14 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_CREATE_TOPICS: "stream-in:1:1,stream-out:1:1"
     volumes:
-      - txchat-kafka:/kafka
+      - kafka_data:/kafka
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
-      - txchat-components
+      - components
     depends_on:
       - zookeeper
     healthcheck:
-      test: [ "CMD", "kafka-topics.sh", "--list", "--zookeeper", "txchat-zookeeper:2181" ]
+      test: [ "CMD-SHELL", "kafka-topics.sh --list --zookeeper=$$KAFKA_ZOOKEEPER_CONNECT" ]
       interval: 5s
       timeout: 10s
       retries: 5
@@ -49,7 +49,7 @@ services:
     environment:
       ZK_HOSTS: ${ZOOKEEPER_CONTAINER_NAME}:2181
     networks:
-      - txchat-components
+      - components
     ports:
       - "9020:9000"
     depends_on:
@@ -62,25 +62,25 @@ services:
     container_name: ${REDIS_CONTAINER_NAME}
     restart: unless-stopped
     networks:
-      - txchat-components
+      - components
     volumes:
-      - ${REDIS_DATA_VOLUME}:/data
-      - ${REDIS_CONFIG_VOLUME}:/usr/local/etc/redis
-      - ${REDIS_LOG_VOLUME}:/logs
+      - redis_data:/data
+      - redis_config:/usr/local/etc/redis
+      - redis_log:/logs
     ports:
       - ${REDIS_PUB_PORT}:6379
-    command: [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
+    command: ["redis-server"]
   etcd:
     image: quay.io/coreos/etcd:${ETCD_VERSION}
     container_name: ${ETCD_CONTAINER_NAME}
     restart: unless-stopped
     networks:
-      - txchat-components
+      - components
     ports:
       - ${ETCD_PUB_CLIENT_PORT}:2379
       - ${ETCD_PUB_PEER_PORT}:2380
     volumes:
-      - ${ETCD_DATA_VOLUME}:/etcd-data
+      - etcd_data:/etcd-data
     command:
       - /usr/local/bin/etcd
       - --name=${ETCD_NAME}
@@ -96,18 +96,24 @@ services:
       - --logger=zap
       - --log-outputs=stderr
 volumes:
-  txchat-zookeeper:
-    external: true
-  txchat-kafka:
-    external: true
-  txchat-redis-data:
-    external: true
-  txchat-redis-config:
-    external: true
-  txchat-redis-log:
-    external: true
-  txchat-etcd-data:
-    external: true
+  zookeeper_data:
+    name: ${ZOOKEEPER_DATA_VOLUME}
+    external: false
+  kafka_data:
+    name: ${KAFKA_DATA_VOLUME}
+    external: false
+  redis_data:
+    name: ${REDIS_DATA_VOLUME}
+    external: false
+  redis_config:
+    name: ${REDIS_CONFIG_VOLUME}
+    external: false
+  redis_log:
+    name: ${REDIS_LOG_VOLUME}
+    external: false
+  etcd_data:
+    name: ${ETCD_DATA_VOLUME}
+    external: false
 networks:
-  txchat-components:
-    external: true
+  components:
+    external: false

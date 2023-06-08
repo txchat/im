@@ -1,0 +1,33 @@
+// protoc -I=. -I=$GOPATH/src --go_out=plugins=grpc:. *.proto
+
+syntax = "proto3";
+package echo;
+option go_package = "github.com/im/examples/server/echo/types/types;types";
+
+enum EchoOp {
+  Undefined = 0;
+  PingAction = 1;
+  PongAction = 2;
+}
+
+message Ping { string msg = 1; }
+
+message Pong { string msg = 1; }
+
+message EchoMsg {
+  oneof value {
+    Ping ping = 1;
+    Pong pong = 2;
+  }
+  int32 ty = 3;
+}
+
+message PingLog {
+  string msg = 1;
+  string echo = 2;
+}
+
+message PongLog {
+  string msg = 1;
+  string echo = 2;
+}

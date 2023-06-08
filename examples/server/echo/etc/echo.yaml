@@ -1,0 +1,34 @@
+AppID: mock
+Name: echo.rpc
+ListenOn: 0.0.0.0:3109
+Prometheus:
+  Host: 0.0.0.0
+  Port: 9091
+  Path: /metrics
+Telemetry:
+  Name: ${SERVER_NAME}
+  Endpoint: http://${TELEMETRY_HOST}:14268/api/traces
+  Sampler: 1.0
+  Batcher: jaeger
+Etcd:
+  Hosts:
+  - ${ETCD_HOST}:2379
+  Key: comet.rpc
+LogicRPC:
+  Etcd:
+    Hosts:
+      - "${ETCD_HOST}:2379"
+    Key: "logic.rpc"
+    Timeout: 60000 # 60s
+Producer:
+  Version: ""
+  Brokers: ["${KAFKA_HOST}:9092"]
+ConsumerConfig:
+  Version: ""
+  Brokers: ["${KAFKA_HOST}:9092"]
+  CacheCapacity: 0
+  ConnectTimeout: "30s"
+BatchConsumerConf:
+  CacheCapacity: 0
+  Consumers: 0
+  Processors: 0
