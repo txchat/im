@@ -48,6 +48,8 @@ var (
 	ProtoReady = &Proto{Op: int32(Op_ProtoReady)}
 	// ProtoFinish proto finish
 	ProtoFinish = &Proto{Op: int32(Op_ProtoFinish)}
+	// ProtoResend proto resend
+	ProtoResend = &Proto{Op: int32(Op_ProtoResend)}
 )
 
 // WriteTo write a proto to bytes writer.

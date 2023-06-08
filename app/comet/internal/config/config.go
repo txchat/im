@@ -3,20 +3,18 @@ package config
 import (
 	"time"
 
-	xlog "github.com/txchat/im-pkg/log"
-
 	"github.com/txchat/im/internal/comet"
 	"github.com/zeromicro/go-zero/zrpc"
 )
 
 type Config struct {
+	Node int64 `json:",default=1"`
 	zrpc.RpcServerConf
 	LogicRPC  zrpc.RpcClientConf
 	TCP       TCP `json:"TCP"`
 	Websocket Websocket
 	Protocol  Protocol
 	Bucket    comet.BucketConfig
-	Zlog      xlog.Config
 }
 
 // TCP is tcp config.
@@ -55,4 +53,5 @@ type Protocol struct {
 	MaxHeartbeat     time.Duration `json:",default=10m"`
 	TaskDuration     time.Duration `json:",default=30m"`
 	Rto              time.Duration `json:",default=3s"`
+	LRUSize          int           `json:",default=86400"`
 }

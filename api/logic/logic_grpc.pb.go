@@ -23,14 +23,15 @@ type LogicClient interface {
 	Disconnect(ctx context.Context, in *DisconnectReq, opts ...grpc.CallOption) (*Reply, error)
 	Heartbeat(ctx context.Context, in *HeartbeatReq, opts ...grpc.CallOption) (*Reply, error)
 	Receive(ctx context.Context, in *ReceiveReq, opts ...grpc.CallOption) (*Reply, error)
-	PushByMids(ctx context.Context, in *MidsMsg, opts ...grpc.CallOption) (*Reply, error)
-	PushByKeys(ctx context.Context, in *KeysMsg, opts ...grpc.CallOption) (*Reply, error)
-	PushGroup(ctx context.Context, in *GroupMsg, opts ...grpc.CallOption) (*Reply, error)
-	JoinGroupsByKeys(ctx context.Context, in *GroupsKey, opts ...grpc.CallOption) (*Reply, error)
-	JoinGroupsByMids(ctx context.Context, in *GroupsMid, opts ...grpc.CallOption) (*Reply, error)
-	LeaveGroupsByKeys(ctx context.Context, in *GroupsKey, opts ...grpc.CallOption) (*Reply, error)
-	LeaveGroupsByMids(ctx context.Context, in *GroupsMid, opts ...grpc.CallOption) (*Reply, error)
-	DelGroups(ctx context.Context, in *DelGroupsReq, opts ...grpc.CallOption) (*Reply, error)
+	SendByUID(ctx context.Context, in *SendByUIDReq, opts ...grpc.CallOption) (*Reply, error)
+	PushByUID(ctx context.Context, in *PushByUIDReq, opts ...grpc.CallOption) (*Reply, error)
+	PushByKey(ctx context.Context, in *PushByKeyReq, opts ...grpc.CallOption) (*Reply, error)
+	PushGroup(ctx context.Context, in *PushGroupReq, opts ...grpc.CallOption) (*Reply, error)
+	JoinGroupByKey(ctx context.Context, in *JoinGroupByKeyReq, opts ...grpc.CallOption) (*Reply, error)
+	JoinGroupByUID(ctx context.Context, in *JoinGroupByUIDReq, opts ...grpc.CallOption) (*Reply, error)
+	LeaveGroupByKey(ctx context.Context, in *LeaveGroupByKeyReq, opts ...grpc.CallOption) (*Reply, error)
+	LeaveGroupByUID(ctx context.Context, in *LeaveGroupByUIDReq, opts ...grpc.CallOption) (*Reply, error)
+	DelGroup(ctx context.Context, in *DelGroupReq, opts ...grpc.CallOption) (*Reply, error)
 }
 
 type logicClient struct {
@@ -77,25 +78,34 @@ func (c *logicClient) Receive(ctx context.Context, in *ReceiveReq, opts ...grpc.
 	return out, nil
 }
 
-func (c *logicClient) PushByMids(ctx context.Context, in *MidsMsg, opts ...grpc.CallOption) (*Reply, error) {
+func (c *logicClient) SendByUID(ctx context.Context, in *SendByUIDReq, opts ...grpc.CallOption) (*Reply, error) {
 	out := new(Reply)
-	err := c.cc.Invoke(ctx, "/im.logic.Logic/PushByMids", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/im.logic.Logic/SendByUID", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *logicClient) PushByKeys(ctx context.Context, in *KeysMsg, opts ...grpc.CallOption) (*Reply, error) {
+func (c *logicClient) PushByUID(ctx context.Context, in *PushByUIDReq, opts ...grpc.CallOption) (*Reply, error) {
 	out := new(Reply)
-	err := c.cc.Invoke(ctx, "/im.logic.Logic/PushByKeys", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/im.logic.Logic/PushByUID", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *logicClient) PushGroup(ctx context.Context, in *GroupMsg, opts ...grpc.CallOption) (*Reply, error) {
+func (c *logicClient) PushByKey(ctx context.Context, in *PushByKeyReq, opts ...grpc.CallOption) (*Reply, error) {
+	out := new(Reply)
+	err := c.cc.Invoke(ctx, "/im.logic.Logic/PushByKey", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *logicClient) PushGroup(ctx context.Context, in *PushGroupReq, opts ...grpc.CallOption) (*Reply, error) {
 	out := new(Reply)
 	err := c.cc.Invoke(ctx, "/im.logic.Logic/PushGroup", in, out, opts...)
 	if err != nil {
@@ -104,45 +114,45 @@ func (c *logicClient) PushGroup(ctx context.Context, in *GroupMsg, opts ...grpc.
 	return out, nil
 }
 
-func (c *logicClient) JoinGroupsByKeys(ctx context.Context, in *GroupsKey, opts ...grpc.CallOption) (*Reply, error) {
+func (c *logicClient) JoinGroupByKey(ctx context.Context, in *JoinGroupByKeyReq, opts ...grpc.CallOption) (*Reply, error) {
 	out := new(Reply)
-	err := c.cc.Invoke(ctx, "/im.logic.Logic/JoinGroupsByKeys", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/im.logic.Logic/JoinGroupByKey", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *logicClient) JoinGroupsByMids(ctx context.Context, in *GroupsMid, opts ...grpc.CallOption) (*Reply, error) {
+func (c *logicClient) JoinGroupByUID(ctx context.Context, in *JoinGroupByUIDReq, opts ...grpc.CallOption) (*Reply, error) {
 	out := new(Reply)
-	err := c.cc.Invoke(ctx, "/im.logic.Logic/JoinGroupsByMids", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/im.logic.Logic/JoinGroupByUID", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *logicClient) LeaveGroupsByKeys(ctx context.Context, in *GroupsKey, opts ...grpc.CallOption) (*Reply, error) {
+func (c *logicClient) LeaveGroupByKey(ctx context.Context, in *LeaveGroupByKeyReq, opts ...grpc.CallOption) (*Reply, error) {
 	out := new(Reply)
-	err := c.cc.Invoke(ctx, "/im.logic.Logic/LeaveGroupsByKeys", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/im.logic.Logic/LeaveGroupByKey", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *logicClient) LeaveGroupsByMids(ctx context.Context, in *GroupsMid, opts ...grpc.CallOption) (*Reply, error) {
+func (c *logicClient) LeaveGroupByUID(ctx context.Context, in *LeaveGroupByUIDReq, opts ...grpc.CallOption) (*Reply, error) {
 	out := new(Reply)
-	err := c.cc.Invoke(ctx, "/im.logic.Logic/LeaveGroupsByMids", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/im.logic.Logic/LeaveGroupByUID", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *logicClient) DelGroups(ctx context.Context, in *DelGroupsReq, opts ...grpc.CallOption) (*Reply, error) {
+func (c *logicClient) DelGroup(ctx context.Context, in *DelGroupReq, opts ...grpc.CallOption) (*Reply, error) {
 	out := new(Reply)
-	err := c.cc.Invoke(ctx, "/im.logic.Logic/DelGroups", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/im.logic.Logic/DelGroup", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -157,14 +167,15 @@ type LogicServer interface {
 	Disconnect(context.Context, *DisconnectReq) (*Reply, error)
 	Heartbeat(context.Context, *HeartbeatReq) (*Reply, error)
 	Receive(context.Context, *ReceiveReq) (*Reply, error)
-	PushByMids(context.Context, *MidsMsg) (*Reply, error)
-	PushByKeys(context.Context, *KeysMsg) (*Reply, error)
-	PushGroup(context.Context, *GroupMsg) (*Reply, error)
-	JoinGroupsByKeys(context.Context, *GroupsKey) (*Reply, error)
-	JoinGroupsByMids(context.Context, *GroupsMid) (*Reply, error)
-	LeaveGroupsByKeys(context.Context, *GroupsKey) (*Reply, error)
-	LeaveGroupsByMids(context.Context, *GroupsMid) (*Reply, error)
-	DelGroups(context.Context, *DelGroupsReq) (*Reply, error)
+	SendByUID(context.Context, *SendByUIDReq) (*Reply, error)
+	PushByUID(context.Context, *PushByUIDReq) (*Reply, error)
+	PushByKey(context.Context, *PushByKeyReq) (*Reply, error)
+	PushGroup(context.Context, *PushGroupReq) (*Reply, error)
+	JoinGroupByKey(context.Context, *JoinGroupByKeyReq) (*Reply, error)
+	JoinGroupByUID(context.Context, *JoinGroupByUIDReq) (*Reply, error)
+	LeaveGroupByKey(context.Context, *LeaveGroupByKeyReq) (*Reply, error)
+	LeaveGroupByUID(context.Context, *LeaveGroupByUIDReq) (*Reply, error)
+	DelGroup(context.Context, *DelGroupReq) (*Reply, error)
 	mustEmbedUnimplementedLogicServer()
 }
 
@@ -184,29 +195,32 @@ func (UnimplementedLogicServer) Heartbeat(context.Context, *HeartbeatReq) (*Repl
 func (UnimplementedLogicServer) Receive(context.Context, *ReceiveReq) (*Reply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Receive not implemented")
 }
-func (UnimplementedLogicServer) PushByMids(context.Context, *MidsMsg) (*Reply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method PushByMids not implemented")
+func (UnimplementedLogicServer) SendByUID(context.Context, *SendByUIDReq) (*Reply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendByUID not implemented")
 }
-func (UnimplementedLogicServer) PushByKeys(context.Context, *KeysMsg) (*Reply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method PushByKeys not implemented")
+func (UnimplementedLogicServer) PushByUID(context.Context, *PushByUIDReq) (*Reply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PushByUID not implemented")
 }
-func (UnimplementedLogicServer) PushGroup(context.Context, *GroupMsg) (*Reply, error) {
+func (UnimplementedLogicServer) PushByKey(context.Context, *PushByKeyReq) (*Reply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PushByKey not implemented")
+}
+func (UnimplementedLogicServer) PushGroup(context.Context, *PushGroupReq) (*Reply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PushGroup not implemented")
 }
-func (UnimplementedLogicServer) JoinGroupsByKeys(context.Context, *GroupsKey) (*Reply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method JoinGroupsByKeys not implemented")
+func (UnimplementedLogicServer) JoinGroupByKey(context.Context, *JoinGroupByKeyReq) (*Reply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method JoinGroupByKey not implemented")
 }
-func (UnimplementedLogicServer) JoinGroupsByMids(context.Context, *GroupsMid) (*Reply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method JoinGroupsByMids not implemented")
+func (UnimplementedLogicServer) JoinGroupByUID(context.Context, *JoinGroupByUIDReq) (*Reply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method JoinGroupByUID not implemented")
 }
-func (UnimplementedLogicServer) LeaveGroupsByKeys(context.Context, *GroupsKey) (*Reply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method LeaveGroupsByKeys not implemented")
+func (UnimplementedLogicServer) LeaveGroupByKey(context.Context, *LeaveGroupByKeyReq) (*Reply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method LeaveGroupByKey not implemented")
 }
-func (UnimplementedLogicServer) LeaveGroupsByMids(context.Context, *GroupsMid) (*Reply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method LeaveGroupsByMids not implemented")
+func (UnimplementedLogicServer) LeaveGroupByUID(context.Context, *LeaveGroupByUIDReq) (*Reply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method LeaveGroupByUID not implemented")
 }
-func (UnimplementedLogicServer) DelGroups(context.Context, *DelGroupsReq) (*Reply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DelGroups not implemented")
+func (UnimplementedLogicServer) DelGroup(context.Context, *DelGroupReq) (*Reply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DelGroup not implemented")
 }
 func (UnimplementedLogicServer) mustEmbedUnimplementedLogicServer() {}
 
@@ -293,44 +307,62 @@ func _Logic_Receive_Handler(srv interface{}, ctx context.Context, dec func(inter
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Logic_PushByMids_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(MidsMsg)
+func _Logic_SendByUID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SendByUIDReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(LogicServer).PushByMids(ctx, in)
+		return srv.(LogicServer).SendByUID(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/im.logic.Logic/PushByMids",
+		FullMethod: "/im.logic.Logic/SendByUID",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LogicServer).PushByMids(ctx, req.(*MidsMsg))
+		return srv.(LogicServer).SendByUID(ctx, req.(*SendByUIDReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Logic_PushByKeys_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(KeysMsg)
+func _Logic_PushByUID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PushByUIDReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(LogicServer).PushByKeys(ctx, in)
+		return srv.(LogicServer).PushByUID(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/im.logic.Logic/PushByKeys",
+		FullMethod: "/im.logic.Logic/PushByUID",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LogicServer).PushByKeys(ctx, req.(*KeysMsg))
+		return srv.(LogicServer).PushByUID(ctx, req.(*PushByUIDReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Logic_PushByKey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PushByKeyReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LogicServer).PushByKey(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/im.logic.Logic/PushByKey",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LogicServer).PushByKey(ctx, req.(*PushByKeyReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Logic_PushGroup_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GroupMsg)
+	in := new(PushGroupReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -342,97 +374,97 @@ func _Logic_PushGroup_Handler(srv interface{}, ctx context.Context, dec func(int
 		FullMethod: "/im.logic.Logic/PushGroup",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LogicServer).PushGroup(ctx, req.(*GroupMsg))
+		return srv.(LogicServer).PushGroup(ctx, req.(*PushGroupReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Logic_JoinGroupsByKeys_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GroupsKey)
+func _Logic_JoinGroupByKey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(JoinGroupByKeyReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(LogicServer).JoinGroupsByKeys(ctx, in)
+		return srv.(LogicServer).JoinGroupByKey(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/im.logic.Logic/JoinGroupsByKeys",
+		FullMethod: "/im.logic.Logic/JoinGroupByKey",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LogicServer).JoinGroupsByKeys(ctx, req.(*GroupsKey))
+		return srv.(LogicServer).JoinGroupByKey(ctx, req.(*JoinGroupByKeyReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Logic_JoinGroupsByMids_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GroupsMid)
+func _Logic_JoinGroupByUID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(JoinGroupByUIDReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(LogicServer).JoinGroupsByMids(ctx, in)
+		return srv.(LogicServer).JoinGroupByUID(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/im.logic.Logic/JoinGroupsByMids",
+		FullMethod: "/im.logic.Logic/JoinGroupByUID",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LogicServer).JoinGroupsByMids(ctx, req.(*GroupsMid))
+		return srv.(LogicServer).JoinGroupByUID(ctx, req.(*JoinGroupByUIDReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Logic_LeaveGroupsByKeys_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GroupsKey)
+func _Logic_LeaveGroupByKey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LeaveGroupByKeyReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(LogicServer).LeaveGroupsByKeys(ctx, in)
+		return srv.(LogicServer).LeaveGroupByKey(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/im.logic.Logic/LeaveGroupsByKeys",
+		FullMethod: "/im.logic.Logic/LeaveGroupByKey",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LogicServer).LeaveGroupsByKeys(ctx, req.(*GroupsKey))
+		return srv.(LogicServer).LeaveGroupByKey(ctx, req.(*LeaveGroupByKeyReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Logic_LeaveGroupsByMids_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GroupsMid)
+func _Logic_LeaveGroupByUID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LeaveGroupByUIDReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(LogicServer).LeaveGroupsByMids(ctx, in)
+		return srv.(LogicServer).LeaveGroupByUID(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/im.logic.Logic/LeaveGroupsByMids",
+		FullMethod: "/im.logic.Logic/LeaveGroupByUID",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LogicServer).LeaveGroupsByMids(ctx, req.(*GroupsMid))
+		return srv.(LogicServer).LeaveGroupByUID(ctx, req.(*LeaveGroupByUIDReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Logic_DelGroups_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DelGroupsReq)
+func _Logic_DelGroup_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DelGroupReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(LogicServer).DelGroups(ctx, in)
+		return srv.(LogicServer).DelGroup(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/im.logic.Logic/DelGroups",
+		FullMethod: "/im.logic.Logic/DelGroup",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LogicServer).DelGroups(ctx, req.(*DelGroupsReq))
+		return srv.(LogicServer).DelGroup(ctx, req.(*DelGroupReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -461,36 +493,40 @@ var Logic_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Logic_Receive_Handler,
 		},
 		{
-			MethodName: "PushByMids",
-			Handler:    _Logic_PushByMids_Handler,
+			MethodName: "SendByUID",
+			Handler:    _Logic_SendByUID_Handler,
 		},
 		{
-			MethodName: "PushByKeys",
-			Handler:    _Logic_PushByKeys_Handler,
+			MethodName: "PushByUID",
+			Handler:    _Logic_PushByUID_Handler,
+		},
+		{
+			MethodName: "PushByKey",
+			Handler:    _Logic_PushByKey_Handler,
 		},
 		{
 			MethodName: "PushGroup",
 			Handler:    _Logic_PushGroup_Handler,
 		},
 		{
-			MethodName: "JoinGroupsByKeys",
-			Handler:    _Logic_JoinGroupsByKeys_Handler,
+			MethodName: "JoinGroupByKey",
+			Handler:    _Logic_JoinGroupByKey_Handler,
 		},
 		{
-			MethodName: "JoinGroupsByMids",
-			Handler:    _Logic_JoinGroupsByMids_Handler,
+			MethodName: "JoinGroupByUID",
+			Handler:    _Logic_JoinGroupByUID_Handler,
 		},
 		{
-			MethodName: "LeaveGroupsByKeys",
-			Handler:    _Logic_LeaveGroupsByKeys_Handler,
+			MethodName: "LeaveGroupByKey",
+			Handler:    _Logic_LeaveGroupByKey_Handler,
 		},
 		{
-			MethodName: "LeaveGroupsByMids",
-			Handler:    _Logic_LeaveGroupsByMids_Handler,
+			MethodName: "LeaveGroupByUID",
+			Handler:    _Logic_LeaveGroupByUID_Handler,
 		},
 		{
-			MethodName: "DelGroups",
-			Handler:    _Logic_DelGroups_Handler,
+			MethodName: "DelGroup",
+			Handler:    _Logic_DelGroup_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

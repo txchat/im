@@ -1,12 +1,10 @@
 package comet
 
 import (
-	"errors"
 	"sync"
 	"sync/atomic"
 
 	"github.com/Terry-Mao/goim/pkg/bufio"
-	"github.com/golang/protobuf/proto"
 	"github.com/txchat/im/api/protocol"
 )
 
@@ -35,31 +33,18 @@ func NewChannel(cli, svr int) *Channel {
 	return c
 }
 
-// Push server push message.
 func (c *Channel) seqInc() int32 {
 	return atomic.AddInt32(&c.Seq, 1)
 }
 
 // Push server push message.
-func (c *Channel) push(p *protocol.Proto) (err error) {
+func (c *Channel) Push(p *protocol.Proto) (err error) {
+	p.Seq = c.seqInc()
 	select {
 	case c.signal <- p:
 	default:
 	}
 	return
-}
-
-// Push server push message.
-func (c *Channel) Push(p *protocol.Proto) (seq int32, err error) {
-	if p, ok := proto.Clone(p).(*protocol.Proto); ok {
-		if p.Op == int32(protocol.Op_ReceiveMsg) {
-			p.Seq = c.seqInc()
-		}
-		seq = p.Seq
-		return seq, c.push(p)
-	} else {
-		return 0, errors.New("protocol type protocol proto failed")
-	}
 }
 
 // Ready check the channel ready or close?
@@ -72,36 +57,42 @@ func (c *Channel) Signal() {
 	c.signal <- protocol.ProtoReady
 }
 
-// Close close the channel.
+// Resend send signal to the channel, protocol resend.
+func (c *Channel) Resend() {
+	c.signal <- protocol.ProtoResend
+}
+
+// Close notice goroutine finish.
 func (c *Channel) Close() {
 	c.signal <- protocol.ProtoFinish
 }
 
-// Close close the channel.
-func (c Channel) Groups() map[string]*Node {
+// Groups get joined groups.
+func (c *Channel) Groups() map[string]*Node {
 	return c.nodes
 }
 
-//
+// DelNode delete the group node by id
 func (c *Channel) DelNode(id string) {
 	c.mutex.Lock()
 	delete(c.nodes, id)
 	c.mutex.Unlock()
 }
 
+// SetNode set a group node by id
 func (c *Channel) SetNode(id string, node *Node) {
 	c.mutex.Lock()
 	c.nodes[id] = node
 	c.mutex.Unlock()
 }
 
+// GetNode get a group node by id
 func (c *Channel) GetNode(id string) *Node {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 	return c.nodes[id]
 }
 
-// base info just for debug
 func (c *Channel) GetSeq() int32 {
 	return c.Seq
 }

@@ -7,20 +7,19 @@ import (
 	"time"
 
 	"github.com/gomodule/redigo/redis"
-	"github.com/rs/zerolog/log"
 	"github.com/txchat/im/app/logic/internal/config"
 )
 
 const (
-	MidFmt             = "%s:%v"       // {appId}:{uid}
-	_prefixMidServer   = "mid_%s:%v"   // mid_{appId}:{uid} -> key:server
+	UIDFmt             = "%s:%v"       // {appId}:{uid}
+	_prefixUIDServer   = "uid_%s:%v"   // uid_{appId}:{uid} -> key:server
 	_prefixKeyServer   = "key_%s"      // key_{key} -> server
 	_prefixKeyUser     = "usr_%s"      // usr_{key} -> {appId}:{uid}
 	_prefixGroupServer = "group_%s:%s" // group_{appId}:{gid} -> {server}:{score}
 )
 
-func keyMidServer(appId string, mid string) string {
-	return fmt.Sprintf(_prefixMidServer, appId, mid)
+func keyUIDServer(appId string, uid string) string {
+	return fmt.Sprintf(_prefixUIDServer, appId, uid)
 }
 
 func keyKeyServer(key string) string {
@@ -67,14 +66,14 @@ func NewLogicRepositoryRedis(cfg config.Redis) *LogicRepositoryRedis {
 	}
 }
 
-func (repo *LogicRepositoryRedis) pingRedis(c context.Context) (err error) {
+func (repo *LogicRepositoryRedis) pingRedis(ctx context.Context) (err error) {
 	conn := repo.redis.Get()
 	_, err = conn.Do("SET", "PING", "PONG")
 	conn.Close()
 	return
 }
 
-func (repo *LogicRepositoryRedis) GetMember(c context.Context, key string) (appId string, mid string, err error) {
+func (repo *LogicRepositoryRedis) GetMember(ctx context.Context, key string) (appId string, uid string, err error) {
 	conn := repo.redis.Get()
 	defer conn.Close()
 	ss, err := redis.String(conn.Do("GET", keyKeyUser(key)))
@@ -86,18 +85,18 @@ func (repo *LogicRepositoryRedis) GetMember(c context.Context, key string) (appI
 		return "", "", fmt.Errorf("invalid key %v", key)
 	}
 	appId = arr[0]
-	mid = arr[1]
+	uid = arr[1]
 	return
 }
 
-// KeysByMids get a key server by mid.
-func (repo *LogicRepositoryRedis) KeysByMids(c context.Context, appId string, mids []string) (ress map[string]string, olMids []string, err error) {
+// KeysByUIDs get a key server by uid.
+func (repo *LogicRepositoryRedis) KeysByUIDs(ctx context.Context, appId string, uids []string) (ress map[string]string, onlyUID []string, err error) {
 	conn := repo.redis.Get()
 	defer conn.Close()
 	ress = make(map[string]string)
-	for _, mid := range mids {
-		if err = conn.Send("HGETALL", keyMidServer(appId, mid)); err != nil {
-			err = fmt.Errorf("conn.Do(HGETALL %s) error: %v", mid, err)
+	for _, uid := range uids {
+		if err = conn.Send("HGETALL", keyUIDServer(appId, uid)); err != nil {
+			err = fmt.Errorf("conn.Do(HGETALL %s) error: %v", uid, err)
 			return
 		}
 	}
@@ -105,16 +104,15 @@ func (repo *LogicRepositoryRedis) KeysByMids(c context.Context, appId string, mi
 		err = fmt.Errorf("conn.Flush() error %v", err)
 		return
 	}
-	for idx := 0; idx < len(mids); idx++ {
+	for idx := 0; idx < len(uids); idx++ {
 		var (
 			res map[string]string
 		)
 		if res, err = redis.StringMap(conn.Receive()); err != nil {
-			log.Error().Err(err).Msg("conn.Receive() error")
 			return
 		}
 		if len(res) > 0 {
-			olMids = append(olMids, mids[idx])
+			onlyUID = append(onlyUID, uids[idx])
 		}
 		for k, v := range res {
 			ress[k] = v
@@ -123,17 +121,17 @@ func (repo *LogicRepositoryRedis) KeysByMids(c context.Context, appId string, mi
 	return
 }
 
-func (repo *LogicRepositoryRedis) GetServer(c context.Context, key string) (server string, err error) {
+func (repo *LogicRepositoryRedis) GetServer(ctx context.Context, key string) (server string, err error) {
 	conn := repo.redis.Get()
 	defer conn.Close()
 	if server, err = redis.String(conn.Do("GET", keyKeyServer(key))); err != nil {
-		log.Error().Str("key", key).Err(err).Msg("conn.DO(GET)")
+		err = fmt.Errorf("conn.DO(GET) error %v", err)
 	}
 	return
 }
 
 // ServersByKeys get a server by key.
-func (repo *LogicRepositoryRedis) ServersByKeys(c context.Context, keys []string) (res []string, err error) {
+func (repo *LogicRepositoryRedis) ServersByKeys(ctx context.Context, keys []string) (res []string, err error) {
 	conn := repo.redis.Get()
 	defer conn.Close()
 	var args []interface{}
@@ -141,50 +139,48 @@ func (repo *LogicRepositoryRedis) ServersByKeys(c context.Context, keys []string
 		args = append(args, keyKeyServer(key))
 	}
 	if res, err = redis.Strings(conn.Do("MGET", args...)); err != nil {
-		log.Error().Err(err).Msg(fmt.Sprintf("conn.Do(MGET %v) error", args))
+		err = fmt.Errorf("conn.Do(MGET %v) error %v", args, err)
 	}
 	return
 }
 
-func (repo *LogicRepositoryRedis) AddMapping(c context.Context, mid string, appId string, key string, server string) (err error) {
+func (repo *LogicRepositoryRedis) AddMapping(ctx context.Context, uid string, appId string, key string, server string) (err error) {
 	conn := repo.redis.Get()
 	defer conn.Close()
 	var n = 4
-	if mid != "" {
-		if err = conn.Send("HSET", keyMidServer(appId, mid), key, server); err != nil {
-			log.Error().Str("key", key).Err(err).Msg(fmt.Sprintf("conn.Send(HSET %s,%s,%s,%s) error", appId, mid, server, key))
+	if uid != "" {
+		if err = conn.Send("HSET", keyUIDServer(appId, uid), key, server); err != nil {
+			err = fmt.Errorf("conn.Send(HSET %s,%s,%s,%s) error %v", appId, uid, server, key, err)
 			return
 		}
-		if err = conn.Send("EXPIRE", keyMidServer(appId, mid), repo.redisExpire); err != nil {
-			log.Error().Str("key", key).Err(err).Msg(fmt.Sprintf("conn.Send(EXPIRE %s,%s,%s,%s)", appId, mid, key, server))
+		if err = conn.Send("EXPIRE", keyUIDServer(appId, uid), repo.redisExpire); err != nil {
+			err = fmt.Errorf("conn.Send(EXPIRE %s,%s,%s,%s) error %v", appId, uid, key, server, err)
 			return
 		}
 		n += 2
 	}
 	if err = conn.Send("SET", keyKeyServer(key), server); err != nil {
-		log.Error().Str("key", key).Err(err).Msg(fmt.Sprintf("conn.Send(HSET %s,%s,%s) error", mid, server, key))
+		err = fmt.Errorf("conn.Send(HSET %s,%s,%s) error %v", uid, server, key, err)
 		return
 	}
 	if err = conn.Send("EXPIRE", keyKeyServer(key), repo.redisExpire); err != nil {
-		log.Error().Str("key", key).Err(err).Msg(fmt.Sprintf("conn.Send(EXPIRE %s,%s,%s) error", mid, key, server))
+		err = fmt.Errorf("conn.Send(EXPIRE %s,%s,%s) error %v", uid, key, server, err)
 		return
 	}
-	user := fmt.Sprintf(MidFmt, appId, mid)
+	user := fmt.Sprintf(UIDFmt, appId, uid)
 	if err = conn.Send("SET", keyKeyUser(key), user); err != nil {
-		log.Error().Str("key", key).Err(err).Msg(fmt.Sprintf("conn.Send(HSET %s,%s,%s) error", mid, appId, key))
+		err = fmt.Errorf("conn.Send(HSET %s,%s,%s) error %v", uid, appId, key, err)
 		return
 	}
 	if err = conn.Send("EXPIRE", keyKeyUser(key), repo.redisExpire); err != nil {
-		log.Error().Str("key", key).Err(err).Msg(fmt.Sprintf("conn.Send(EXPIRE %s,%s,%s) error", mid, appId, key))
+		err = fmt.Errorf("conn.Send(EXPIRE %s,%s,%s) error %v", uid, appId, key, err)
 		return
 	}
 	if err = conn.Flush(); err != nil {
-		log.Error().Str("key", key).Err(err).Msg("conn.Flush() error")
 		return
 	}
 	for i := 0; i < n; i++ {
 		if _, err = conn.Receive(); err != nil {
-			log.Error().Str("key", key).Err(err).Msg("conn.Receive() error")
 			return
 		}
 	}
@@ -192,137 +188,118 @@ func (repo *LogicRepositoryRedis) AddMapping(c context.Context, mid string, appI
 }
 
 // ExpireMapping expire a mapping.
-func (repo *LogicRepositoryRedis) ExpireMapping(c context.Context, mid string, appId string, key string) (has bool, err error) {
+func (repo *LogicRepositoryRedis) ExpireMapping(ctx context.Context, uid string, appId string, key string) (has bool, err error) {
 	conn := repo.redis.Get()
 	defer conn.Close()
 	var n = 2
-	if mid != "" {
-		if err = conn.Send("EXPIRE", keyMidServer(appId, mid), repo.redisExpire); err != nil {
-			log.Error().Str("key", key).Err(err).Msg(fmt.Sprintf("conn.Send(EXPIRE %s) error", keyMidServer(appId, mid)))
+	if uid != "" {
+		if err = conn.Send("EXPIRE", keyUIDServer(appId, uid), repo.redisExpire); err != nil {
+			err = fmt.Errorf("conn.Send(EXPIRE %s) error %v", keyUIDServer(appId, uid), err)
 			return
 		}
 		n++
 	}
 	if err = conn.Send("EXPIRE", keyKeyServer(key), repo.redisExpire); err != nil {
-		log.Error().Str("key", key).Err(err).Msg(fmt.Sprintf("conn.Send(EXPIRE %s) error", keyKeyServer(key)))
+		err = fmt.Errorf("conn.Send(EXPIRE %s) error %v", keyKeyServer(key), err)
 		return
 	}
 	if err = conn.Send("EXPIRE", keyKeyUser(key), repo.redisExpire); err != nil {
-		log.Error().Str("key", key).Err(err).Msg(fmt.Sprintf("conn.Send(EXPIRE %s) error", keyKeyServer(key)))
+		err = fmt.Errorf("conn.Send(EXPIRE %s) error %v", keyKeyServer(key), err)
 		return
 	}
 	if err = conn.Flush(); err != nil {
-		log.Error().Str("key", key).Err(err).Msg("conn.Flush() error")
 		return
 	}
 	for i := 0; i < n; i++ {
 		if has, err = redis.Bool(conn.Receive()); err != nil {
-			log.Error().Str("key", key).Err(err).Msg("conn.Receive() error")
 			return
 		}
 	}
 	return
 }
 
-func (repo *LogicRepositoryRedis) DelMapping(c context.Context, mid string, appId string, key string) (has bool, err error) {
+func (repo *LogicRepositoryRedis) DelMapping(ctx context.Context, uid string, appId string, key string) (has bool, err error) {
 	conn := repo.redis.Get()
 	defer conn.Close()
 	var n = 2
-	if mid != "" {
-		if err = conn.Send("HDEL", keyMidServer(appId, mid), key); err != nil {
-			log.Error().Str("key", key).Err(err).Msg(fmt.Sprintf("conn.Send(HDEL %s) error", keyMidServer(appId, mid)))
+	if uid != "" {
+		if err = conn.Send("HDEL", keyUIDServer(appId, uid), key); err != nil {
+			err = fmt.Errorf("conn.Send(HDEL %s) error %v", keyUIDServer(appId, uid), err)
 			return
 		}
 		n++
 	}
 	if err = conn.Send("DEL", keyKeyServer(key)); err != nil {
-		log.Error().Str("key", key).Err(err).Msg(fmt.Sprintf("conn.Send(DEL %s) error", keyKeyServer(key)))
+		err = fmt.Errorf("conn.Send(DEL %s) error %v", keyKeyServer(key), err)
 		return
 	}
 	if err = conn.Send("DEL", keyKeyUser(key)); err != nil {
-		log.Error().Str("key", key).Err(err).Msg(fmt.Sprintf("conn.Send(DEL %s) error", keyKeyUser(key)))
+		err = fmt.Errorf(fmt.Sprintf("conn.Send(DEL %s) error %v", keyKeyUser(key)), err)
 		return
 	}
 	if err = conn.Flush(); err != nil {
-		log.Error().Str("key", key).Err(err).Msg("conn.Flush() error")
 		return
 	}
 	for i := 0; i < n; i++ {
 		if has, err = redis.Bool(conn.Receive()); err != nil {
-			log.Error().Str("key", key).Err(err).Msg("conn.Receive() error")
 			return
 		}
 	}
 	return
 }
 
-func (repo *LogicRepositoryRedis) IncGroupServer(c context.Context, appId, key, server string, gid []string) (err error) {
+func (repo *LogicRepositoryRedis) IncGroupServer(ctx context.Context, appId, key, server string, gid []string) (err error) {
 	conn := repo.redis.Get()
 	defer conn.Close()
 	var n = 0
 	for _, g := range gid {
 		if err = conn.Send("ZINCRBY", keyGroupServer(appId, g), "1", server); err != nil {
-			log.Error().Str("key", key).Err(err).Msg(
-				fmt.Sprintf("conn.Send(ZINCRBY %s,%s,%s) error", keyGroupServer(appId, g), "1", server))
+			err = fmt.Errorf("conn.Send(ZINCRBY %s,%s,%s) error %v", keyGroupServer(appId, g), "1", server, err)
 			return
 		}
-		//if err = conn.Send("EXPIRE", keyGroupServer(appId, g), repo.redisExpire); err != nil {
-		//	log.Error().Str("key", key).Err(err).Msg(fmt.Sprintf("conn.Send(EXPIRE %s,%s,%s,%s)", appId, mid, key, server))
-		//	return
-		//}
 		n++
 	}
 	if err = conn.Flush(); err != nil {
-		log.Error().Str("key", key).Err(err).Msg("conn.Flush() error")
 		return
 	}
 	for i := 0; i < n; i++ {
 		if _, err = conn.Receive(); err != nil {
-			log.Error().Str("key", key).Err(err).Msg("conn.Receive() error")
 			return
 		}
 	}
 	return
 }
 
-func (repo *LogicRepositoryRedis) DecGroupServer(c context.Context, appId, key, server string, gid []string) (err error) {
+func (repo *LogicRepositoryRedis) DecGroupServer(ctx context.Context, appId, key, server string, gid []string) (err error) {
 	conn := repo.redis.Get()
 	defer conn.Close()
 	var n = 0
 	for _, g := range gid {
 		if err = conn.Send("ZINCRBY", keyGroupServer(appId, g), "-1", server); err != nil {
-			log.Error().Str("key", key).Err(err).Msg(
-				fmt.Sprintf("conn.Send(ZINCRBY %s,%s,%s) error", keyGroupServer(appId, g), "-1", server))
+			err = fmt.Errorf("conn.Send(ZINCRBY %s,%s,%s) error %v", keyGroupServer(appId, g), "-1", server, err)
 			return
 		}
-		//if err = conn.Send("EXPIRE", keyGroupServer(appId, g), repo.redisExpire); err != nil {
-		//	log.Error().Str("key", key).Err(err).Msg(fmt.Sprintf("conn.Send(EXPIRE %s,%s,%s,%s)", appId, mid, key, server))
-		//	return
-		//}
 		n++
 	}
 	if err = conn.Flush(); err != nil {
-		log.Error().Str("key", key).Err(err).Msg("conn.Flush() error")
 		return
 	}
 	for i := 0; i < n; i++ {
 		if _, err = conn.Receive(); err != nil {
-			log.Error().Str("key", key).Err(err).Msg("conn.Receive() error")
 			return
 		}
 	}
 	return
 }
 
-// KeysByMids get a key server by mid.
-func (repo *LogicRepositoryRedis) ServersByGid(c context.Context, appId string, gid string) (res []string, err error) {
+// ServersByGid get a key server by uid.
+func (repo *LogicRepositoryRedis) ServersByGid(ctx context.Context, appId string, gid string) (res []string, err error) {
 	conn := repo.redis.Get()
 	defer conn.Close()
 	res = make([]string, 0)
 	ress := make(map[string]string)
 	if ress, err = redis.StringMap(conn.Do("ZRANGE", keyGroupServer(appId, gid), "0", "-1", "WITHSCORES")); err != nil {
-		log.Error().Str("appId", appId).Str("gid", gid).Err(err).Msg(
-			fmt.Sprintf("conn.DO(ZRANGE %s,%s,%s,%s) error", keyGroupServer(appId, gid), "0", "-1", "WITHSCORES"))
+		err = fmt.Errorf("conn.DO(ZRANGE %s,%s,%s,%s) error %v", keyGroupServer(appId, gid), "0", "-1", "WITHSCORES", err)
 	}
 	for k := range ress {
 		res = append(res, k)
@@ -330,8 +307,8 @@ func (repo *LogicRepositoryRedis) ServersByGid(c context.Context, appId string, 
 	return
 }
 
-// KeysByMids key=server value=gid list
-func (repo *LogicRepositoryRedis) ServersByGids(c context.Context, appId string, gids []string) (ress map[string][]string, err error) {
+// ServersByGids key=server value=gid list
+func (repo *LogicRepositoryRedis) ServersByGids(ctx context.Context, appId string, gids []string) (ress map[string][]string, err error) {
 	conn := repo.redis.Get()
 	defer conn.Close()
 	ress = make(map[string][]string)

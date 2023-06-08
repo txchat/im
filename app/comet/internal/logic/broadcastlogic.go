@@ -31,7 +31,7 @@ func (l *BroadcastLogic) Broadcast(in *comet.BroadcastReq) (*comet.BroadcastRepl
 	// TODO use broadcast queue
 	go func() {
 		for _, bucket := range l.svcCtx.Buckets() {
-			bucket.Broadcast(in.GetProto(), in.GetProtoOp())
+			bucket.Broadcast(in.GetProto())
 		}
 	}()
 	return &comet.BroadcastReply{}, nil

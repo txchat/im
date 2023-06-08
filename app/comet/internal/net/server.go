@@ -2,38 +2,52 @@ package net
 
 import (
 	"context"
-	"encoding/base64"
 	"errors"
 	"fmt"
 	"io"
 	"math"
 	"net"
-	"runtime"
-	"strconv"
 	"strings"
 	"time"
 
 	"github.com/Terry-Mao/goim/pkg/bytes"
 	xtime "github.com/Terry-Mao/goim/pkg/time"
 	"github.com/Terry-Mao/goim/pkg/websocket"
-	"github.com/rs/zerolog/log"
 	"github.com/txchat/im/api/protocol"
 	"github.com/txchat/im/app/comet/internal/svc"
 	"github.com/txchat/im/internal/comet"
-	dtask "github.com/txchat/task"
+	"github.com/txchat/im/pkg/auth"
+	"github.com/zeromicro/go-zero/core/logx"
 )
 
-type CometConnCreator func(conn net.Conn) Conn
+type CometScheme interface {
+	Name() string
+	GetConn(conn net.Conn) Conn
+}
 
-var WebsocketServer = func(conn net.Conn) Conn {
+type websocketScheme struct{}
+
+func (ws *websocketScheme) Name() string {
+	return "websocket"
+}
+func (ws *websocketScheme) GetConn(conn net.Conn) Conn {
 	return NewWebsocket(conn)
 }
-var TCPServer = func(conn net.Conn) Conn {
+
+type tcpScheme struct{}
+
+func (tcp *tcpScheme) Name() string {
+	return "tcp"
+}
+func (tcp *tcpScheme) GetConn(conn net.Conn) Conn {
 	return NewTCP(conn)
 }
 
+var WebsocketServer = &websocketScheme{}
+var TCPServer = &tcpScheme{}
+
 // InitServer listen all tcp.bind and start accept connections.
-func InitServer(svcCtx *svc.ServiceContext, address []string, thread int, scheme CometConnCreator) (err error) {
+func InitServer(svcCtx *svc.ServiceContext, address []string, thread int, scheme CometScheme) (err error) {
 	var (
 		bind     string
 		listener *net.TCPListener
@@ -62,40 +76,31 @@ func InitServer(svcCtx *svc.ServiceContext, address []string, thread int, scheme
 // Accept accepts connections on the listener and serves requests
 // for each incoming connection.  Accept blocks; the caller typically
 // invokes it in a go statement.
-func accept(svcCtx *svc.ServiceContext, lis *net.TCPListener, scheme CometConnCreator) {
-	defer func() {
-		buf := make([]byte, 1024*3)
-		runtime.Stack(buf, false)
-		log.Error().Str("panic", string(buf)).Msg("accept done")
-		if r := recover(); r != nil {
-			buf := make([]byte, 1024*3)
-			runtime.Stack(buf, false)
-			log.Error().Interface("recover", r).Str("panic", string(buf)).Msg("Recovered in accept")
-		}
-	}()
+func accept(svcCtx *svc.ServiceContext, lis *net.TCPListener, scheme CometScheme) {
 	var (
 		conn *net.TCPConn
 		err  error
 		r    int
 	)
+	logx.Infof("Starting %s server at %s...", scheme.Name(), lis.Addr().String())
 	for {
 		if conn, err = lis.AcceptTCP(); err != nil {
 			// if listener close then return
-			log.Error().Stack().Err(err).Msg(fmt.Sprintf("listener.Accept(\"%s\")", lis.Addr().String()))
+			logx.Errorf("listener.Accept(\"%s\") error:", lis.Addr().String(), err)
 			continue
 			//return
 		}
-		log.Info().Str("remoteIP", conn.RemoteAddr().String()).Msg("accept conn")
+		logx.Info("accept conn", "remoteIP", conn.RemoteAddr().String())
 		if err = conn.SetKeepAlive(svcCtx.Config.TCP.KeepAlive); err != nil {
-			log.Error().Stack().Err(err).Msg("conn.SetKeepAlive()")
+			logx.Error("conn.SetKeepAlive()", "err", err)
 			return
 		}
 		if err = conn.SetReadBuffer(svcCtx.Config.TCP.Rcvbuf); err != nil {
-			log.Error().Stack().Err(err).Msg("conn.SetReadBuffer()")
+			logx.Error("conn.SetReadBuffer()", "err", err)
 			return
 		}
 		if err = conn.SetWriteBuffer(svcCtx.Config.TCP.Sndbuf); err != nil {
-			log.Error().Stack().Err(err).Msg("conn.SetWriteBuffer()")
+			logx.Error("conn.SetWriteBuffer()", "err", err)
 			return
 		}
 		go serve(svcCtx, conn, r, scheme)
@@ -105,7 +110,7 @@ func accept(svcCtx *svc.ServiceContext, lis *net.TCPListener, scheme CometConnCr
 	}
 }
 
-func serve(svcCtx *svc.ServiceContext, conn net.Conn, r int, scheme CometConnCreator) {
+func serve(svcCtx *svc.ServiceContext, conn net.Conn, r int, scheme CometScheme) {
 	var (
 		// timer
 		tr = svcCtx.Round().Timer(r)
@@ -113,11 +118,13 @@ func serve(svcCtx *svc.ServiceContext, conn net.Conn, r int, scheme CometConnCre
 		wp = svcCtx.Round().Writer(r)
 	)
 
-	NewCometServer(svcCtx).Serve(scheme(conn), conn, rp, wp, tr)
+	NewCometServer(svcCtx).Serve(scheme.GetConn(conn), conn, rp, wp, tr)
 }
 
 type CometServer struct {
 	svcCtx *svc.ServiceContext
+
+	resend *comet.Resend
 }
 
 func NewCometServer(svcCtx *svc.ServiceContext) *CometServer {
@@ -139,7 +146,6 @@ func (s *CometServer) Serve(cometConn Conn, conn net.Conn, rp, wp *bytes.Pool, t
 		ch     = comet.NewChannel(s.svcCtx.Config.Protocol.CliProto, s.svcCtx.Config.Protocol.SvrProto)
 		rr     = &ch.Reader
 		wr     = &ch.Writer
-		tsk    *dtask.Task
 	)
 	// reset reader buffer
 	ch.Reader.ResetBuffer(conn, rb.Bytes())
@@ -154,7 +160,7 @@ func (s *CometServer) Serve(cometConn Conn, conn net.Conn, rp, wp *bytes.Pool, t
 		// NOTE: fix close block for tls
 		_ = conn.SetDeadline(time.Now().Add(time.Millisecond * 100))
 		_ = conn.Close()
-		log.Error().Int("step", step).Str("key", ch.Key).Str("remoteIP", conn.RemoteAddr().String()).Msg("handshake timeout")
+		logx.Error("handshake timeout", "step", step, "key", ch.Key, "remoteIP", conn.RemoteAddr().String())
 	})
 	ch.IP, ch.Port, _ = net.SplitHostPort(conn.RemoteAddr().String())
 
@@ -165,7 +171,7 @@ func (s *CometServer) Serve(cometConn Conn, conn net.Conn, rp, wp *bytes.Pool, t
 		rp.Put(rb)
 		wp.Put(wb)
 		if err != io.EOF {
-			log.Error().Err(err).Msg("websocket.NewServerConn")
+			logx.Error("cometConn.Upgrade", "err", err)
 		}
 		return
 	}
@@ -174,7 +180,7 @@ func (s *CometServer) Serve(cometConn Conn, conn net.Conn, rp, wp *bytes.Pool, t
 	step = 2
 	if p, err = ch.CliProto.Set(); err == nil {
 		if ch.Key, hb, err = s.auth(ctx, cometConn, p); err == nil {
-			log.Info().Str("key", ch.Key).Str("remoteIP", conn.RemoteAddr().String()).Msg("authoried")
+			logx.Error("authentication", "key", ch.Key, "remoteIP", conn.RemoteAddr().String())
 			b = s.svcCtx.Bucket(ch.Key)
 			err = b.Put(ch)
 		}
@@ -185,7 +191,7 @@ func (s *CometServer) Serve(cometConn Conn, conn net.Conn, rp, wp *bytes.Pool, t
 		wp.Put(wb)
 		tr.Del(trd)
 		if err != io.EOF && err != websocket.ErrMessageClose {
-			log.Error().Int("step", step).Str("key", ch.Key).Str("remoteIP", conn.RemoteAddr().String()).Msg("handshake failed")
+			logx.Error("handshake failed", "step", step, "key", ch.Key, "remoteIP", conn.RemoteAddr().String())
 		}
 		return
 	}
@@ -194,10 +200,13 @@ func (s *CometServer) Serve(cometConn Conn, conn net.Conn, rp, wp *bytes.Pool, t
 
 	// handshake ok start dispatch goroutine
 	step = 3
-	tsk = dtask.NewTask()
-	go s.dispatch(cometConn, wp, wb, ch, tsk)
+	s.resend = comet.NewResend(ch.Key, s.svcCtx.Config.Protocol.Rto, s.svcCtx.TaskPool, func() {
+		ch.Resend()
+	})
 
-	serverHeartbeat := s.svcCtx.RandServerHearbeat()
+	go s.dispatch(cometConn, wp, wb, ch)
+
+	serverHeartbeat := s.svcCtx.RandServerHeartbeat()
 	for {
 		if p, err = ch.CliProto.Set(); err != nil {
 			break
@@ -217,7 +226,7 @@ func (s *CometServer) Serve(cometConn Conn, conn net.Conn, rp, wp *bytes.Pool, t
 			}
 			step++
 		} else {
-			if err = s.svcCtx.Operate(ctx, p, ch, tsk); err != nil {
+			if err = s.operate(ctx, p, ch); err != nil {
 				break
 			}
 		}
@@ -226,7 +235,7 @@ func (s *CometServer) Serve(cometConn Conn, conn net.Conn, rp, wp *bytes.Pool, t
 		ch.Signal()
 	}
 	if err != nil && err != io.EOF && err != websocket.ErrMessageClose && !strings.Contains(err.Error(), "closed") {
-		log.Error().Err(err).Str("key", ch.Key).Msg("server comet failed")
+		logx.Error("server comet failed", "err", err, "key", ch.Key)
 	}
 	b.Del(ch)
 	tr.Del(trd)
@@ -234,13 +243,15 @@ func (s *CometServer) Serve(cometConn Conn, conn net.Conn, rp, wp *bytes.Pool, t
 	ch.Close()
 	rp.Put(rb)
 	if err = s.svcCtx.Disconnect(ctx, ch.Key); err != nil {
-		log.Error().Str("key", ch.Key).Err(err).Msg("operator do disconnect")
+		logx.Error("operator do disconnect", "err", err, "key", ch.Key)
 	}
 }
 
 // auth for goim handshake with client, use rsa & aes.
 func (s *CometServer) auth(ctx context.Context, conn Conn, p *protocol.Proto) (key string, hb time.Duration, err error) {
-reauth:
+auth:
+	var authReplyBody []byte
+	success := true
 	for {
 		if err = conn.ReadProto(p); err != nil {
 			return
@@ -248,48 +259,37 @@ reauth:
 		if p.Op == int32(protocol.Op_Auth) {
 			break
 		}
-		log.Error().Int32("operation", p.Op).Msg("comet conn request operation not auth")
+		logx.Error("comet conn request operation not auth", "operation", p.Op)
 	}
-	var errMsg string
-	if key, hb, errMsg, err = s.svcCtx.Connect(ctx, p); err != nil {
-		if errMsg != "" {
-			//error result
-			log.Debug().Str("errMsg", errMsg).Msg("Connect reject")
-			var body []byte
-			body, err = base64.StdEncoding.DecodeString(errMsg)
-			if err != nil {
-				log.Error().Err(err).Str("errMsg", errMsg).Msg("base64 Decode errMsg String failed")
-				return
-			}
-			p.Op = int32(protocol.Op_AuthReply)
-			p.Body = body
-			if err = conn.WriteProto(p); err != nil {
-				return
-			}
-			err = conn.Flush()
-			goto reauth
+	if key, hb, err = s.svcCtx.Connect(ctx, p); err != nil {
+		success = false
+		// set authReplyBody
+		authReplyBody, err = auth.ParseGRPCErr(err)
+		if err != nil {
+			return
 		}
-		log.Error().Err(err).Msg("can not call logic.Connect")
-		return
 	}
 	p.Op = int32(protocol.Op_AuthReply)
-	p.Body = nil
+	p.Ack = p.Seq
+	p.Body = authReplyBody
 	if err = conn.WriteProto(p); err != nil {
 		return
 	}
 	err = conn.Flush()
+	if !success {
+		goto auth
+	}
 	return
 }
 
 // dispatch accepts connections on the listener and serves requests
 // for each incoming connection.  dispatch blocks; the caller typically
 // invokes it in a go statement.
-func (s *CometServer) dispatch(conn Conn, wp *bytes.Pool, wb *bytes.Buffer, ch *comet.Channel, tsk *dtask.Task) {
+func (s *CometServer) dispatch(conn Conn, wp *bytes.Pool, wb *bytes.Buffer, ch *comet.Channel) {
 	var (
 		err    error
 		finish bool
 		online int32
-		rto    = s.svcCtx.Config.Protocol.Rto
 	)
 	for {
 		var p = ch.Ready()
@@ -307,10 +307,9 @@ func (s *CometServer) dispatch(conn Conn, wp *bytes.Pool, wb *bytes.Buffer, ch *
 					if err = conn.WriteHeart(p, online); err != nil {
 						goto failed
 					}
-				} else if p.Op == int32(protocol.Op_ReceiveMsgReply) {
-					//skip
-				} else if p.Op == int32(protocol.Op_SendMsg) {
-					//skip
+				} else if p.Op == int32(protocol.Op_MessageReply) {
+					//del resend but skip conn write
+					s.resend.Del(p.GetAck())
 				} else {
 					if err = conn.WriteProto(p); err != nil {
 						goto failed
@@ -319,38 +318,22 @@ func (s *CometServer) dispatch(conn Conn, wp *bytes.Pool, wb *bytes.Buffer, ch *
 				p.Body = nil // avoid memory leak
 				ch.CliProto.GetAdv()
 			}
+		case protocol.ProtoResend:
+			for _, rp := range s.resend.All() {
+				if err = conn.WriteProto(rp); err != nil {
+					goto failed
+				}
+			}
 		default:
 			switch p.Op {
-			case int32(protocol.Op_SendMsgReply):
+			case int32(protocol.Op_Message):
 				if err = conn.WriteProto(p); err != nil {
 					goto failed
 				}
-			case int32(protocol.Op_RePush):
-				p.Op = int32(protocol.Op_ReceiveMsg)
-				if err = conn.WriteProto(p); err != nil {
+				if err = s.resend.Add(p); err != nil {
+					logx.Error("append resend job error", "err", err)
 					goto failed
 				}
-			case int32(protocol.Op_ReceiveMsg):
-				if err = conn.WriteProto(p); err != nil {
-					goto failed
-				}
-				p.Op = int32(protocol.Op_RePush)
-				seq := strconv.FormatInt(int64(p.Seq), 10)
-				if j := tsk.Get(seq); j != nil {
-					continue
-				}
-				//push into task pool
-				job, inserted := tsk.AddJobRepeat(rto, 0, func() {
-					if _, err = ch.Push(p); err != nil {
-						log.Error().Err(err).Msg("task job ch.Push error")
-						return
-					}
-				})
-				if !inserted {
-					log.Error().Err(err).Msg("tsk.AddJobRepeat error")
-					goto failed
-				}
-				tsk.Add(seq, job)
 			default:
 				continue
 			}
@@ -362,13 +345,36 @@ func (s *CometServer) dispatch(conn Conn, wp *bytes.Pool, wb *bytes.Buffer, ch *
 	}
 failed:
 	if err != nil && err != io.EOF && err != websocket.ErrMessageClose {
-		log.Error().Err(err).Str("key", ch.Key).Msg("dispatch comet conn error")
+		logx.Error("dispatch comet conn error", "err", err, "key", ch.Key)
 	}
-	tsk.Stop()
+	s.resend.Stop()
 	conn.Close()
 	wp.Put(wb)
-	// must ensure all channel message discard, for reader won't blocking Signal
+	// must ensure all channel message discard, for reader won't block Signal
 	for !finish {
-		finish = (ch.Ready() == protocol.ProtoFinish)
+		finish = ch.Ready() == protocol.ProtoFinish
 	}
+}
+
+// Operate operate.
+func (s *CometServer) operate(ctx context.Context, p *protocol.Proto, ch *comet.Channel) error {
+	//switch p.Op {
+	//case int32(protocol.Op_Message):
+	//	err := s.svcCtx.Receive(ctx, ch.Key, p)
+	//	if err != nil {
+	//		//下层业务调用失败，返回error的话会直接断开连接
+	//		return err
+	//	}
+	//	//标明Ack的消息序列
+	//	p.Ack = p.Seq
+	//	p.Op = int32(protocol.Op_MessageReply)
+	//	p.Body = nil
+	//case int32(protocol.Op_MessageReply):
+	//	err := s.svcCtx.Receive(ctx, ch.Key, p)
+	//	if err != nil {
+	//		//下层业务调用失败，返回error的话会直接断开连接
+	//		return err
+	//	}
+	//}
+	return nil
 }

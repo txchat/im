@@ -27,7 +27,7 @@ func NewGroup(id string) (r *Group) {
 	return
 }
 
-// Put put channel into the group.
+// Put hold the channel instance.
 func (r *Group) Put(ch *Channel) (err error) {
 	r.rLock.Lock()
 	if !r.drop && ch.GetNode(r.ID) == nil {
@@ -73,18 +73,18 @@ func (r *Group) Del(ch *Channel) bool {
 	return r.drop
 }
 
-// Push push msg to the group, if chan full discard it.
+// Push broadcast msg inner group, if chan full discard it.
 func (r *Group) Push(p *protocol.Proto) {
 	r.rLock.RLock()
 	for node := r.next; node != nil; node = node.Next {
 		if node.Current != nil {
-			_, _ = node.Current.Push(p)
+			_ = node.Current.Push(p)
 		}
 	}
 	r.rLock.RUnlock()
 }
 
-// group members Key,IP
+// Members group members Key,IP
 func (r *Group) Members() ([]string, []string) {
 	r.rLock.RLock()
 	members := make([]string, 0)
@@ -99,7 +99,7 @@ func (r *Group) Members() ([]string, []string) {
 	return members, mIp
 }
 
-// Close close the group.
+// Close remove group channel index.
 func (r *Group) Close() {
 	r.rLock.Lock()
 	for node := r.next; node != nil; node = node.Next {

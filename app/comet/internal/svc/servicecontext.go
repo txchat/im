@@ -5,25 +5,24 @@ import (
 	"fmt"
 	"math/rand"
 	"net"
-	"strconv"
 	"time"
+
+	dtask "github.com/txchat/task"
 
 	"github.com/Terry-Mao/goim/pkg/ip"
 	"github.com/txchat/im/api/protocol"
 	"github.com/txchat/im/app/comet/internal/config"
 	"github.com/txchat/im/app/logic/logicclient"
 	"github.com/txchat/im/internal/comet"
-	dtask "github.com/txchat/task"
 	"github.com/zeromicro/go-zero/zrpc"
 	"github.com/zhenjl/cityhash"
-	"google.golang.org/genproto/googleapis/rpc/errdetails"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 type ServiceContext struct {
 	Config   config.Config
 	LogicRPC logicclient.Logic
+
+	TaskPool *dtask.Task
 
 	serverID  string
 	round     *comet.Round
@@ -36,6 +35,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	svc := &ServiceContext{
 		Config:   c,
 		LogicRPC: logicclient.NewLogic(zrpc.MustNewClient(c.LogicRPC, zrpc.WithNonBlock(), zrpc.WithNonBlock())),
+		TaskPool: dtask.NewTask(),
 		serverID: fmt.Sprintf("grpc://%s:%v", ip.InternalIP(), port),
 		round: comet.NewRound(comet.RoundOptions{
 			Reader:       c.TCP.Reader,
@@ -58,6 +58,11 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	return svc
 }
 
+// Close the service resource.
+func (s *ServiceContext) Close() {
+	s.TaskPool.Stop()
+}
+
 // Round return all round.
 func (s *ServiceContext) Round() *comet.Round {
 	return s.round
@@ -74,33 +79,22 @@ func (s *ServiceContext) Bucket(subKey string) *comet.Bucket {
 	return s.buckets[idx]
 }
 
-// RandServerHearbeat rand server heartbeat.
-func (s *ServiceContext) RandServerHearbeat() time.Duration {
+// RandServerHeartbeat rand server heartbeat.
+func (s *ServiceContext) RandServerHeartbeat() time.Duration {
 	return s.Config.Protocol.MinHeartbeat + time.Duration(rand.Int63n(int64(s.Config.Protocol.MaxHeartbeat-s.Config.Protocol.MinHeartbeat)))
 }
 
 // Connect connected a connection.
-func (s *ServiceContext) Connect(c context.Context, p *protocol.Proto) (key string, hb time.Duration, errMsg string, err error) {
+func (s *ServiceContext) Connect(c context.Context, p *protocol.Proto) (key string, hb time.Duration, err error) {
 	reply, err := s.LogicRPC.Connect(c, &logicclient.ConnectReq{
 		Server: s.serverID,
 		Proto:  p,
 	})
 	if err != nil {
-		errStatus, ok := status.FromError(err)
-		if !ok {
-			return
-		}
-		if errStatus.Code() == codes.Unauthenticated {
-			for _, detail := range errStatus.Details() {
-				if d, ok := detail.(*errdetails.ErrorInfo); ok && d.GetReason() == "DEVICE_REJECT" {
-					errMsg = d.Metadata["resp_data"]
-				}
-			}
-		}
 		return
 	}
 
-	return reply.Key, time.Duration(reply.Heartbeat), errMsg, nil
+	return reply.Key, time.Duration(reply.Heartbeat), nil
 }
 
 // Disconnect disconnected a connection.
@@ -125,39 +119,4 @@ func (s *ServiceContext) Heartbeat(ctx context.Context, key string) error {
 func (s *ServiceContext) Receive(ctx context.Context, key string, p *protocol.Proto) error {
 	_, err := s.LogicRPC.Receive(ctx, &logicclient.ReceiveReq{Key: key, Proto: p})
 	return err
-}
-
-// Operate operate.
-func (s *ServiceContext) Operate(ctx context.Context, p *protocol.Proto, ch *comet.Channel, tsk *dtask.Task) error {
-	switch p.Op {
-	case int32(protocol.Op_SendMsg):
-		//标明Ack的消息序列
-		p.Ack = p.Seq
-		err := s.Receive(ctx, ch.Key, p)
-		if err != nil {
-			//下层业务调用失败，返回error的话会直接断开连接
-			return err
-		}
-		//p.Op = int32(protocol.Op_SendMsgReply)
-	case int32(protocol.Op_ReceiveMsgReply):
-		//从task中删除某一条
-		if j := tsk.Get(strconv.FormatInt(int64(p.Ack), 10)); j != nil {
-			j.Cancel()
-		}
-		err := s.Receive(ctx, ch.Key, p)
-		if err != nil {
-			//下层业务调用失败，返回error的话会直接断开连接
-			return err
-		}
-	case int32(protocol.Op_SyncMsgReq):
-		err := s.Receive(ctx, ch.Key, p)
-		if err != nil {
-			//下层业务调用失败，返回error的话会直接断开连接
-			return err
-		}
-		p.Op = int32(protocol.Op_SyncMsgReply)
-	default:
-		return s.Receive(ctx, ch.Key, p)
-	}
-	return nil
 }

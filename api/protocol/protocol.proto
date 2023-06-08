@@ -16,21 +16,21 @@ enum Op {
   Disconnect = 5;
   DisconnectReply = 6;
 
-  SendMsg = 7;
-  SendMsgReply = 8; //客户端回复消息已收到
+  Message = 7;
+  MessageReply = 8;
 
-  ReceiveMsg = 9;
-  ReceiveMsgReply = 10;
+  ProtoReady = 20;
+  ProtoFinish = 21;
+  ProtoResend = 22;
 
-  ProtoReady = 11;
-  ProtoFinish = 12;
+  Raw = 23;
+}
 
-  Raw = 13;
-
-  SyncMsgReq = 14;
-  SyncMsgReply = 15;
-
-  RePush = 16;
+// Proto 中 Op 为 OpAuth 时， body 必须可以反序列化为 AuthMsg
+message AuthBody {
+  string appId = 1;
+  string token = 2;
+  bytes ext = 3; // 其它业务方可能需要的信息
 }
 
 message Proto {

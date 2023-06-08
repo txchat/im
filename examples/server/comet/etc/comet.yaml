@@ -1,0 +1,52 @@
+Node: 1
+Name: comet.rpc
+ListenOn: 0.0.0.0:3109
+Prometheus:
+  Host: 0.0.0.0
+  Port: 9091
+  Path: /metrics
+Telemetry:
+  Name: ${SERVER_NAME}
+  Endpoint: http://${TELEMETRY_HOST}:14268/api/traces
+  Sampler: 1.0
+  Batcher: jaeger
+Etcd:
+  Hosts:
+  - ${ETCD_HOST}:2379
+  Key: comet.rpc
+LogicRPC:
+  Etcd:
+    Hosts:
+      - "${ETCD_HOST}:2379"
+    Key: "logic.rpc"
+    Timeout: 60000 # 60s
+TCP:
+  Bind: [":3101"]
+  Sndbuf: 4096
+  Rcvbuf: 4096
+  Keepalive: false
+  Reader: 32
+  ReadBuf: 1024
+  ReadBufSize: 8192
+  Writer: 32
+  WriteBuf: 1024
+  WriteBufSize: 8192
+Websocket:
+  Bind: [":3102"]
+  TlsOpen: false
+  TlsBind: [":3103"]
+  CertFile: "../../cert.pem"
+  PrivateFile: "../../private.pem"
+Protocol:
+  Timer: 32
+  TimerSize: 2048
+  SvrProto: 10
+  CliProto: 5
+  HandshakeTimeout: "8s"
+  MinHeartbeat: "5s"
+  MaxHeartbeat: "10s"
+  Rto: "2s"
+  LRUSize: 86400
+Bucket:
+  Size: 32
+  Channel: 1024
