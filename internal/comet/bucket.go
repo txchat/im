@@ -69,7 +69,7 @@ func (b *Bucket) ChannelsCount() (res []string) {
 }
 
 // Put hold a channel instance.
-func (b *Bucket) Put(ch *Channel) (err error) {
+func (b *Bucket) Put(ch *Channel) {
 	b.cLock.Lock()
 	// close old channel
 	if dch := b.chs[ch.Key]; dch != nil {

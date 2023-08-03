@@ -6,6 +6,7 @@ require (
 	github.com/Terry-Mao/goim v0.0.0-20210523140626-e742c99ad76e
 	github.com/gin-contrib/pprof v1.4.0
 	github.com/gin-gonic/gin v1.8.2
+	github.com/golang/glog v1.0.0 // indirect
 	github.com/golang/protobuf v1.5.2
 	github.com/gomodule/redigo v2.0.0+incompatible
 	github.com/google/uuid v1.3.0

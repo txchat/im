@@ -182,7 +182,7 @@ func (s *CometServer) Serve(cometConn Conn, conn net.Conn, rp, wp *bytes.Pool, t
 		if ch.Key, hb, err = s.auth(ctx, cometConn, p); err == nil {
 			logx.Error("authentication", "key", ch.Key, "remoteIP", conn.RemoteAddr().String())
 			b = s.svcCtx.Bucket(ch.Key)
-			err = b.Put(ch)
+			b.Put(ch)
 		}
 	}
 	if err != nil {

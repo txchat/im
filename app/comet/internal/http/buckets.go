@@ -56,7 +56,6 @@ func BucketsInfo(c *gin.Context) {
 	c.JSON(200, buckets)
 }
 
-//
 type User struct {
 	ChIndex int      `json:"ch_index"`
 	Seq     int32    `json:"seq"`
