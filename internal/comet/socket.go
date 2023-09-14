@@ -1,6 +1,7 @@
 package comet
 
 import (
+	"bufio"
 	"context"
 	"fmt"
 	"math"
@@ -8,7 +9,6 @@ import (
 	"net"
 	"time"
 
-	"github.com/Terry-Mao/goim/pkg/bufio"
 	"github.com/google/uuid"
 	"github.com/txchat/im/api/protocol"
 	dtask "github.com/txchat/task"
@@ -16,27 +16,30 @@ import (
 )
 
 type ListenerConfig struct {
-	ClientCacheSize   int
-	ServerCacheSize   int
-	KeepAlive         bool
-	ReceiveBufferSize int
-	SendBufferSize    int
-	HandshakeTimeout  time.Duration
-	RTO               time.Duration
-	MinHeartbeat      time.Duration
-	MaxHeartbeat      time.Duration
+	CometReadBufSize  int
+	CometWriteBufSize int
+
+	ProtoClientCacheSize int
+	ProtoServerCacheSize int
+	KeepAlive            bool
+	TCPReceiveBufferSize int
+	TCPSendBufferSize    int
+	HandshakeTimeout     time.Duration
+	RTO                  time.Duration
+	MinHeartbeat         time.Duration
+	MaxHeartbeat         time.Duration
 }
 
 var DefaultListenerConfig = &ListenerConfig{
-	ClientCacheSize:   10,
-	ServerCacheSize:   5,
-	KeepAlive:         false,
-	ReceiveBufferSize: 4096,
-	SendBufferSize:    4096,
-	HandshakeTimeout:  5 * time.Second,
-	RTO:               3 * time.Second,
-	MinHeartbeat:      5 * time.Minute,
-	MaxHeartbeat:      10 * time.Minute,
+	ProtoClientCacheSize: 10,
+	ProtoServerCacheSize: 5,
+	KeepAlive:            false,
+	TCPReceiveBufferSize: 4096,
+	TCPSendBufferSize:    4096,
+	HandshakeTimeout:     5 * time.Second,
+	RTO:                  3 * time.Second,
+	MinHeartbeat:         5 * time.Minute,
+	MaxHeartbeat:         10 * time.Minute,
 }
 var defaultConnectHandle = func(ctx context.Context, p *protocol.Proto) (key string, hb time.Duration, err error) {
 	return fmt.Sprintf("mock-%s", uuid.New().String()), 5 * time.Second, nil
@@ -183,10 +186,10 @@ func (l *Listener) Accept() (*Conn, error) {
 	if err = conn.SetKeepAlive(l.c.KeepAlive); err != nil {
 		return nil, err
 	}
-	if err = conn.SetReadBuffer(l.c.ReceiveBufferSize); err != nil {
+	if err = conn.SetReadBuffer(l.c.TCPReceiveBufferSize); err != nil {
 		return nil, err
 	}
-	if err = conn.SetWriteBuffer(l.c.SendBufferSize); err != nil {
+	if err = conn.SetWriteBuffer(l.c.TCPSendBufferSize); err != nil {
 		return nil, err
 	}
 
@@ -194,6 +197,17 @@ func (l *Listener) Accept() (*Conn, error) {
 	rp := l.round.Reader(l.r)
 	wp := l.round.Writer(l.r)
 	return newConn(l, conn, rp, wp, tp)
+}
+
+// Close closes the listener.
+// Any blocked Accept operations will be unblocked and return errors.
+func (l *Listener) Close() error {
+	panic("not implemented") // TODO: Implement
+}
+
+// Addr returns the listener's network address.
+func (l *Listener) Addr() net.Addr {
+	panic("not implemented") // TODO: Implement
 }
 
 // Bucket get the bucket by subkey.

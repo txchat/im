@@ -1,13 +1,13 @@
 package comet
 
 import (
+	"bufio"
 	"errors"
 	"net"
 	"os"
 	"testing"
 	"time"
 
-	"github.com/Terry-Mao/goim/pkg/bufio"
 	"github.com/stretchr/testify/assert"
 	dtask "github.com/txchat/task"
 )
@@ -92,15 +92,15 @@ func Test_HandshakeTimeout(t *testing.T) {
 	rp := testRound.Reader(1)
 	wp := testRound.Writer(1)
 	l := NewListener(nil, testRound, testBuckets, testTaskPool, testUpgrader.Upgrade, WithConnectHandle(verifyMockFrame), WithListenerConfig(&ListenerConfig{
-		ClientCacheSize:   10,
-		ServerCacheSize:   5,
-		KeepAlive:         false,
-		ReceiveBufferSize: 4096,
-		SendBufferSize:    4096,
-		HandshakeTimeout:  2 * time.Second,
-		RTO:               3 * time.Second,
-		MinHeartbeat:      5 * time.Minute,
-		MaxHeartbeat:      10 * time.Minute,
+		ProtoClientCacheSize: 10,
+		ProtoServerCacheSize: 5,
+		KeepAlive:            false,
+		TCPReceiveBufferSize: 4096,
+		TCPSendBufferSize:    4096,
+		HandshakeTimeout:     2 * time.Second,
+		RTO:                  3 * time.Second,
+		MinHeartbeat:         5 * time.Minute,
+		MaxHeartbeat:         10 * time.Minute,
 	}))
 	conn, err := newConn(l, NewMockConn(rb), rp, wp, tp)
 	assert.Nil(t, err)

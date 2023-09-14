@@ -1,11 +1,11 @@
 package comet
 
 import (
+	"bufio"
 	"context"
 	"testing"
 	"time"
 
-	"github.com/Terry-Mao/goim/pkg/bufio"
 	"github.com/stretchr/testify/assert"
 	"github.com/txchat/im/api/protocol"
 )
@@ -15,7 +15,7 @@ func Test_verifyMockFrame(t *testing.T) {
 	assert.Nil(t, err)
 
 	var p protocol.Proto
-	err = p.ReadTCP(bufio.NewReader(reader))
+	err = p.ReadFrom(bufio.NewReader(reader))
 	assert.Nil(t, err)
 	key, hb, err := verifyMockFrame(context.Background(), &p)
 	assert.Nil(t, err)

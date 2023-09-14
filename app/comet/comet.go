@@ -11,7 +11,7 @@ import (
 	"github.com/txchat/im/api/comet"
 	"github.com/txchat/im/app/comet/internal/config"
 	"github.com/txchat/im/app/comet/internal/http"
-	xnet2 "github.com/txchat/im/app/comet/internal/net2"
+	xnet "github.com/txchat/im/app/comet/internal/net"
 	"github.com/txchat/im/app/comet/internal/server"
 	"github.com/txchat/im/app/comet/internal/svc"
 	"github.com/zeromicro/go-zero/core/conf"
@@ -33,10 +33,10 @@ func Main() {
 	rand.Seed(time.Now().UTC().UnixNano())
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
-	if err := xnet2.InitServer(ctx, c.Websocket.Bind, runtime.NumCPU(), xnet2.WebsocketServer); err != nil {
+	if err := xnet.InitServer(ctx, c.Websocket.Bind, runtime.NumCPU(), xnet.WebsocketServer); err != nil {
 		panic(err)
 	}
-	if err := xnet2.InitServer(ctx, c.TCP.Bind, runtime.NumCPU(), xnet2.TCPServer); err != nil {
+	if err := xnet.InitServer(ctx, c.TCP.Bind, runtime.NumCPU(), xnet.TCPServer); err != nil {
 		panic(err)
 	}
 	httpSrv := http.Start(":8000", ctx)

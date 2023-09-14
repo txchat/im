@@ -1,6 +1,7 @@
 package comet
 
 import (
+	"bufio"
 	"context"
 	"fmt"
 	"io"
@@ -9,7 +10,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Terry-Mao/goim/pkg/bufio"
 	"github.com/golang/protobuf/proto"
 	"github.com/txchat/im/api/protocol"
 )
@@ -34,7 +34,7 @@ func authMockFrame(token string) (io.Reader, error) {
 	go func() {
 		//write to
 		wr := bufio.NewWriter(w)
-		p.WriteTCP(wr)
+		p.WriteTo(wr)
 		err = wr.Flush()
 	}()
 	return r, err
@@ -169,15 +169,15 @@ func (c *MockConn) SetWriteDeadline(t time.Time) error {
 }
 
 func (c *MockConn) ReadProto(proto *protocol.Proto) error {
-	return proto.ReadTCP(c.rr)
+	return proto.ReadFrom(c.rr)
 }
 
 func (c *MockConn) WriteHeart(proto *protocol.Proto, online int32) error {
-	return proto.WriteTCPHeart(c.wr, online)
+	return proto.WriteTo(c.wr)
 }
 
 func (c *MockConn) WriteProto(proto *protocol.Proto) error {
-	return proto.WriteTCP(c.wr)
+	return proto.WriteTo(c.wr)
 }
 
 func (c *MockConn) Flush() error {

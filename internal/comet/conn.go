@@ -1,16 +1,16 @@
 package comet
 
 import (
+	"bufio"
 	"context"
 	"fmt"
 	"io"
 	"net"
 	"time"
 
-	"github.com/Terry-Mao/goim/pkg/bytes"
 	xtime "github.com/Terry-Mao/goim/pkg/time"
-	"github.com/Terry-Mao/goim/pkg/websocket"
 	"github.com/txchat/im/api/protocol"
+	"github.com/txchat/im/internal/websocket"
 	"github.com/txchat/im/pkg/auth"
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -20,7 +20,6 @@ type ProtoReader interface {
 }
 
 type ProtoWriter interface {
-	WriteHeart(proto *protocol.Proto, online int32) error
 	WriteProto(proto *protocol.Proto) error
 	Flush() error
 }
@@ -45,15 +44,15 @@ type DisconnectHandler func(ctx context.Context, key string) error
 type HeartbeatHandler func(ctx context.Context, key string) error
 
 type Conn struct {
-	ctx  context.Context
-	conn net.Conn
-	rwc  ProtoReaderWriterCloser
+	ctx context.Context
+	rwc ProtoReaderWriterCloser
 
 	b  *Bucket
 	ch *Channel
 
-	rp, wp *bytes.Pool
-	rb, wb *bytes.Buffer
+	rp, wp BufferPool
+	rb     *bufio.Reader
+	wb     *bufio.Writer
 
 	resend *Resend
 
@@ -70,6 +69,17 @@ type Conn struct {
 
 func (c *Conn) resetHeartbeat() {
 	c.tp.Set(c.td, c.hb)
+}
+
+// Close closes the connection.
+// Any blocked Read or Write operations will be unblocked and return errors.
+func (c *Conn) Close() error {
+	c.b.Del(c.ch)
+	c.tp.Del(c.td)
+	c.rwc.Close()
+	c.ch.Close()
+	c.rp.Put(c.rb)
+	return c.disconnect(c.ctx, c.ch.Key)
 }
 
 func (c *Conn) ReadMessage() error {
@@ -100,27 +110,22 @@ func (c *Conn) ReadMessage() error {
 	return nil
 }
 
-func (c *Conn) Close() error {
-	c.b.Del(c.ch)
-	c.tp.Del(c.td)
-	c.rwc.Close()
-	c.ch.Close()
-	c.rp.Put(c.rb)
-	return c.disconnect(c.ctx, c.ch.Key)
-}
-
-func newConn(l *Listener, conn net.Conn, rp, wp *bytes.Pool, tp *xtime.Timer) (*Conn, error) {
+func newConn(l *Listener, conn net.Conn, rp, wp BufferPool, tp *xtime.Timer) (*Conn, error) {
 	var (
-		rb = rp.Get()
-		wb = wp.Get()
-		ch = NewChannel(l.c.ClientCacheSize, l.c.ServerCacheSize)
-		rr = &ch.Reader
-		wr = &ch.Writer
+		//rb *bufio.Reader
+		//wb *bufio.Writer
+		ch = NewChannel(l.c.ProtoClientCacheSize, l.c.ProtoServerCacheSize)
 	)
-	// reset reader buffer
-	ch.Reader.ResetBuffer(conn, rb.Bytes())
-	ch.Writer.ResetBuffer(conn, wb.Bytes())
 
+	rb, ok := rp.Get().(*bufio.Reader)
+	if !ok {
+		rb = bufio.NewReaderSize(conn, l.c.CometReadBufSize)
+	}
+
+	wb, ok := wp.Get().(*bufio.Writer)
+	if !ok {
+		wb = bufio.NewWriterSize(conn, l.c.CometReadBufSize)
+	}
 	// set handshake timeout
 	step := 0
 	td := tp.Add(l.c.HandshakeTimeout, func() {
@@ -132,7 +137,7 @@ func newConn(l *Listener, conn net.Conn, rp, wp *bytes.Pool, tp *xtime.Timer) (*
 
 	// upgrade connection
 	step = 1
-	rwc, err := l.upgrade(conn, rr, wr)
+	rwc, err := l.upgrade(conn, rb, wb)
 	if err != nil {
 		conn.Close()
 		tp.Del(td)
@@ -144,7 +149,6 @@ func newConn(l *Listener, conn net.Conn, rp, wp *bytes.Pool, tp *xtime.Timer) (*
 	ctx := context.TODO()
 	c := &Conn{
 		ctx:        ctx,
-		conn:       conn,
 		rwc:        rwc,
 		ch:         ch,
 		rp:         rp,
@@ -224,7 +228,6 @@ func dispatch(conn *Conn) {
 	var (
 		err    error
 		finish bool
-		online int32
 	)
 	for {
 		var p = conn.ch.Ready()
@@ -239,7 +242,8 @@ func dispatch(conn *Conn) {
 					break
 				}
 				if p.Op == int32(protocol.Op_HeartbeatReply) {
-					if err = conn.rwc.WriteHeart(p, online); err != nil {
+					// write heartbeat
+					if err = conn.rwc.WriteProto(p); err != nil {
 						goto failed
 					}
 				} else if p.Op == int32(protocol.Op_MessageReply) {
