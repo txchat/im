@@ -202,12 +202,12 @@ func (l *Listener) Accept() (*Conn, error) {
 // Close closes the listener.
 // Any blocked Accept operations will be unblocked and return errors.
 func (l *Listener) Close() error {
-	panic("not implemented") // TODO: Implement
+	return l.lis.Close()
 }
 
 // Addr returns the listener's network address.
 func (l *Listener) Addr() net.Addr {
-	panic("not implemented") // TODO: Implement
+	return l.lis.Addr()
 }
 
 // Bucket get the bucket by subkey.

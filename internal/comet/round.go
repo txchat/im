@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"sync"
 
-	"github.com/Terry-Mao/goim/pkg/time"
+	xtime "github.com/txchat/im/internal/time"
 )
 
 // RoundOptions round options.
@@ -25,7 +25,7 @@ type RoundOptions struct {
 type Round struct {
 	readers []BufferPool
 	writers []BufferPool
-	timers  []time.Timer
+	timers  []xtime.Timer
 	options RoundOptions
 }
 
@@ -44,7 +44,7 @@ func NewRound(opts RoundOptions) (r *Round) {
 		r.writers[i] = NewWriterPool(r.options.WriteBufSize)
 	}
 	// timer
-	r.timers = make([]time.Timer, r.options.Timer)
+	r.timers = make([]xtime.Timer, r.options.Timer)
 	for i = 0; i < r.options.Timer; i++ {
 		r.timers[i].Init(r.options.TimerSize)
 	}
@@ -52,7 +52,7 @@ func NewRound(opts RoundOptions) (r *Round) {
 }
 
 // Timer get a timer.
-func (r *Round) Timer(rn int) *time.Timer {
+func (r *Round) Timer(rn int) *xtime.Timer {
 	return &(r.timers[rn%r.options.Timer])
 }
 

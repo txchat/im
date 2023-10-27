@@ -4,7 +4,6 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/Terry-Mao/goim/pkg/bufio"
 	"github.com/txchat/im/api/protocol"
 )
 
@@ -12,8 +11,6 @@ import (
 type Channel struct {
 	CliProto Ring
 	signal   chan *protocol.Proto
-	Writer   bufio.Writer
-	Reader   bufio.Reader
 
 	Seq  int32
 	Key  string

@@ -77,7 +77,6 @@ func (b *Bucket) Put(ch *Channel) {
 	}
 	b.chs[ch.Key] = ch
 	b.cLock.Unlock()
-	return
 }
 
 // Del delete the channel instance.

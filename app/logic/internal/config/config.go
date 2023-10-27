@@ -3,8 +3,8 @@ package config
 import (
 	"time"
 
-	xtime "github.com/Terry-Mao/goim/pkg/time"
 	xkafka "github.com/oofpgDLD/kafka-go"
+	xtime "github.com/txchat/im/internal/time"
 	"github.com/zeromicro/go-zero/zrpc"
 )
 

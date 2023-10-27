@@ -8,8 +8,8 @@ import (
 	"net"
 	"time"
 
-	xtime "github.com/Terry-Mao/goim/pkg/time"
 	"github.com/txchat/im/api/protocol"
+	xtime "github.com/txchat/im/internal/time"
 	"github.com/txchat/im/internal/websocket"
 	"github.com/txchat/im/pkg/auth"
 	"github.com/zeromicro/go-zero/core/logx"
