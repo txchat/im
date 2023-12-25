@@ -3,7 +3,7 @@ module github.com/txchat/im
 go 1.15
 
 require (
-	github.com/Terry-Mao/goim v0.0.0-20210523140626-e742c99ad76e
+	github.com/Shopify/toxiproxy v2.1.4+incompatible // indirect
 	github.com/gin-contrib/pprof v1.4.0
 	github.com/gin-gonic/gin v1.8.2
 	github.com/golang/glog v1.0.0
