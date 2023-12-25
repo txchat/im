@@ -11,7 +11,13 @@ import (
 	xhttp "github.com/txchat/im/internal/http"
 )
 
-var upgrader = websocket.Upgrader{} // use default options
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
+} // use default options
 
 type Websocket struct {
 	conn *wsStream
@@ -20,16 +26,13 @@ type Websocket struct {
 }
 
 func NewWebsocket(conn net.Conn, rb *bufio.Reader, wb *bufio.Writer) (ProtoReaderWriterCloser, error) {
-	rb.Reset(conn)
-	wb.Reset(conn)
-
 	req, err := http.ReadRequest(rb)
 	//req, err := websocket.ReadRequest(rr)
 	if err != nil || req.RequestURI != "/sub" {
 		return nil, err
 	}
 
-	w, err := xhttp.ReadRequest(wb, req)
+	w, err := xhttp.ReadRequest(bufio.NewReadWriter(rb, wb), req, conn)
 	if err != nil {
 		return nil, err
 	}
@@ -44,12 +47,28 @@ func NewWebsocket(conn net.Conn, rb *bufio.Reader, wb *bufio.Writer) (ProtoReade
 	}
 
 	// must reset source Reader Writer
-	rb.Reset(wsStream)
-	wb.Reset(wsStream)
+	// rb.Reset(wsStream)
+	// wb.Reset(wsStream)
 	return &Websocket{
 		conn: wsStream,
-		rb:   rb,
-		wb:   wb,
+		rb:   bufio.NewReader(wsStream),
+		wb:   bufio.NewWriter(wsStream),
+	}, nil
+}
+
+func FromWebsocketConn(wsConn *websocket.Conn, rb *bufio.Reader, wb *bufio.Writer) (ProtoReaderWriterCloser, error) {
+	wsStream, err := NewWsStream(wsConn)
+	if err != nil {
+		return nil, err
+	}
+
+	// must reset source Reader Writer
+	// rb.Reset(wsStream)
+	// wb.Reset(wsStream)
+	return &Websocket{
+		conn: wsStream,
+		rb:   bufio.NewReader(wsStream),
+		wb:   bufio.NewWriter(wsStream),
 	}, nil
 }
 
@@ -81,27 +100,29 @@ type wsStream struct {
 }
 
 func NewWsStream(conn *websocket.Conn) (*wsStream, error) {
-	writer, err := conn.NextWriter(websocket.BinaryMessage)
-	if err != nil {
-		return nil, err
-	}
-	_, reader, err := conn.NextReader()
-	if err != nil {
-		return nil, err
-	}
 	return &wsStream{
 		wsConn: conn,
-		writer: writer,
-		reader: reader,
 	}, nil
 }
 
 func (c *wsStream) Write(p []byte) (n int, err error) {
+	if c.writer == nil {
+		c.writer, err = c.wsConn.NextWriter(websocket.BinaryMessage)
+		if err != nil {
+			return
+		}
+	}
 	n, err = c.writer.Write(p)
 	return
 }
 
 func (c *wsStream) Read(p []byte) (n int, err error) {
+	if c.reader == nil {
+		_, c.reader, err = c.wsConn.NextReader()
+		if err != nil {
+			return
+		}
+	}
 	n, err = c.reader.Read(p)
 	if err == io.EOF {
 		var reader io.Reader

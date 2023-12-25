@@ -11,7 +11,7 @@ import (
 )
 
 func Test_verifyMockFrame(t *testing.T) {
-	reader, err := authMockFrame("user1-10")
+	reader, err := authMockFrame("user1-10", 0)
 	assert.Nil(t, err)
 
 	var p protocol.Proto

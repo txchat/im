@@ -9,23 +9,46 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/txchat/im/api/protocol"
 	dtask "github.com/txchat/task"
 )
 
 type mockUpgrader struct {
+	rr *bufio.Reader
+	wr *bufio.Writer
 }
 
-func (m *mockUpgrader) Upgrade(conn net.Conn, rr *bufio.Reader, wr *bufio.Writer) (ProtoReaderWriterCloser, error) {
-	if mconn, ok := conn.(*MockConn); ok {
-		mconn.rr = rr
-		mconn.wr = wr
-		return mconn, nil
+func (c *mockUpgrader) Upgrade(conn net.Conn, rr *bufio.Reader, wr *bufio.Writer) (ProtoReaderWriterCloser, error) {
+	if _, ok := conn.(*MockConn); ok {
+		c.rr = rr
+		c.wr = wr
+		return c, nil
 	}
 	return nil, errors.New("mock conn crash")
 }
 
-func (m *mockUpgrader) UpgradeFailed(conn net.Conn, rr *bufio.Reader, wr *bufio.Writer) (ProtoReaderWriterCloser, error) {
+func (c *mockUpgrader) UpgradeFailed(conn net.Conn, rr *bufio.Reader, wr *bufio.Writer) (ProtoReaderWriterCloser, error) {
 	return nil, errors.New("mock conn crash")
+}
+
+func (c *mockUpgrader) ReadProto(proto *protocol.Proto) error {
+	return proto.ReadFrom(c.rr)
+}
+
+func (c *mockUpgrader) WriteHeart(proto *protocol.Proto, online int32) error {
+	return proto.WriteTo(c.wr)
+}
+
+func (c *mockUpgrader) WriteProto(proto *protocol.Proto) error {
+	return proto.WriteTo(c.wr)
+}
+
+func (c *mockUpgrader) Flush() error {
+	return c.wr.Flush()
+}
+
+func (c *mockUpgrader) Close() error {
+	return nil
 }
 
 var (
@@ -60,7 +83,7 @@ func TestMain(m *testing.M) {
 }
 
 func Test_UpgradeConn(t *testing.T) {
-	rb, err := authMockFrame("user1-10")
+	rb, err := authMockFrame("user1-10", 0)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -69,21 +92,13 @@ func Test_UpgradeConn(t *testing.T) {
 	rp := testRound.Reader(1)
 	wp := testRound.Writer(1)
 	l := NewListener(nil, testRound, testBuckets, testTaskPool, testUpgrader.Upgrade, WithConnectHandle(verifyMockFrame))
-	conn, err := newConn(l, NewMockConn(rb), rp, wp, tp)
+	conn, err := newConn(l, NewMockConn(rb, &MockWriterPrinter{}), rp, wp, tp)
 	assert.Nil(t, err)
 	assert.NotNil(t, conn)
-	// go func() {
-	// 	err = conn.ReadMessage()
-	// 	if err != nil {
-	// 		t.Error(err)
-	// 	}
-	// }()
-
-	time.Sleep(10 * time.Second)
 }
 
 func Test_HandshakeTimeout(t *testing.T) {
-	rb, err := authMockFrame("user1-10")
+	rb, err := authMockFrame("user1-10", 10*time.Second)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -102,17 +117,13 @@ func Test_HandshakeTimeout(t *testing.T) {
 		MinHeartbeat:         5 * time.Minute,
 		MaxHeartbeat:         10 * time.Minute,
 	}))
-	conn, err := newConn(l, NewMockConn(rb), rp, wp, tp)
-	assert.Nil(t, err)
-	assert.NotNil(t, conn)
-	err = conn.ReadMessage()
-	if err != nil {
-		t.Error(err)
-	}
+	conn, err := newConn(l, NewMockConn(rb, &MockWriterPrinter{}), rp, wp, tp)
+	assert.EqualError(t, err, "comet connect failed step 2 error: split token failed")
+	assert.Nil(t, conn)
 }
 
 func Test_UpgradeConnUpgradeFailed(t *testing.T) {
-	rb, err := authMockFrame("user1-10")
+	rb, err := authMockFrame("user1-10", 0)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -121,13 +132,13 @@ func Test_UpgradeConnUpgradeFailed(t *testing.T) {
 	rp := testRound.Reader(1)
 	wp := testRound.Writer(1)
 	l := NewListener(nil, testRound, testBuckets, testTaskPool, testUpgrader.UpgradeFailed, WithConnectHandle(verifyMockFrame))
-	conn, err := newConn(l, NewMockConn(rb), rp, wp, tp)
+	conn, err := newConn(l, NewMockConn(rb, &MockWriterPrinter{}), rp, wp, tp)
 	assert.EqualError(t, err, "comet connect failed step 1 error: mock conn crash")
 	assert.Nil(t, conn)
 }
 
 func Test_UpgradeConnAuthFailed(t *testing.T) {
-	rb, err := authMockFrame("")
+	rb, err := authMockFrame("", 0)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -136,7 +147,7 @@ func Test_UpgradeConnAuthFailed(t *testing.T) {
 	rp := testRound.Reader(1)
 	wp := testRound.Writer(1)
 	l := NewListener(nil, testRound, testBuckets, testTaskPool, testUpgrader.Upgrade, WithConnectHandle(verifyMockFrame))
-	conn, err := newConn(l, NewMockConn(rb), rp, wp, tp)
+	conn, err := newConn(l, NewMockConn(rb, &MockWriterPrinter{}), rp, wp, tp)
 	assert.EqualError(t, err, "comet connect failed step 2 error: split token failed")
 	assert.Nil(t, conn)
 }

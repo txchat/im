@@ -15,8 +15,6 @@ type TCP struct {
 }
 
 func NewTCP(conn net.Conn, rb *bufio.Reader, wb *bufio.Writer) (ProtoReaderWriterCloser, error) {
-	rb.Reset(conn)
-	wb.Reset(conn)
 	return &TCP{
 		rwc: conn,
 		rb:  rb,

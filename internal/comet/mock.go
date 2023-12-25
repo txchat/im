@@ -8,13 +8,14 @@ import (
 	"net"
 	"strconv"
 	"strings"
+	"sync/atomic"
 	"time"
 
 	"github.com/golang/protobuf/proto"
 	"github.com/txchat/im/api/protocol"
 )
 
-func authMockFrame(token string) (io.Reader, error) {
+func authMockFrame(token string, dely time.Duration) (io.Reader, error) {
 	r, w := io.Pipe()
 	b, err := proto.Marshal(&protocol.AuthBody{
 		AppId: "mock",
@@ -32,6 +33,9 @@ func authMockFrame(token string) (io.Reader, error) {
 		Body: b,
 	}
 	go func() {
+		if dely > 0 {
+			time.Sleep(dely)
+		}
 		//write to
 		wr := bufio.NewWriter(w)
 		p.WriteTo(wr)
@@ -66,16 +70,15 @@ func verifyMockFrame(ctx context.Context, p *protocol.Proto) (key string, hb tim
 }
 
 type MockConn struct {
-	rr *bufio.Reader
-	wr *bufio.Writer
-
-	rb       io.Reader
-	isClosed bool
+	r        io.Reader
+	w        io.Writer
+	isClosed int32
 }
 
-func NewMockConn(rb io.Reader) *MockConn {
+func NewMockConn(r io.Reader, w io.Writer) *MockConn {
 	return &MockConn{
-		rb: rb,
+		r: r,
+		w: w,
 	}
 }
 
@@ -83,28 +86,27 @@ func NewMockConn(rb io.Reader) *MockConn {
 // Read can be made to time out and return an error after a fixed
 // time limit; see SetDeadline and SetReadDeadline.
 func (c *MockConn) Read(b []byte) (n int, err error) {
-	if c.isClosed {
+	if atomic.LoadInt32(&c.isClosed) == 1 {
 		return 0, net.ErrClosed
 	}
-	return c.rb.Read(b)
+	return c.r.Read(b)
 }
 
 // Write writes data to the connection.
 // Write can be made to time out and return an error after a fixed
 // time limit; see SetDeadline and SetWriteDeadline.
-func (c *MockConn) Write(b []byte) (n int, err error) {
-	if c.isClosed {
+func (c *MockConn) Write(p []byte) (n int, err error) {
+	if atomic.LoadInt32(&c.isClosed) == 1 {
 		return 0, net.ErrClosed
 	}
-	fmt.Printf("write %d bytes\n", len(b))
-	return len(b), nil
+	return c.w.Write(p)
 }
 
 // Close closes the connection.
 // Any blocked Read or Write operations will be unblocked and return errors.
 func (c *MockConn) Close() error {
 	fmt.Print("conn closed")
-	c.isClosed = true
+	atomic.StoreInt32(&c.isClosed, 1)
 	return nil
 }
 
@@ -168,18 +170,10 @@ func (c *MockConn) SetWriteDeadline(t time.Time) error {
 	return nil
 }
 
-func (c *MockConn) ReadProto(proto *protocol.Proto) error {
-	return proto.ReadFrom(c.rr)
+type MockWriterPrinter struct {
 }
 
-func (c *MockConn) WriteHeart(proto *protocol.Proto, online int32) error {
-	return proto.WriteTo(c.wr)
-}
-
-func (c *MockConn) WriteProto(proto *protocol.Proto) error {
-	return proto.WriteTo(c.wr)
-}
-
-func (c *MockConn) Flush() error {
-	return c.wr.Flush()
+func (c *MockWriterPrinter) Write(p []byte) (n int, err error) {
+	fmt.Printf("write %d bytes\n", len(p))
+	return len(p), nil
 }

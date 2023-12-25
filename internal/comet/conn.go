@@ -126,6 +126,8 @@ func newConn(l *Listener, conn net.Conn, rp, wp BufferPool, tp *xtime.Timer) (*C
 	if !ok {
 		wb = bufio.NewWriterSize(conn, l.c.CometReadBufSize)
 	}
+	rb.Reset(conn)
+	wb.Reset(conn)
 	// set handshake timeout
 	step := 0
 	td := tp.Add(l.c.HandshakeTimeout, func() {
